@@ -1,0 +1,37 @@
+# Build artifacts
+bin/
+obj/
+out/
+_build_tmp/
+artifacts/
+
+# Visual Studio / Rider
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+
+# Test / coverage
+TestResults/
+*.trx
+coverage/
+*.coverage
+*.coveragexml
+
+# Logs / local runtime data
+*.log
+logs/
+data/
+StarFire/
+
+# Backup / database local files
+*.db
+*.db-shm
+*.db-wal
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db

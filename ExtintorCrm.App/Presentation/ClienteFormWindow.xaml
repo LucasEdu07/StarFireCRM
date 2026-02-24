@@ -1,0 +1,298 @@
+﻿<Window x:Class="ExtintorCrm.App.Presentation.ClienteFormWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cliente"
+        Height="700"
+        Width="920"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="{DynamicResource AppBackground}"
+        FontFamily="Segoe UI Variable"
+        FontSize="14"
+        Opacity="0">
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.22" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+    <Window.Resources>
+        <Style x:Key="ToolbarIconStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
+        </Style>
+
+        <Style x:Key="InputStyle" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
+            <Setter Property="Height" Value="40" />
+        </Style>
+
+        <Style x:Key="SwitchStyle" TargetType="ToggleButton" BasedOn="{StaticResource ModernToggleSwitch}">
+            <Setter Property="Width" Value="98" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Border x:Name="Track"
+                                    CornerRadius="18"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1" />
+                            <Border x:Name="Knob"
+                                    Width="30"
+                                    Height="30"
+                                    Margin="3"
+                                    HorizontalAlignment="Left"
+                                    CornerRadius="15"
+                                    Background="{DynamicResource CardBackground}"
+                                    BorderBrush="{DynamicResource ControlBorder}"
+                                    BorderThickness="1" />
+                            <TextBlock x:Name="StateLabel"
+                                       Text="Inativo"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondary}"
+                                       Margin="38,0,12,0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="{DynamicResource PrimaryRed}" />
+                                <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource PrimaryRed}" />
+                                <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+                                <Setter TargetName="StateLabel" Property="Text" Value="Ativo" />
+                                <Setter TargetName="StateLabel" Property="Margin" Value="12,0,0,0" />
+                                <Setter TargetName="StateLabel" Property="Foreground" Value="{DynamicResource ButtonPrimaryFg}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Style="{StaticResource AppTitleBarStyle}"
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Editar Cliente"
+                           Style="{StaticResource AppTitleBarTextStyle}" />
+                <Button Grid.Column="1"
+                        Style="{StaticResource AppTitleBarCloseButtonStyle}"
+                        Click="CloseButton_Click"
+                        Content="&#xE8BB;" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Margin="0,0,0,16">
+                <TextBlock Text="Editar Cliente" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
+                <TextBlock Text="Atualize os dados principais do cliente." Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Dados" FontSize="16" FontWeight="SemiBold" Grid.ColumnSpan="3" Margin="0,0,0,12" />
+
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Text="Nome *" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox x:Name="NomeTextBox" Style="{StaticResource InputStyle}" Text="{Binding NomeFantasia, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="2">
+                                <TextBlock Text="CPF/CNPJ *" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox x:Name="CpfTextBox" Style="{StaticResource InputStyle}" Text="{Binding CpfCnpj}" LostFocus="CpfTextBox_LostFocus" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Margin="0,12,0,0">
+                                <TextBlock Text="Status" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <ToggleButton Style="{StaticResource SwitchStyle}" IsChecked="{Binding IsAtivo}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
+                                <TextBlock Text="Contato" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding Contato}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Contato" FontSize="16" FontWeight="SemiBold" Grid.ColumnSpan="3" Margin="0,0,0,12" />
+
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Text="Telefone" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox x:Name="TelefoneTextBox" Style="{StaticResource InputStyle}" Text="{Binding Telefone1}" LostFocus="TelefoneTextBox_LostFocus" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="2">
+                                <TextBlock Text="E-mail" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding Email}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Margin="0,12,0,0">
+                                <TextBlock Text="Razão social" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding RazaoSocial}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
+                                <TextBlock Text="Endereço" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding Endereco}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Endereço e Vencimentos" FontSize="16" FontWeight="SemiBold" Grid.ColumnSpan="3" Margin="0,0,0,12" />
+
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Text="Cidade" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding Cidade}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="2">
+                                <TextBlock Text="UF" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding UF}" MaxLength="2" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Margin="0,12,0,0">
+                                <TextBlock Text="Vencimento dos extintores" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <DatePicker SelectedDate="{Binding VencimentoExtintores}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
+                                <TextBlock Text="Vencimento do alvará" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <DatePicker SelectedDate="{Binding VencimentoAlvara}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="3" Margin="0,12,0,0">
+                                <TextBlock Text="Tipo" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding Tipo}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,12,0,0">
+                                <TextBlock Text="Nº Alvará" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding NumeroAlvara}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="Status da recarga" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding StatusRecarga}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Status do alvará" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                <TextBox Style="{StaticResource InputStyle}" Text="{Binding StatusAlvara}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Observações" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12" />
+                            <TextBox Height="100"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     TextWrapping="Wrap"
+                                     Text="{Binding Observacoes}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Style="{StaticResource PrimaryButton}" Width="132" Margin="0,0,8,0" Click="Salvar_Click">
+                    <StackPanel Style="{StaticResource IconButtonContent}">
+                        <TextBlock Style="{StaticResource ToolbarIconStyle}"
+                                   Text="&#xE74E;"
+                                   Foreground="{DynamicResource ButtonPrimaryFg}" />
+                        <TextBlock Text="Salvar" Foreground="{DynamicResource ButtonPrimaryFg}" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource SecondaryButton}" Width="132" IsCancel="True">
+                    <StackPanel Style="{StaticResource IconButtonContent}">
+                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                        <TextBlock Text="Cancelar" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
+

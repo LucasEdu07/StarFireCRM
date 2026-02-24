@@ -1,0 +1,247 @@
+﻿<Window x:Class="ExtintorCrm.App.Presentation.PagamentoFormWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Pagamento"
+        Height="740"
+        MinHeight="680"
+        Width="640"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="{DynamicResource AppBackground}"
+        FontFamily="Segoe UI Variable"
+        FontSize="14"
+        Opacity="0">
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.22" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+        <Style x:Key="SectionLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Style="{StaticResource AppTitleBarStyle}"
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding WindowTitle}"
+                           Style="{StaticResource AppTitleBarTextStyle}" />
+                <Button Grid.Column="1"
+                        Style="{StaticResource AppTitleBarCloseButtonStyle}"
+                        Click="CloseButton_Click"
+                        Content="&#xE8BB;" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                <TextBlock Text="{Binding WindowTitle}"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimary}" />
+                <TextBlock Text="{Binding WindowSubtitle}"
+                           Margin="0,4,0,0"
+                           Foreground="{DynamicResource TextSecondary}" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Dados da cobrança"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,12"
+                                       Foreground="{DynamicResource TextPrimary}" />
+
+                            <StackPanel Visibility="{Binding IsClienteSelectable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Margin="0,0,0,12">
+                                <TextBlock Text="Cliente *" Style="{StaticResource SectionLabel}" />
+                                <ComboBox Style="{StaticResource ModernComboBox}"
+                                          Height="40"
+                                          MaxDropDownHeight="280"
+                                          IsTextSearchEnabled="True"
+                                          ScrollViewer.CanContentScroll="True"
+                                          VirtualizingStackPanel.IsVirtualizing="True"
+                                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                          ItemsSource="{Binding Clientes}"
+                                          SelectedValuePath="Id"
+                                          DisplayMemberPath="Nome"
+                                          SelectedValue="{Binding ClienteId}" />
+                            </StackPanel>
+
+                            <StackPanel Visibility="{Binding IsClienteReadOnly, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Margin="0,0,0,12">
+                                <TextBlock Text="Cliente" Style="{StaticResource SectionLabel}" />
+                                <TextBox Style="{StaticResource ModernTextBox}"
+                                         Height="40"
+                                         IsReadOnly="True"
+                                         Text="{Binding ClienteNomeSelecionado, Mode=OneWay}" />
+                                <TextBlock Text="CPF/CNPJ"
+                                           Style="{StaticResource SectionLabel}"
+                                           Margin="0,10,0,6" />
+                                <TextBox Style="{StaticResource ModernTextBox}"
+                                         Height="40"
+                                         IsReadOnly="True"
+                                         Text="{Binding CpfCnpjClienteSelecionado, Mode=OneWay}" />
+                            </StackPanel>
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Tipo" Style="{StaticResource SectionLabel}" />
+                                    <ComboBox Style="{StaticResource ModernComboBox}"
+                                              Height="40"
+                                              ItemsSource="{Binding TipoOptions}"
+                                              SelectedItem="{Binding Tipo}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Status" Style="{StaticResource SectionLabel}" />
+                                    <ComboBox Style="{StaticResource ModernComboBox}"
+                                              Height="40"
+                                              ItemsSource="{Binding StatusOptions}"
+                                              SelectedItem="{Binding StatusFinanceiro}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Categoria" Style="{StaticResource SectionLabel}" />
+                                    <TextBox Style="{StaticResource ModernTextBox}"
+                                             Height="40"
+                                             Text="{Binding Categoria}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Subcategoria" Style="{StaticResource SectionLabel}" />
+                                    <TextBox Style="{StaticResource ModernTextBox}"
+                                             Height="40"
+                                             Text="{Binding Subcategoria}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="Descrição" Style="{StaticResource SectionLabel}" />
+                            <TextBox Style="{StaticResource ModernTextBox}"
+                                     Height="40"
+                                     Margin="0,0,0,12"
+                                     Text="{Binding Descricao}" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Valor *" Style="{StaticResource SectionLabel}" />
+                                    <TextBox x:Name="ValorTextBox"
+                                             Style="{StaticResource ModernTextBox}"
+                                             Height="40"
+                                             GotFocus="ValorTextBox_GotFocus"
+                                             PreviewTextInput="ValorTextBox_PreviewTextInput"
+                                             TextChanged="ValorTextBox_TextChanged"
+                                             LostFocus="ValorTextBox_LostFocus"
+                                             DataObject.Pasting="ValorTextBox_Pasting" />
+                                    <TextBlock x:Name="ValorValidationText"
+                                               Margin="2,6,0,0"
+                                               Foreground="{DynamicResource DangerFg}"
+                                               FontSize="12"
+                                               Visibility="Collapsed"
+                                               Text="Informe um valor válido maior que zero." />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Data de vencimento *" Style="{StaticResource SectionLabel}" />
+                                    <DatePicker SelectedDate="{Binding DataVencimento}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="Observações"
+                                       Style="{StaticResource SectionLabel}"
+                                       Margin="0,12,0,6" />
+                            <TextBox Style="{StaticResource ModernTextBox}"
+                                     MinHeight="74"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     Text="{Binding Observacoes}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Status do pagamento"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,12"
+                                       Foreground="{DynamicResource TextPrimary}" />
+
+                            <CheckBox Content="Pagamento já foi realizado"
+                                      IsChecked="{Binding Pago}"
+                                      Style="{StaticResource ModernCheckBox}"
+                                      Margin="0,0,0,10" />
+
+                            <TextBlock Text="Data de pagamento" Style="{StaticResource SectionLabel}" />
+                            <DatePicker SelectedDate="{Binding DataPagamento}"
+                                        IsEnabled="{Binding Pago}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Style="{StaticResource PrimaryButton}" Width="138" Margin="0,0,8,0" Click="Salvar_Click">
+                    <StackPanel Style="{StaticResource IconButtonContent}">
+                        <TextBlock Style="{StaticResource ToolbarIconStyle}"
+                                   Text="&#xE74E;"
+                                   Foreground="{DynamicResource ButtonPrimaryFg}" />
+                        <TextBlock Text="Salvar" Foreground="{DynamicResource ButtonPrimaryFg}" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource SecondaryButton}" Width="138" IsCancel="True">
+                    <StackPanel Style="{StaticResource IconButtonContent}">
+                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                        <TextBlock Text="Cancelar" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

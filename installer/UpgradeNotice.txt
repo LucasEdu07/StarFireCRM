@@ -1,0 +1,11 @@
+ATUALIZAÇÃO SEGURA - STAR FIRE CRM
+
+Esta atualização altera somente os arquivos do aplicativo.
+
+Seus dados de clientes, pagamentos e configurações NÃO serão apagados.
+Eles permanecem salvos em:
+%LocalAppData%\StarFire\data
+
+Recomendação:
+- Feche o Star Fire CRM antes de iniciar a atualização.
+- Em caso de dúvida, faça um backup antes de atualizar.

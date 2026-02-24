@@ -25,10 +25,12 @@ namespace ExtintorCrm.App.Infrastructure
             if (!string.IsNullOrWhiteSpace(term))
             {
                 term = term.Trim();
+                var termLower = term.ToLower();
                 query = query.Where(x =>
-                    (x.NomeFantasia != null && x.NomeFantasia.Contains(term)) ||
-                    (x.Documento != null && x.Documento.Contains(term)) ||
-                    (x.CPF != null && x.CPF.Contains(term)) ||
+                    (x.NomeFantasia != null && x.NomeFantasia.ToLower().Contains(termLower)) ||
+                    (x.RazaoSocial != null && x.RazaoSocial.ToLower().Contains(termLower)) ||
+                    (x.Documento != null && x.Documento.ToLower().Contains(termLower)) ||
+                    (x.CPF != null && x.CPF.ToLower().Contains(termLower)) ||
                     (x.Telefone != null && x.Telefone.Contains(term)) ||
                     (x.Telefone1 != null && x.Telefone1.Contains(term)));
             }

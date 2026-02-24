@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using ExtintorCrm.App.Domain;
 using ExtintorCrm.App.Infrastructure.Settings;
 
@@ -224,6 +225,84 @@ namespace ExtintorCrm.App.Presentation
 
             UpdateSelectedClientes([cliente]);
             await ShowDetailsAsync();
+        }
+
+        private async Task OpenDashboardAlertsAsync(string? key)
+        {
+            var normalizedKey = (key ?? string.Empty).Trim().ToLowerInvariant();
+            var allAlerts = BuildDashboardAlertItems();
+
+            string title;
+            string subtitle;
+            IEnumerable<DashboardAlertItem> query = allAlerts;
+
+            switch (normalizedKey)
+            {
+                case "ext-vencidos":
+                    title = "Extintores vencidos";
+                    subtitle = "Clientes com extintores em atraso.";
+                    query = allAlerts.Where(x => x.Tipo == "Extintor" && x.Status == "Vencido");
+                    break;
+                case "ext-vencendo7":
+                    title = "Extintores vencendo em 7 dias";
+                    subtitle = "Clientes com vencimento iminente de extintores.";
+                    query = allAlerts.Where(x => x.Tipo == "Extintor" && x.DiasParaVencer is >= 0 and <= 7);
+                    break;
+                case "ext-vencendo30":
+                    title = "Extintores vencendo em 30 dias";
+                    subtitle = "Clientes com extintores que vencem nos próximos 30 dias.";
+                    query = allAlerts.Where(x => x.Tipo == "Extintor" && x.DiasParaVencer is >= 0 and <= 30);
+                    break;
+                case "alvara-vencidos":
+                    title = "Alvarás vencidos";
+                    subtitle = "Clientes com alvará em atraso.";
+                    query = allAlerts.Where(x => x.Tipo == "Alvará" && x.Status == "Vencido");
+                    break;
+                case "alvara-vencendo30":
+                    title = "Alvarás vencendo em 30 dias";
+                    subtitle = "Clientes com alvará próximo do vencimento.";
+                    query = allAlerts.Where(x => x.Tipo == "Alvará" && x.DiasParaVencer is >= 0 and <= 30);
+                    break;
+                case "pag-vencidos":
+                    title = "Pagamentos vencidos";
+                    subtitle = "Clientes com cobranças em atraso.";
+                    query = allAlerts.Where(x => x.Tipo == "Pagamento" && x.Status == "Vencido");
+                    break;
+                case "pag-vencendo30":
+                    title = "Pagamentos vencendo em 30 dias";
+                    subtitle = "Clientes com cobranças para os próximos 30 dias.";
+                    query = allAlerts.Where(x => x.Tipo == "Pagamento" && x.DiasParaVencer is >= 0 and <= 30);
+                    break;
+                default:
+                    title = "Avisos do Dashboard";
+                    subtitle = "Clientes com alertas vencidos ou vencendo.";
+                    query = allAlerts.Where(x => x.Status == "Vencido" || x.Status == "Vencendo");
+                    break;
+            }
+
+            var items = query
+                .OrderBy(x => x.Status == "Vencido" ? 0 : 1)
+                .ThenBy(x => x.DiasParaVencer ?? int.MaxValue)
+                .ThenBy(x => x.ClienteNome)
+                .ToList();
+
+            if (items.Count == 0)
+            {
+                await ShowToastAsync("Nenhum cliente encontrado para este aviso.", "Info");
+                return;
+            }
+
+            var window = new DashboardAlertsWindow(title, subtitle, items)
+            {
+                Owner = Application.Current?.MainWindow
+            };
+
+            if (window.ShowDialog() != true || window.SelectedAlert == null)
+            {
+                return;
+            }
+
+            await OpenDashboardItemAsync(window.SelectedAlert);
         }
 
         private void RefreshCriticalAlerts()

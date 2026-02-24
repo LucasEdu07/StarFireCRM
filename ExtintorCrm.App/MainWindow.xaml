@@ -86,7 +86,7 @@
 
             <Style x:Key="DashboardAnimatedCardStyle" TargetType="Border" BasedOn="{StaticResource CardStyle}">
                 <Setter Property="Opacity" Value="0" />
-                <Setter Property="CornerRadius" Value="14" />
+                <Setter Property="CornerRadius" Value="16" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderStrong}" />
                 <Setter Property="Background" Value="{DynamicResource CardBackground}" />
@@ -94,12 +94,15 @@
                 <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
                 <Setter Property="RenderTransform">
                     <Setter.Value>
-                        <TranslateTransform Y="10" />
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="0.992" ScaleY="0.992" />
+                            <TranslateTransform Y="12" />
+                        </TransformGroup>
                     </Setter.Value>
                 </Setter>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBlueBorder}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryRedHover}" />
                         <Setter Property="Effect" Value="{StaticResource SoftShadowHover}" />
                     </Trigger>
                     <EventTrigger RoutedEvent="FrameworkElement.Loaded">
@@ -108,29 +111,49 @@
                                 <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                  From="0"
                                                  To="1"
-                                                 Duration="0:0:0.22" />
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                 From="10"
+                                                 Duration="0:0:0.24" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                                 From="12"
                                                  To="0"
-                                                 Duration="0:0:0.22" />
+                                                 Duration="0:0:0.24" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                 From="0.992"
+                                                 To="1"
+                                                 Duration="0:0:0.24" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                 From="0.992"
+                                                 To="1"
+                                                 Duration="0:0:0.24" />
                             </Storyboard>
                         </BeginStoryboard>
                     </EventTrigger>
                     <EventTrigger RoutedEvent="MouseEnter">
                         <BeginStoryboard>
                             <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                 To="-2"
-                                                 Duration="0:0:0.14" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                                 To="-4"
+                                                 Duration="0:0:0.16" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                 To="1.01"
+                                                 Duration="0:0:0.16" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                 To="1.01"
+                                                 Duration="0:0:0.16" />
                             </Storyboard>
                         </BeginStoryboard>
                     </EventTrigger>
                     <EventTrigger RoutedEvent="MouseLeave">
                         <BeginStoryboard>
                             <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
                                                  To="0"
-                                                 Duration="0:0:0.14" />
+                                                 Duration="0:0:0.16" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                 To="1"
+                                                 Duration="0:0:0.16" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                 To="1"
+                                                 Duration="0:0:0.16" />
                             </Storyboard>
                         </BeginStoryboard>
                     </EventTrigger>
@@ -139,23 +162,26 @@
 
             <Style x:Key="DashboardAnimatedKpiCardStyle" TargetType="Border" BasedOn="{StaticResource KpiCardStyle}">
                 <Setter Property="Opacity" Value="0" />
-                <Setter Property="Width" Value="232" />
-                <Setter Property="MinHeight" Value="178" />
-                <Setter Property="Padding" Value="18" />
-                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="MinHeight" Value="212" />
+                <Setter Property="Padding" Value="18,16,18,16" />
+                <Setter Property="CornerRadius" Value="20" />
                 <Setter Property="BorderThickness" Value="1" />
-                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderStrong}" />
                 <Setter Property="Background" Value="{DynamicResource CardBackground}" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
                 <Setter Property="Effect" Value="{StaticResource SoftShadow}" />
                 <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
                 <Setter Property="RenderTransform">
                     <Setter.Value>
-                        <TranslateTransform Y="10" />
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="0.99" ScaleY="0.99" />
+                            <TranslateTransform Y="12" />
+                        </TransformGroup>
                     </Setter.Value>
                 </Setter>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBlueBorder}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryRedHover}" />
                         <Setter Property="Effect" Value="{StaticResource SoftShadowHover}" />
                     </Trigger>
                     <EventTrigger RoutedEvent="FrameworkElement.Loaded">
@@ -164,71 +190,116 @@
                                 <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                  From="0"
                                                  To="1"
-                                                 Duration="0:0:0.2" />
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                 From="10"
+                                                 Duration="0:0:0.22" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                                 From="12"
                                                  To="0"
-                                                 Duration="0:0:0.2" />
+                                                 Duration="0:0:0.22" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                 From="0.99"
+                                                 To="1"
+                                                 Duration="0:0:0.22" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                 From="0.99"
+                                                 To="1"
+                                                 Duration="0:0:0.22" />
                             </Storyboard>
                         </BeginStoryboard>
                     </EventTrigger>
                     <EventTrigger RoutedEvent="MouseEnter">
                         <BeginStoryboard>
                             <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                 To="-4"
-                                                 Duration="0:0:0.14" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                                 To="-6"
+                                                 Duration="0:0:0.16" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                 To="1.013"
+                                                 Duration="0:0:0.16" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                 To="1.013"
+                                                 Duration="0:0:0.16" />
                             </Storyboard>
                         </BeginStoryboard>
                     </EventTrigger>
                     <EventTrigger RoutedEvent="MouseLeave">
                         <BeginStoryboard>
                             <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
                                                  To="0"
-                                                 Duration="0:0:0.14" />
+                                                 Duration="0:0:0.16" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                 To="1"
+                                                 Duration="0:0:0.16" />
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                 To="1"
+                                                 Duration="0:0:0.16" />
                             </Storyboard>
                         </BeginStoryboard>
                     </EventTrigger>
                 </Style.Triggers>
             </Style>
 
+            <Style x:Key="KpiCardDangerStyle" TargetType="Border" BasedOn="{StaticResource DashboardAnimatedKpiCardStyle}">
+                <Setter Property="BorderBrush" Value="{DynamicResource BadgeDangerBg}" />
+            </Style>
+
+            <Style x:Key="KpiCardWarningStyle" TargetType="Border" BasedOn="{StaticResource DashboardAnimatedKpiCardStyle}">
+                <Setter Property="BorderBrush" Value="{DynamicResource BadgeWarningBg}" />
+            </Style>
+
             <Style x:Key="KpiIconWrapStyle" TargetType="Border">
-                <Setter Property="Width" Value="44" />
-                <Setter Property="Height" Value="44" />
-                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="Width" Value="50" />
+                <Setter Property="Height" Value="50" />
+                <Setter Property="CornerRadius" Value="15" />
                 <Setter Property="HorizontalAlignment" Value="Left" />
                 <Setter Property="VerticalAlignment" Value="Top" />
                 <Setter Property="Background" Value="{DynamicResource BadgeSuccessBg}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="0" />
             </Style>
 
             <Style x:Key="KpiValueTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="34" />
+                <Setter Property="FontSize" Value="36" />
                 <Setter Property="FontWeight" Value="Bold" />
                 <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-                <Setter Property="Margin" Value="0,10,0,2" />
+                <Setter Property="Margin" Value="0,9,0,3" />
                 <Setter Property="TextTrimming" Value="CharacterEllipsis" />
                 <Setter Property="MinHeight" Value="44" />
+                <Setter Property="TextAlignment" Value="Left" />
+                <Setter Property="LineHeight" Value="40" />
             </Style>
 
             <Style x:Key="KpiLabelTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="13" />
-                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="13.5" />
+                <Setter Property="FontWeight" Value="Medium" />
                 <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
                 <Setter Property="TextWrapping" Value="Wrap" />
-                <Setter Property="LineHeight" Value="17" />
-                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="LineHeight" Value="18" />
+                <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+                <Setter Property="MinHeight" Value="38" />
             </Style>
 
             <Style x:Key="KpiBadgeTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="FontSize" Value="11" />
                 <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="TextAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
                 <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+            </Style>
+
+            <Style x:Key="KpiSeverityBadgeStyle" TargetType="Border" BasedOn="{StaticResource BadgePill}">
+                <Setter Property="MinWidth" Value="92" />
+                <Setter Property="Padding" Value="12,5" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Margin" Value="0,2,0,0" />
             </Style>
 
             <Style x:Key="KpiTopStripBaseStyle" TargetType="Border">
-                <Setter Property="Height" Value="4" />
-                <Setter Property="CornerRadius" Value="14,14,0,0" />
+                <Setter Property="Height" Value="6" />
+                <Setter Property="CornerRadius" Value="20,20,0,0" />
                 <Setter Property="HorizontalAlignment" Value="Stretch" />
                 <Setter Property="VerticalAlignment" Value="Top" />
                 <Setter Property="Background" Value="{DynamicResource BadgeWarningBg}" />
@@ -376,23 +447,26 @@
             <Style x:Key="CriticalGridRowStyle" TargetType="DataGridRow" BasedOn="{StaticResource UnifiedGridRowStyle}">
                 <Setter Property="Cursor" Value="Hand" />
                 <Setter Property="ToolTip" Value="Abrir perfil do cliente" />
+                <Setter Property="MinHeight" Value="44" />
             </Style>
 
             <Style x:Key="CriticalClienteTextStyle" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="13.5" />
                 <Setter Property="VerticalAlignment" Value="Center" />
                 <Setter Property="TextWrapping" Value="NoWrap" />
                 <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                <Setter Property="Margin" Value="8,0,8,0" />
+                <Setter Property="Margin" Value="6,0,8,0" />
             </Style>
 
             <Style x:Key="CriticalTypeBadgeBorderStyle" TargetType="Border">
                 <Setter Property="CornerRadius" Value="999" />
-                <Setter Property="Padding" Value="10,4" />
+                <Setter Property="Padding" Value="10,5" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+                <Setter Property="MinWidth" Value="94" />
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Tipo}" Value="Pagamento">
                         <Setter Property="Background" Value="{DynamicResource AccentBlueBg}" />
@@ -411,10 +485,11 @@
 
             <Style x:Key="CriticalDaysBadgeBorderStyle" TargetType="Border">
                 <Setter Property="CornerRadius" Value="999" />
-                <Setter Property="Padding" Value="10,4" />
+                <Setter Property="Padding" Value="10,5" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="Background" Value="{DynamicResource BadgeSuccessBg}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource BadgeSuccessBg}" />
+                <Setter Property="MinWidth" Value="62" />
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding SituacaoNivel}" Value="Vencendo">
                         <Setter Property="Background" Value="{DynamicResource BadgeWarningBg}" />
@@ -430,6 +505,7 @@
             <Style x:Key="CriticalDaysBadgeTextStyle" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{DynamicResource BadgeSuccessFg}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="12.5" />
                 <Setter Property="TextAlignment" Value="Center" />
                 <Setter Property="HorizontalAlignment" Value="Center" />
                 <Setter Property="VerticalAlignment" Value="Center" />
@@ -1230,7 +1306,7 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Grid.Row="0">
-                                        <TextBlock Text="Panorama operacional" FontSize="17" FontWeight="SemiBold" />
+                                        <TextBlock Text="Panorama operacional" FontSize="18" FontWeight="SemiBold" />
                                         <TextBlock Text="Monitoramento de extintores, alvarás e cobranças em tempo real." Margin="0,6,0,12" Foreground="{DynamicResource TextSecondary}" />
                                         <WrapPanel>
                                             <Border Style="{StaticResource NotificationTypeBadgeBorderStyle}" Margin="0,0,8,0">
@@ -1247,7 +1323,7 @@
 
                                     <Border Grid.Row="1" Margin="0,14,0,0" Padding="0,14,0,0" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
                                         <StackPanel>
-                                            <TextBlock Text="Ações rápidas" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10" />
+                                            <TextBlock Text="Ações rápidas" FontSize="15.5" FontWeight="SemiBold" Margin="0,0,0,10" />
                                             <WrapPanel x:Name="DashboardQuickActionsPanel" VerticalAlignment="Center">
                                             <Button Style="{StaticResource QuickActionButtonStyle}" Margin="0,0,10,0" Command="{Binding GoToClientesCommand}">
                                                 <StackPanel Style="{StaticResource IconButtonContent}">
@@ -1268,21 +1344,32 @@
                             </Border>
                         </StackPanel>
 
-                        <WrapPanel x:Name="DashboardKpiPanel"
-                                   Margin="0,0,0,20"
-                                   ItemWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource DashboardKpiItemWidthConverter}}">
-                            <Border Style="{StaticResource DashboardAnimatedKpiCardStyle}" Margin="0,0,14,14" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource BorderStrong}">
+                        <Grid x:Name="DashboardKpiPanel"
+                              Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Style="{StaticResource KpiCardDangerStyle}" Margin="0,0,10,0" Cursor="Hand" ToolTip="Clique para listar os clientes deste aviso">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenDashboardAlertsCommand}" CommandParameter="ext-vencidos" />
+                                </Border.InputBindings>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <Border Style="{StaticResource KpiTopStripDangerStyle}" Margin="-18,-18,-18,0" />
-                                    <DockPanel>
+                                    <Border Style="{StaticResource KpiTopStripDangerStyle}" Margin="0,0,0,0" />
+                                    <DockPanel LastChildFill="False" Margin="0,10,0,0">
                                         <Border Style="{StaticResource KpiIconWrapStyle}" Background="{DynamicResource BadgeDangerBg}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE814;" Foreground="{DynamicResource BadgeDangerFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="18" FontWeight="SemiBold" Text="&#xE814;" Foreground="{DynamicResource BadgeDangerFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
-                                        <Border DockPanel.Dock="Right" Style="{StaticResource BadgePill}" Background="{DynamicResource BadgeDangerBg}" BorderBrush="{DynamicResource BadgeDangerBg}">
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiSeverityBadgeStyle}" Background="{DynamicResource BadgeDangerBg}" BorderBrush="{DynamicResource BadgeDangerBg}">
                                             <TextBlock Style="{StaticResource KpiBadgeTextStyle}" Text="Crítico" Foreground="{DynamicResource BadgeDangerFg}" />
                                         </Border>
                                     </DockPanel>
@@ -1293,18 +1380,21 @@
                                 </Grid>
                             </Border>
 
-                            <Border Style="{StaticResource DashboardAnimatedKpiCardStyle}" Margin="0,0,14,14" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource BorderStrong}">
+                            <Border Grid.Column="1" Style="{StaticResource KpiCardWarningStyle}" Margin="0,0,10,0" Cursor="Hand" ToolTip="Clique para listar os clientes deste aviso">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenDashboardAlertsCommand}" CommandParameter="ext-vencendo7" />
+                                </Border.InputBindings>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <Border Style="{StaticResource KpiTopStripWarningStyle}" Margin="-18,-18,-18,0" />
-                                    <DockPanel>
+                                    <Border Style="{StaticResource KpiTopStripWarningStyle}" Margin="0,0,0,0" />
+                                    <DockPanel LastChildFill="False" Margin="0,10,0,0">
                                         <Border Style="{StaticResource KpiIconWrapStyle}" Background="{DynamicResource BadgeWarningBg}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE823;" Foreground="{DynamicResource BadgeWarningFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="18" FontWeight="SemiBold" Text="&#xE823;" Foreground="{DynamicResource BadgeWarningFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
-                                        <Border DockPanel.Dock="Right" Style="{StaticResource BadgePill}" Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}">
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiSeverityBadgeStyle}" Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}">
                                             <TextBlock Style="{StaticResource KpiBadgeTextStyle}" Text="Atenção" Foreground="{DynamicResource BadgeWarningFg}" />
                                         </Border>
                                     </DockPanel>
@@ -1319,18 +1409,21 @@
                                 </Grid>
                             </Border>
 
-                            <Border Style="{StaticResource DashboardAnimatedKpiCardStyle}" Margin="0,0,14,14" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource BorderStrong}">
+                            <Border Grid.Column="2" Style="{StaticResource KpiCardWarningStyle}" Margin="0,0,10,0" Cursor="Hand" ToolTip="Clique para listar os clientes deste aviso">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenDashboardAlertsCommand}" CommandParameter="ext-vencendo30" />
+                                </Border.InputBindings>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <Border Style="{StaticResource KpiTopStripWarningStyle}" Margin="-18,-18,-18,0" />
-                                    <DockPanel>
+                                    <Border Style="{StaticResource KpiTopStripWarningStyle}" Margin="0,0,0,0" />
+                                    <DockPanel LastChildFill="False" Margin="0,10,0,0">
                                         <Border Style="{StaticResource KpiIconWrapStyle}" Background="{DynamicResource BadgeWarningBg}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE823;" Foreground="{DynamicResource BadgeWarningFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="18" FontWeight="SemiBold" Text="&#xE823;" Foreground="{DynamicResource BadgeWarningFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
-                                        <Border DockPanel.Dock="Right" Style="{StaticResource BadgePill}" Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}">
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiSeverityBadgeStyle}" Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}">
                                             <TextBlock Style="{StaticResource KpiBadgeTextStyle}" Text="30 dias" Foreground="{DynamicResource BadgeWarningFg}" />
                                         </Border>
                                     </DockPanel>
@@ -1345,18 +1438,21 @@
                                 </Grid>
                             </Border>
 
-                            <Border Style="{StaticResource DashboardAnimatedKpiCardStyle}" Margin="0,0,14,14" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource BorderStrong}">
+                            <Border Grid.Column="3" Style="{StaticResource KpiCardDangerStyle}" Margin="0,0,10,0" Cursor="Hand" ToolTip="Clique para listar os clientes deste aviso">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenDashboardAlertsCommand}" CommandParameter="alvara-vencidos" />
+                                </Border.InputBindings>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <Border Style="{StaticResource KpiTopStripDangerStyle}" Margin="-18,-18,-18,0" />
-                                    <DockPanel>
+                                    <Border Style="{StaticResource KpiTopStripDangerStyle}" Margin="0,0,0,0" />
+                                    <DockPanel LastChildFill="False" Margin="0,10,0,0">
                                         <Border Style="{StaticResource KpiIconWrapStyle}" Background="{DynamicResource BadgeDangerBg}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B4;" Foreground="{DynamicResource BadgeDangerFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="18" FontWeight="SemiBold" Text="&#xE8B4;" Foreground="{DynamicResource BadgeDangerFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
-                                        <Border DockPanel.Dock="Right" Style="{StaticResource BadgePill}" Background="{DynamicResource BadgeDangerBg}" BorderBrush="{DynamicResource BadgeDangerBg}">
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiSeverityBadgeStyle}" Background="{DynamicResource BadgeDangerBg}" BorderBrush="{DynamicResource BadgeDangerBg}">
                                             <TextBlock Style="{StaticResource KpiBadgeTextStyle}" Text="Crítico" Foreground="{DynamicResource BadgeDangerFg}" />
                                         </Border>
                                     </DockPanel>
@@ -1367,18 +1463,21 @@
                                 </Grid>
                             </Border>
 
-                            <Border Style="{StaticResource DashboardAnimatedKpiCardStyle}" Margin="0,0,14,14" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource BorderStrong}">
+                            <Border Grid.Column="4" Style="{StaticResource KpiCardWarningStyle}" Margin="0,0,10,0" Cursor="Hand" ToolTip="Clique para listar os clientes deste aviso">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenDashboardAlertsCommand}" CommandParameter="alvara-vencendo30" />
+                                </Border.InputBindings>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <Border Style="{StaticResource KpiTopStripWarningStyle}" Margin="-18,-18,-18,0" />
-                                    <DockPanel>
+                                    <Border Style="{StaticResource KpiTopStripWarningStyle}" Margin="0,0,0,0" />
+                                    <DockPanel LastChildFill="False" Margin="0,10,0,0">
                                         <Border Style="{StaticResource KpiIconWrapStyle}" Background="{DynamicResource BadgeWarningBg}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B4;" Foreground="{DynamicResource BadgeWarningFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="18" FontWeight="SemiBold" Text="&#xE8B4;" Foreground="{DynamicResource BadgeWarningFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
-                                        <Border DockPanel.Dock="Right" Style="{StaticResource BadgePill}" Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}">
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiSeverityBadgeStyle}" Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}">
                                             <TextBlock Style="{StaticResource KpiBadgeTextStyle}" Text="30 dias" Foreground="{DynamicResource BadgeWarningFg}" />
                                         </Border>
                                     </DockPanel>
@@ -1393,18 +1492,21 @@
                                 </Grid>
                             </Border>
 
-                            <Border Style="{StaticResource DashboardAnimatedKpiCardStyle}" Margin="0,0,14,14" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource BorderStrong}">
+                            <Border Grid.Column="5" Style="{StaticResource KpiCardDangerStyle}" Margin="0,0,10,0" Cursor="Hand" ToolTip="Clique para listar os clientes deste aviso">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenDashboardAlertsCommand}" CommandParameter="pag-vencidos" />
+                                </Border.InputBindings>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <Border Style="{StaticResource KpiTopStripDangerStyle}" Margin="-18,-18,-18,0" />
-                                    <DockPanel>
+                                    <Border Style="{StaticResource KpiTopStripDangerStyle}" Margin="0,0,0,0" />
+                                    <DockPanel LastChildFill="False" Margin="0,10,0,0">
                                         <Border Style="{StaticResource KpiIconWrapStyle}" Background="{DynamicResource BadgeDangerBg}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C7;" Foreground="{DynamicResource BadgeDangerFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="18" FontWeight="SemiBold" Text="&#xE8C7;" Foreground="{DynamicResource BadgeDangerFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
-                                        <Border DockPanel.Dock="Right" Style="{StaticResource BadgePill}" Background="{DynamicResource BadgeDangerBg}" BorderBrush="{DynamicResource BadgeDangerBg}">
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiSeverityBadgeStyle}" Background="{DynamicResource BadgeDangerBg}" BorderBrush="{DynamicResource BadgeDangerBg}">
                                             <TextBlock Style="{StaticResource KpiBadgeTextStyle}" Text="Crítico" Foreground="{DynamicResource BadgeDangerFg}" />
                                         </Border>
                                     </DockPanel>
@@ -1415,18 +1517,21 @@
                                 </Grid>
                             </Border>
 
-                            <Border Style="{StaticResource DashboardAnimatedKpiCardStyle}" Margin="0,0,14,14" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource BorderStrong}">
+                            <Border Grid.Column="6" Style="{StaticResource KpiCardWarningStyle}" Margin="0,0,0,0" Cursor="Hand" ToolTip="Clique para listar os clientes deste aviso">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenDashboardAlertsCommand}" CommandParameter="pag-vencendo30" />
+                                </Border.InputBindings>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <Border Style="{StaticResource KpiTopStripWarningStyle}" Margin="-18,-18,-18,0" />
-                                    <DockPanel>
+                                    <Border Style="{StaticResource KpiTopStripWarningStyle}" Margin="0,0,0,0" />
+                                    <DockPanel LastChildFill="False" Margin="0,10,0,0">
                                         <Border Style="{StaticResource KpiIconWrapStyle}" Background="{DynamicResource BadgeWarningBg}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8C7;" Foreground="{DynamicResource BadgeWarningFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="18" FontWeight="SemiBold" Text="&#xE8C7;" Foreground="{DynamicResource BadgeWarningFg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
-                                        <Border DockPanel.Dock="Right" Style="{StaticResource BadgePill}" Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}">
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiSeverityBadgeStyle}" Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}">
                                             <TextBlock Style="{StaticResource KpiBadgeTextStyle}" Text="30 dias" Foreground="{DynamicResource BadgeWarningFg}" />
                                         </Border>
                                     </DockPanel>
@@ -1440,7 +1545,7 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
-                        </WrapPanel>
+                        </Grid>
 
                         <Border x:Name="DashboardCriticalCard" Style="{StaticResource DashboardAnimatedCardStyle}" Margin="0,0,0,18">
                             <StackPanel>
@@ -1450,7 +1555,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="Críticos agora" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
+                                        <TextBlock Text="Críticos agora" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
                                         <TextBlock Text="Top 10 vencimentos mais urgentes para ação imediata." Margin="0,4,0,0" Foreground="{DynamicResource TextSecondary}" />
                                     </StackPanel>
                                     <Border Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource BadgePill}" Background="{DynamicResource BadgeDangerBg}" BorderBrush="{DynamicResource BadgeDangerBg}">
@@ -1473,6 +1578,9 @@
                                 <DataGrid Style="{StaticResource CleanDataGrid}"
                                           AutoGenerateColumns="False"
                                           IsReadOnly="True"
+                                          RowHeight="44"
+                                          ColumnHeaderHeight="40"
+                                          FontSize="13.5"
                                           MaxHeight="360"
                                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                                           ItemsSource="{Binding CriticalItems}"
@@ -1526,7 +1634,7 @@
 
                             <Border Grid.Column="0" Style="{StaticResource DashboardAnimatedCardStyle}" MinHeight="286" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="Próximos 7 dias" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12" />
+                                    <TextBlock Text="Próximos 7 dias" FontSize="16.5" FontWeight="SemiBold" Margin="0,0,0,12" />
                                     <ItemsControl ItemsSource="{Binding Next7Days}">
                                         <ItemsControl.Style>
                                             <Style TargetType="ItemsControl">
@@ -1576,7 +1684,7 @@
 
                             <Border Grid.Column="2" Style="{StaticResource DashboardAnimatedCardStyle}" MinHeight="286" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="Próximos 30 dias" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12" />
+                                    <TextBlock Text="Próximos 30 dias" FontSize="16.5" FontWeight="SemiBold" Margin="0,0,0,12" />
                                     <ItemsControl ItemsSource="{Binding Next30Days}">
                                         <ItemsControl.Style>
                                             <Style TargetType="ItemsControl">
@@ -1627,7 +1735,7 @@
 
                         <Border Style="{StaticResource DashboardAnimatedCardStyle}">
                             <StackPanel>
-                                <TextBlock Text="Distribuição de alertas" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12" />
+                                <TextBlock Text="Distribuição de alertas" FontSize="16.5" FontWeight="SemiBold" Margin="0,0,0,12" />
                                 <Grid Margin="0,0,0,10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="140" />
@@ -1724,13 +1832,13 @@
                                         <TextBlock>
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="Abrir detalhes do cliente selecionado." />
+                                                    <Setter Property="Text" Value="Abrir perfil completo do cliente para consulta e edição." />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding HasMultiSelection}" Value="True">
-                                                            <Setter Property="Text" Value="Selecione apenas 1 cliente para ver detalhes." />
+                                                            <Setter Property="Text" Value="Selecione apenas 1 cliente para abrir o perfil." />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding SelectedClientesCount}" Value="0">
-                                                            <Setter Property="Text" Value="Selecione um cliente para ver detalhes." />
+                                                            <Setter Property="Text" Value="Selecione um cliente para abrir o perfil." />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -1740,32 +1848,7 @@
                                     <ToolTipService.ShowOnDisabled>True</ToolTipService.ShowOnDisabled>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
                                         <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE946;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                                        <TextBlock Text="Ver Detalhes" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                                    </StackPanel>
-                                </Button>
-
-                                <Button Style="{StaticResource ActionBarWarningButtonStyle}" Margin="0,0,12,0" MinWidth="110" Command="{Binding EditCommand}">
-                                    <Button.ToolTip>
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="Editar cliente selecionado." />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding HasMultiSelection}" Value="True">
-                                                            <Setter Property="Text" Value="Edição disponível apenas para 1 cliente por vez." />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding SelectedClientesCount}" Value="0">
-                                                            <Setter Property="Text" Value="Selecione um cliente para editar." />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Button.ToolTip>
-                                    <ToolTipService.ShowOnDisabled>True</ToolTipService.ShowOnDisabled>
-                                    <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE70F;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                                        <TextBlock Text="Editar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <TextBlock Text="Abrir Perfil" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
 
@@ -1887,7 +1970,7 @@
                     <Border x:Name="ClientesGridCard"
                             Grid.Row="4"
                             Style="{StaticResource CardStyle}"
-                            Padding="8"
+                            Padding="10"
                             BorderBrush="{DynamicResource BorderStrong}"
                             BorderThickness="1">
                         <Grid>
@@ -1902,7 +1985,11 @@
                             <DataGrid x:Name="ClientesDataGrid"
                                       Style="{StaticResource CleanDataGrid}"
                                       AutoGenerateColumns="False"
+                                      CanUserSortColumns="True"
                                       IsReadOnly="True"
+                                      RowHeight="50"
+                                      ColumnHeaderHeight="42"
+                                      FontSize="14.5"
                                       SelectionMode="Extended"
                                       SelectionUnit="FullRow"
                                       RowStyle="{StaticResource UnifiedGridRowStyle}"
@@ -1911,7 +1998,13 @@
                                       SelectedItem="{Binding SelectedCliente, Mode=TwoWay}"
                                       PreviewMouseLeftButtonDown="ClientesDataGrid_PreviewMouseLeftButtonDown"
                                       SelectionChanged="ClientesDataGrid_SelectionChanged"
+                                      Sorting="ClientesDataGrid_Sorting"
                                       MouseDoubleClick="ClientesDataGrid_MouseDoubleClick">
+                                <DataGrid.Resources>
+                                    <Style x:Key="ClientesSortableHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource UnifiedGridHeaderStyle}">
+                                        <Setter Property="ToolTip" Value="Clique para ordenar" />
+                                    </Style>
+                                </DataGrid.Resources>
                                 <DataGrid.Columns>
                                     <DataGridTemplateColumn Width="44" CanUserSort="False">
                                         <DataGridTemplateColumn.HeaderTemplate>
@@ -1931,12 +2024,12 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Nome" Binding="{Binding NomeFantasia}" Width="2*" ElementStyle="{StaticResource LeftCellStyle}" />
-                                    <DataGridTextColumn Header="CPF/CNPJ" Binding="{Binding CPF}" Width="*" ElementStyle="{StaticResource LeftCellStyle}" />
-                                    <DataGridTextColumn Header="Telefone" Binding="{Binding Telefone1}" Width="*" ElementStyle="{StaticResource LeftCellStyle}" />
-                                    <DataGridTextColumn Header="Cidade" Binding="{Binding Cidade}" Width="*" ElementStyle="{StaticResource LeftCellStyle}" />
-                                    <DataGridTextColumn Header="Vencimento Extintores" Binding="{Binding VencimentoExtintores, StringFormat=dd/MM/yyyy}" Width="*" ElementStyle="{StaticResource CenterCellStyle}" />
-                                    <DataGridTemplateColumn Header="Situação" Width="160">
+                                    <DataGridTextColumn Header="Nome" Binding="{Binding NomeFantasia}" SortMemberPath="NomeFantasia" HeaderStyle="{StaticResource ClientesSortableHeaderStyle}" Width="2*" ElementStyle="{StaticResource LeftCellStyle}" />
+                                    <DataGridTextColumn Header="CPF/CNPJ" Binding="{Binding CPF}" SortMemberPath="CPF" HeaderStyle="{StaticResource ClientesSortableHeaderStyle}" Width="*" ElementStyle="{StaticResource LeftCellStyle}" />
+                                    <DataGridTextColumn Header="Telefone" Binding="{Binding Telefone1}" SortMemberPath="Telefone1" HeaderStyle="{StaticResource ClientesSortableHeaderStyle}" Width="*" ElementStyle="{StaticResource LeftCellStyle}" />
+                                    <DataGridTextColumn Header="Cidade" Binding="{Binding Cidade}" SortMemberPath="Cidade" HeaderStyle="{StaticResource ClientesSortableHeaderStyle}" Width="*" ElementStyle="{StaticResource LeftCellStyle}" />
+                                    <DataGridTextColumn Header="Vencimento Extintores" Binding="{Binding VencimentoExtintores, StringFormat=dd/MM/yyyy}" SortMemberPath="VencimentoExtintores" HeaderStyle="{StaticResource ClientesSortableHeaderStyle}" Width="*" ElementStyle="{StaticResource CenterCellStyle}" />
+                                    <DataGridTemplateColumn Header="Situação" SortMemberPath="SituacaoTexto" HeaderStyle="{StaticResource ClientesSortableHeaderStyle}" Width="160">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Border Style="{StaticResource StatusBadgeBorderStyle}" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -1973,6 +2066,26 @@
                                     <TextBlock Text="Anterior" />
                                 </StackPanel>
                             </Button>
+                            <ItemsControl ItemsSource="{Binding PageIndexes}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource SecondaryButton}"
+                                                MinWidth="38"
+                                                Height="34"
+                                                Margin="0,0,6,0"
+                                                Padding="10,4"
+                                                Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=TabControl}}"
+                                                CommandParameter="{Binding}">
+                                            <TextBlock Text="{Binding}" />
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                             <Border Background="{DynamicResource BadgeWarningBg}" BorderBrush="{DynamicResource BadgeWarningBg}" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,8,0">
                                 <TextBlock Text="{Binding PageNumber, StringFormat=Página {0}}" FontWeight="SemiBold" Foreground="{DynamicResource BadgeWarningFg}" />
                             </Border>
@@ -2746,6 +2859,13 @@
         </Grid>
     </Grid>
 </Window>
+
+
+
+
+
+
+
 
 
 

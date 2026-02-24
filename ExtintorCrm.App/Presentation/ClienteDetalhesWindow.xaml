@@ -247,6 +247,9 @@
 
                     <StackPanel>
                         <TextBlock Text="{Binding NomeFantasia}" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
+                        <TextBlock Text="Visualize e edite os dados do cliente em um único lugar."
+                                   Foreground="{DynamicResource TextSecondary}"
+                                   Margin="0,4,0,0" />
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                             <TextBlock Text="Telefone:" Style="{StaticResource SmallLabel}" Margin="0,0,6,0" />
                             <TextBlock Text="{Binding TelefoneResumo}" Margin="0,0,16,0" />
@@ -322,7 +325,16 @@
                                 <TextBox Style="{StaticResource ModernTextBox}" Height="38" Margin="0,6,0,12" Text="{Binding Tipo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditMode}" />
 
                                 <TextBlock Text="Status da recarga" Style="{StaticResource SmallLabel}" />
-                                <TextBox Style="{StaticResource ModernTextBox}" Height="38" Margin="0,6,0,12" Text="{Binding StatusRecarga, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditMode}" />
+                                <ComboBox Height="38"
+                                          Margin="0,6,0,12"
+                                          IsEnabled="{Binding IsEditMode}"
+                                          SelectedValuePath="Content"
+                                          SelectedValue="{Binding StatusRecarga, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <ComboBoxItem Content="Não informado" />
+                                    <ComboBoxItem Content="Em dia" />
+                                    <ComboBoxItem Content="Pendente" />
+                                    <ComboBoxItem Content="Vencido" />
+                                </ComboBox>
 
                                 <Border Style="{StaticResource SituacaoBadge}" HorizontalAlignment="Left">
                                     <TextBlock Text="{Binding ExtintorBadgeTexto}" FontWeight="SemiBold">
@@ -353,7 +365,16 @@
                                 <TextBox Style="{StaticResource ModernTextBox}" Height="38" Margin="0,6,0,12" Text="{Binding NumeroAlvara, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditMode}" />
 
                                 <TextBlock Text="Status do alvará" Style="{StaticResource SmallLabel}" />
-                                <TextBox Style="{StaticResource ModernTextBox}" Height="38" Margin="0,6,0,12" Text="{Binding StatusAlvara, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditMode}" />
+                                <ComboBox Height="38"
+                                          Margin="0,6,0,12"
+                                          IsEnabled="{Binding IsEditMode}"
+                                          SelectedValuePath="Content"
+                                          SelectedValue="{Binding StatusAlvara, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <ComboBoxItem Content="Não informado" />
+                                    <ComboBoxItem Content="Em dia" />
+                                    <ComboBoxItem Content="Pendente" />
+                                    <ComboBoxItem Content="Vencido" />
+                                </ComboBox>
 
                                 <TextBlock Text="Vencimento do alvará" Style="{StaticResource SmallLabel}" />
                                 <DatePicker Margin="0,6,0,12" SelectedDate="{Binding VencimentoAlvara, Mode=TwoWay}" IsEnabled="{Binding IsEditMode}" />

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -42,7 +44,9 @@ namespace ExtintorCrm.App.Presentation
         private readonly RelayCommand _goToDashboardCommand;
         private readonly RelayCommand _toggleNotificationsCommand;
         private readonly RelayCommand _openDashboardItemCommand;
+        private readonly RelayCommand _openDashboardAlertsCommand;
         private readonly RelayCommand _selectConfigSectionCommand;
+        private readonly RelayCommand _goToPageCommand;
         private readonly RelayCommand _contactSupportWhatsAppCommand;
         private readonly RelayCommand _contactSupportEmailCommand;
         private readonly AlertService _alertService;
@@ -54,8 +58,10 @@ namespace ExtintorCrm.App.Presentation
         private readonly HashSet<string> _preferredPagamentoExportFields = new();
         private const double DefaultWindowWidth = 1380;
         private const double DefaultWindowHeight = 860;
+        private const int ClientesPageSize = 10;
         private readonly List<Pagamento> _allPagamentos = new();
         private readonly List<Cliente> _allClientes = new();
+        private readonly List<Cliente> _filteredClientes = new();
         private readonly List<Cliente> _selectedClientes = new();
         private Cliente? _selectedCliente;
         private Pagamento? _selectedPagamento;
@@ -92,8 +98,11 @@ namespace ExtintorCrm.App.Presentation
         private double _mainWindowLeft = double.NaN;
         private double _mainWindowTop = double.NaN;
         private DispatcherTimer? _backupTimer;
+        private CancellationTokenSource? _searchDebounceCts;
         private readonly string _appVersion;
         private readonly string _buildDateTimeDisplay;
+        private string _clientesSortMember = nameof(Cliente.NomeFantasia);
+        private ListSortDirection _clientesSortDirection = ListSortDirection.Ascending;
 
         public ClientesViewModel()
             : this(new ClienteRepository(), new PagamentoRepository(), new ConfiguracaoAlertaRepository())
@@ -125,8 +134,9 @@ namespace ExtintorCrm.App.Presentation
             _importCommand = new RelayCommand(async _ => await ImportAsync(), _ => !IsImporting);
             _exportCommand = new RelayCommand(async _ => await ExportAsync(), _ => _allClientes.Any() || _allPagamentos.Any());
             _backupCommand = new RelayCommand(async _ => await RunBackupAsync(false), _ => !IsImporting && !IsBackupRunning);
-            _previousPageCommand = new RelayCommand(_ => { }, _ => CanGoPrev);
-            _nextPageCommand = new RelayCommand(_ => { }, _ => CanGoNext);
+            _previousPageCommand = new RelayCommand(_ => ChangeClientesPage(-1), _ => CanGoPrev);
+            _nextPageCommand = new RelayCommand(_ => ChangeClientesPage(1), _ => CanGoNext);
+            _goToPageCommand = new RelayCommand(page => GoToPage(page), page => CanGoToPage(page));
             _newPagamentoCommand = new RelayCommand(async _ => await NewPagamentoAsync());
             _editPagamentoCommand = new RelayCommand(async _ => await EditPagamentoAsync(), _ => SelectedPagamento != null);
             _deletePagamentoCommand = new RelayCommand(async _ => await DeletePagamentoAsync(), _ => SelectedPagamento != null);
@@ -146,6 +156,7 @@ namespace ExtintorCrm.App.Presentation
             _goToPagamentosCommand = new RelayCommand(_ => SelectedMainTabIndex = 2);
             _toggleNotificationsCommand = new RelayCommand(_ => IsNotificationPanelOpen = !IsNotificationPanelOpen);
             _openDashboardItemCommand = new RelayCommand(async item => await OpenDashboardItemAsync(item as DashboardAlertItem), item => item is DashboardAlertItem);
+            _openDashboardAlertsCommand = new RelayCommand(async key => await OpenDashboardAlertsAsync(key as string));
             _selectConfigSectionCommand = new RelayCommand(section => SelectConfigSection(section as string));
             _contactSupportWhatsAppCommand = new RelayCommand(async _ => await ContactSupportWhatsAppAsync());
             _contactSupportEmailCommand = new RelayCommand(async _ => await ContactSupportEmailAsync());
@@ -157,6 +168,7 @@ namespace ExtintorCrm.App.Presentation
             BackupCommand = _backupCommand;
             PreviousPageCommand = _previousPageCommand;
             NextPageCommand = _nextPageCommand;
+            GoToPageCommand = _goToPageCommand;
             NewPagamentoCommand = _newPagamentoCommand;
             EditPagamentoCommand = _editPagamentoCommand;
             DeletePagamentoCommand = _deletePagamentoCommand;
@@ -172,6 +184,7 @@ namespace ExtintorCrm.App.Presentation
             GoToPagamentosCommand = _goToPagamentosCommand;
             ToggleNotificationsCommand = _toggleNotificationsCommand;
             OpenDashboardItemCommand = _openDashboardItemCommand;
+            OpenDashboardAlertsCommand = _openDashboardAlertsCommand;
             SelectConfigSectionCommand = _selectConfigSectionCommand;
             ContactSupportWhatsAppCommand = _contactSupportWhatsAppCommand;
             ContactSupportEmailCommand = _contactSupportEmailCommand;
@@ -189,6 +202,7 @@ namespace ExtintorCrm.App.Presentation
         public ObservableCollection<DashboardAlertItem> Next30Days { get; } = new();
         public ObservableCollection<int> BackupIntervalOptions { get; } = new() { 1, 6, 12, 24 };
         public ObservableCollection<int> BackupRetentionOptions { get; } = new() { 5, 10, 20, 30 };
+        public ObservableCollection<int> PageIndexes { get; } = new();
 
         public Cliente? SelectedCliente
         {
@@ -212,6 +226,8 @@ namespace ExtintorCrm.App.Presentation
         public bool HasMultiSelection => SelectedClientesCount > 1;
         public bool CanEditSelectedCliente => SelectedClientesCount == 1 && SelectedCliente != null;
         public bool CanDeleteSelectedClientes => SelectedClientesCount >= 1;
+        public string ClientesSortMember => _clientesSortMember;
+        public ListSortDirection ClientesSortDirection => _clientesSortDirection;
         public string SelectedClientesSummary => SelectedClientesCount == 0
             ? "Nenhum cliente selecionado"
             : SelectedClientesCount == 1
@@ -238,6 +254,7 @@ namespace ExtintorCrm.App.Presentation
             {
                 _searchTerm = value;
                 OnPropertyChanged();
+                QueueSearch();
             }
         }
 
@@ -263,6 +280,7 @@ namespace ExtintorCrm.App.Presentation
         public ICommand BackupCommand { get; }
         public ICommand PreviousPageCommand { get; }
         public ICommand NextPageCommand { get; }
+        public ICommand GoToPageCommand { get; }
         public ICommand NewPagamentoCommand { get; }
         public ICommand EditPagamentoCommand { get; }
         public ICommand DeletePagamentoCommand { get; }
@@ -278,6 +296,7 @@ namespace ExtintorCrm.App.Presentation
         public ICommand GoToPagamentosCommand { get; }
         public ICommand ToggleNotificationsCommand { get; }
         public ICommand OpenDashboardItemCommand { get; }
+        public ICommand OpenDashboardAlertsCommand { get; }
         public ICommand SelectConfigSectionCommand { get; }
         public ICommand ContactSupportWhatsAppCommand { get; }
         public ICommand ContactSupportEmailCommand { get; }
@@ -372,10 +391,10 @@ namespace ExtintorCrm.App.Presentation
 
         public bool CanGoPrev => PageNumber > 1;
         public bool CanGoNext => PageNumber < PageCount;
-        public int DisplayFrom => TotalClientes == 0 ? 0 : 1;
-        public int DisplayTo => TotalClientes;
+        public int DisplayFrom => TotalClientes == 0 ? 0 : ((PageNumber - 1) * ClientesPageSize) + 1;
+        public int DisplayTo => TotalClientes == 0 ? 0 : Math.Min(PageNumber * ClientesPageSize, TotalClientes);
         public string FooterSummary => $"Exibindo {DisplayFrom} a {DisplayTo} de {TotalClientes} clientes";
-        public bool ShowPagination => TotalClientes > 10;
+        public bool ShowPagination => TotalClientes > ClientesPageSize;
 
         public int SelectedMainTabIndex
         {

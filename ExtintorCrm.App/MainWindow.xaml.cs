@@ -80,6 +80,31 @@ public partial class MainWindow : Window
         _viewModel.UpdateSelectedClientes(selected);
     }
 
+    private void ClientesDataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+    {
+        var sortMemberPath = e.Column.SortMemberPath;
+        if (string.IsNullOrWhiteSpace(sortMemberPath))
+        {
+            return;
+        }
+
+        e.Handled = true;
+        _viewModel.SortClientesBy(sortMemberPath);
+
+        if (sender is DataGrid grid)
+        {
+            foreach (var column in grid.Columns)
+            {
+                if (!ReferenceEquals(column, e.Column))
+                {
+                    column.SortDirection = null;
+                }
+            }
+        }
+
+        e.Column.SortDirection = _viewModel.ClientesSortDirection;
+    }
+
     private void ClientesSelectionCheckBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not CheckBox checkBox || checkBox.DataContext is not Domain.Cliente cliente)

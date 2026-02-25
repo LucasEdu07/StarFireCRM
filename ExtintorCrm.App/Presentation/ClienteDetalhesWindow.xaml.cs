@@ -1,15 +1,26 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using ExtintorCrm.App.Domain;
+using ExtintorCrm.App.Infrastructure;
+using ExtintorCrm.App.Infrastructure.Documents;
+using Microsoft.Win32;
 
 namespace ExtintorCrm.App.Presentation
 {
     public partial class ClienteDetalhesWindow : Window
     {
         private readonly CultureInfo _ptBr = new("pt-BR");
+        private readonly DocumentoAnexoRepository _documentoAnexoRepository = new();
+        private readonly DocumentoStorageService _documentoStorageService = new();
+        private readonly ObservableCollection<DocumentoAnexoItem> _alvaraAnexos = new();
         private bool _isFormattingValor;
         public bool SaveRequested { get; private set; }
 
@@ -17,6 +28,13 @@ namespace ExtintorCrm.App.Presentation
         {
             InitializeComponent();
             DataContext = viewModel;
+            AlvaraAnexosDataGrid.ItemsSource = _alvaraAnexos;
+            UpdateAlvaraAnexosUi();
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            await LoadAlvaraAnexosAsync();
         }
 
         private void Editar_Click(object sender, RoutedEventArgs e)
@@ -70,6 +88,180 @@ namespace ExtintorCrm.App.Presentation
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private async Task LoadAlvaraAnexosAsync()
+        {
+            if (DataContext is not ClienteDetalhesViewModel vm)
+            {
+                return;
+            }
+
+            try
+            {
+                var anexos = await _documentoAnexoRepository.ListByClienteAlvaraAsync(vm.ClienteId);
+                _alvaraAnexos.Clear();
+                foreach (var anexo in anexos)
+                {
+                    _alvaraAnexos.Add(new DocumentoAnexoItem(anexo));
+                }
+
+                AlvaraAnexosDataGrid.SelectedIndex = _alvaraAnexos.Count > 0 ? 0 : -1;
+                UpdateAlvaraAnexosUi();
+            }
+            catch (Exception ex)
+            {
+                DialogService.Error("Anexos", $"Falha ao carregar documentos do alvará: {ex.Message}", this);
+            }
+        }
+
+        private void UpdateAlvaraAnexosUi()
+        {
+            AlvaraAnexosCountText.Text = _alvaraAnexos.Count == 0
+                ? "Nenhum documento anexado"
+                : $"{_alvaraAnexos.Count} documento(s) anexado(s)";
+
+            var hasSelection = AlvaraAnexosDataGrid.SelectedItem is DocumentoAnexoItem;
+            AbrirAlvaraButton.IsEnabled = hasSelection;
+            ExcluirAlvaraButton.IsEnabled = hasSelection;
+        }
+
+        private void AlvaraAnexosDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateAlvaraAnexosUi();
+        }
+
+        private async void AnexarAlvaraDocumento_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not ClienteDetalhesViewModel vm)
+            {
+                return;
+            }
+
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecionar documentos do alvará",
+                Filter = "Documentos (*.*)|*.*",
+                CheckFileExists = true,
+                Multiselect = true
+            };
+
+            if (dialog.ShowDialog() != true || dialog.FileNames.Length == 0)
+            {
+                return;
+            }
+
+            foreach (var fileName in dialog.FileNames)
+            {
+                StoredDocumentoArquivo? storedFile = null;
+                try
+                {
+                    storedFile = _documentoStorageService.StoreForAlvara(vm.ClienteId, fileName);
+                    await _documentoAnexoRepository.AddAsync(new DocumentoAnexo
+                    {
+                        Id = storedFile.DocumentoId,
+                        ClienteId = vm.ClienteId,
+                        Contexto = "Alvara",
+                        TipoDocumento = ResolveAlvaraDocumentType(Path.GetFileName(fileName)),
+                        NomeOriginal = storedFile.NomeOriginal,
+                        CaminhoRelativo = storedFile.CaminhoRelativo,
+                        TamanhoBytes = storedFile.TamanhoBytes,
+                        CriadoEm = DateTime.UtcNow,
+                        AtualizadoEm = DateTime.UtcNow
+                    });
+                }
+                catch (Exception ex)
+                {
+                    if (storedFile != null)
+                    {
+                        _documentoStorageService.DeleteByRelativePath(storedFile.CaminhoRelativo);
+                    }
+
+                    DialogService.Error(
+                        "Anexos",
+                        $"Falha ao anexar '{Path.GetFileName(fileName)}': {ex.Message}",
+                        this);
+                }
+            }
+
+            await LoadAlvaraAnexosAsync();
+        }
+
+        private void AbrirAlvaraDocumento_Click(object sender, RoutedEventArgs e)
+        {
+            if (AlvaraAnexosDataGrid.SelectedItem is not DocumentoAnexoItem selected)
+            {
+                return;
+            }
+
+            try
+            {
+                var absolutePath = _documentoStorageService.ResolveAbsolutePath(selected.CaminhoRelativo);
+                if (!File.Exists(absolutePath))
+                {
+                    DialogService.Info("Anexos", "Arquivo não encontrado no armazenamento local.", this);
+                    return;
+                }
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = absolutePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                DialogService.Error("Anexos", $"Falha ao abrir arquivo: {ex.Message}", this);
+            }
+        }
+
+        private async void ExcluirAlvaraDocumento_Click(object sender, RoutedEventArgs e)
+        {
+            if (AlvaraAnexosDataGrid.SelectedItem is not DocumentoAnexoItem selected)
+            {
+                return;
+            }
+
+            var confirmed = DialogService.Confirm(
+                "Excluir anexo",
+                $"Deseja realmente excluir o anexo '{selected.NomeOriginal}'?",
+                this);
+            if (!confirmed)
+            {
+                return;
+            }
+
+            try
+            {
+                await _documentoAnexoRepository.DeleteAsync(selected.Id);
+                _documentoStorageService.DeleteByRelativePath(selected.CaminhoRelativo);
+                await LoadAlvaraAnexosAsync();
+            }
+            catch (Exception ex)
+            {
+                DialogService.Error("Anexos", $"Falha ao excluir anexo: {ex.Message}", this);
+            }
+        }
+
+        private static string ResolveAlvaraDocumentType(string? fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return "Alvará";
+            }
+
+            var lower = fileName.ToLowerInvariant();
+            if (lower.Contains("laudo"))
+            {
+                return "Laudo";
+            }
+
+            if (lower.Contains("licenca") || lower.Contains("licença"))
+            {
+                return "Licença";
+            }
+
+            return "Alvará";
         }
 
         private void ValorEditor_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -230,5 +422,3 @@ namespace ExtintorCrm.App.Presentation
         }
     }
 }
-
-

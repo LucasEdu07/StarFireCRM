@@ -38,6 +38,7 @@ namespace ExtintorCrm.App.Presentation
             _source = source;
             if (source != null)
             {
+                PagamentoId = source.Id;
                 _clienteId = source.ClienteId;
                 _descricao = source.Descricao;
                 _tipo = string.IsNullOrWhiteSpace(source.Tipo) ? "Receita" : source.Tipo;
@@ -56,6 +57,7 @@ namespace ExtintorCrm.App.Presentation
             }
         }
 
+        public Guid PagamentoId { get; } = Guid.Empty;
         public List<ClienteOption> Clientes { get; }
         public List<string> TipoOptions { get; }
         public List<string> StatusOptions { get; }

@@ -1,30 +1,30 @@
-# Star Fire CRM
+﻿# Star Fire CRM
 
-Aplicação desktop WPF para gestão operacional de clientes, vencimentos, alertas e pagamentos.
+Aplicacao desktop WPF para gestao operacional de clientes, vencimentos, alertas e pagamentos.
 
-## Visão Geral
+## Visao Geral
 
-O **Star Fire CRM** foi projetado para operação offline com foco em:
+O **Star Fire CRM** foi projetado para operacao offline com foco em:
 
-- Cadastro e gestão de clientes
-- Controle de vencimento de extintores e alvarás
-- Gestão de pagamentos
-- Alertas e pendências críticas
-- Backup e restauração
-- Importação/Exportação de dados
+- Cadastro e gestao de clientes
+- Controle de vencimento de extintores e alvaras
+- Gestao de pagamentos
+- Alertas e pendencias criticas
+- Backup e restauracao
+- Importacao/Exportacao de dados
 
 ## Principais Funcionalidades
 
 - Dashboard executivo com KPIs e alertas
 - CRUD completo de clientes
-- Perfil detalhado do cliente (extintores, alvará, pagamentos, observações)
+- Perfil detalhado do cliente (extintores, alvara, pagamentos, observacoes)
 - CRUD de pagamentos
-- Importação de clientes por planilha
-- Importação de pagamentos por planilha
-- Exportação para Excel/CSV com seleção de campos
-- Tema Light/Dark com persistência
-- Backup manual/automático e restauração
-- Atualização de versão via instalador
+- Importacao de clientes por planilha
+- Importacao de pagamentos por planilha
+- Exportacao para Excel/CSV com selecao de campos
+- Tema Light/Dark com persistencia
+- Backup manual/automatico e restauracao
+- Atualizacao de versao via instalador
 
 ## Tecnologias
 
@@ -37,7 +37,7 @@ O **Star Fire CRM** foi projetado para operação offline com foco em:
 
 - Windows 10/11
 - .NET SDK 8.0 (para desenvolvimento)
-- Microsoft Excel instalado (recomendado para alguns fluxos de importação de arquivos legados)
+- Microsoft Excel instalado (recomendado para alguns fluxos de importacao de arquivos legados)
 
 ## Estrutura do Projeto
 
@@ -61,7 +61,7 @@ dotnet build
 dotnet run --project .\ExtintorCrm.App\
 ```
 
-## Build e Publicação
+## Build e Publicacao
 
 Gerar publish + instalador:
 
@@ -69,45 +69,44 @@ Gerar publish + instalador:
 powershell -ExecutionPolicy Bypass -File .\scripts\Publish-StarFire.ps1 -Version 1.0.4 -BuildInstaller
 ```
 
-Saídas:
+Saidas:
 
-- Publish: `artifacts/publish/StarFire-<versão>/`
-- Instalador: `artifacts/installer/StarFire-Setup-<versão>.exe`
+- Publish: `artifacts/publish/StarFire-<versao>/`
+- Instalador: `artifacts/installer/StarFire-Setup-<versao>.exe`
 
-## Dados, Backup e Atualização
+## Dados, Backup e Atualizacao
 
-- O app utiliza pasta de dados local do usuário (não sobrescrever dados em atualização de executável).
-- Use a aba **Configurações > Backup** para:
+- O app utiliza pasta de dados local do usuario (nao sobrescrever dados em atualizacao de executavel).
+- Use a aba **Configuracoes > Backup** para:
   - definir pasta de backup
-  - configurar backup automático
+  - configurar backup automatico
   - restaurar backup
 
-Leia também:
+Leia tambem:
 
 - `docs/ATUALIZACAO-CLIENTE.md`
 - `README_RELEASE.md`
 
-## Importação
+## Importacao
 
 ### Clientes
 
 - Suporta planilhas e CSV
-- Regras de validação aplicadas no importador
-- Linhas inválidas são ignoradas com motivo no resumo
+- Regras de validacao aplicadas no importador
+- Linhas invalidas sao ignoradas com motivo no resumo
 
 ### Pagamentos
 
-- Importação por aba de Pagamentos
-- Validação por vínculo com cliente existente
+- Importacao por aba de Pagamentos
+- Validacao por vinculo com cliente existente
 
 ## Testes e Smoke
 
-Referência de validação manual:
+Referencia de validacao manual:
 
 - `docs/TESTES_SMOKE.md`
 - projeto de apoio: `ExtintorCrm.App.SmokeTests`
 
 ## Suporte
 
-No app, acesse **Configurações > Sobre** para acionar suporte por WhatsApp ou e-mail com mensagem pré-preenchida.
-
+No app, acesse **Configuracoes > Sobre** para acionar suporte por WhatsApp ou e-mail com mensagem pre-preenchida.

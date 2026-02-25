@@ -15,5 +15,11 @@ namespace ExtintorCrm.App.Infrastructure.Settings
         public bool ExportPreferExcel { get; set; } = true;
         public string ExportClienteSelectedFields { get; set; } = string.Empty;
         public string ExportPagamentoSelectedFields { get; set; } = string.Empty;
+        public bool NotificationShowExtintores { get; set; } = true;
+        public bool NotificationShowAlvaras { get; set; } = true;
+        public bool NotificationShowPagamentos { get; set; } = true;
+        public bool NotificationIncludeOverdue { get; set; } = true;
+        public int NotificationDaysWindow { get; set; } = 30;
+        public int NotificationMaxItems { get; set; } = 10;
     }
 }

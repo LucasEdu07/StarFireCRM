@@ -213,6 +213,11 @@ namespace ExtintorCrm.App.Presentation
                 query = query.Where(c => !c.IsAtivo);
             }
 
+            if (!string.Equals(ClienteSituacaoFilter, "Todos", System.StringComparison.Ordinal))
+            {
+                query = query.Where(c => string.Equals(c.SituacaoNivel, ClienteSituacaoFilter, System.StringComparison.OrdinalIgnoreCase));
+            }
+
             var filtered = query.ToList();
             _filteredClientes.Clear();
             _filteredClientes.AddRange(filtered);
@@ -245,6 +250,9 @@ namespace ExtintorCrm.App.Presentation
             _previousPageCommand.RaiseCanExecuteChanged();
             _nextPageCommand.RaiseCanExecuteChanged();
             _goToPageCommand.RaiseCanExecuteChanged();
+            OnPropertyChanged(nameof(CanResetClienteFilters));
+            _resetClienteFiltersCommand.RaiseCanExecuteChanged();
+            _removeClienteFilterCommand.RaiseCanExecuteChanged();
         }
 
         public void SortClientesBy(string? sortMemberPath)
@@ -266,10 +274,127 @@ namespace ExtintorCrm.App.Presentation
                 _clientesSortDirection = System.ComponentModel.ListSortDirection.Ascending;
             }
 
-            ApplyClientesSorting();
-            ApplyClientesPage();
+            ApplyClientesSortingAndRefreshPage();
             OnPropertyChanged(nameof(ClientesSortMember));
             OnPropertyChanged(nameof(ClientesSortDirection));
+            OnPropertyChanged(nameof(ClienteSortField));
+            OnPropertyChanged(nameof(ClienteSortDirection));
+            OnPropertyChanged(nameof(CanResetClienteFilters));
+            _resetClienteFiltersCommand.RaiseCanExecuteChanged();
+            _removeClienteFilterCommand.RaiseCanExecuteChanged();
+        }
+
+        private void ResetClienteFilters()
+        {
+            _clienteStatusTabIndex = 0;
+            _clienteSituacaoFilter = "Todos";
+            _clientesSortMember = nameof(Cliente.NomeFantasia);
+            _clientesSortDirection = System.ComponentModel.ListSortDirection.Ascending;
+
+            ApplyClienteStatusFilter();
+
+            OnPropertyChanged(nameof(ClienteStatusTabIndex));
+            OnPropertyChanged(nameof(ClienteSituacaoFilter));
+            OnPropertyChanged(nameof(ClienteSortField));
+            OnPropertyChanged(nameof(ClienteSortDirection));
+            OnPropertyChanged(nameof(ClientesSortMember));
+            OnPropertyChanged(nameof(ClientesSortDirection));
+            OnPropertyChanged(nameof(CanResetClienteFilters));
+            _resetClienteFiltersCommand.RaiseCanExecuteChanged();
+            _removeClienteFilterCommand.RaiseCanExecuteChanged();
+        }
+
+        private void RemoveClienteFilter(string? filterKey)
+        {
+            switch (filterKey?.Trim().ToLowerInvariant())
+            {
+                case "status":
+                    if (ClienteStatusTabIndex != 0)
+                    {
+                        ClienteStatusTabIndex = 0;
+                    }
+
+                    break;
+
+                case "situacao":
+                    if (!string.Equals(ClienteSituacaoFilter, "Todos", System.StringComparison.Ordinal))
+                    {
+                        ClienteSituacaoFilter = "Todos";
+                    }
+
+                    break;
+
+                case "sortfield":
+                    if (!string.Equals(ClienteSortField, "Nome", System.StringComparison.Ordinal))
+                    {
+                        ClienteSortField = "Nome";
+                    }
+
+                    break;
+
+                case "sortdirection":
+                    if (!string.Equals(ClienteSortDirection, "Crescente", System.StringComparison.Ordinal))
+                    {
+                        ClienteSortDirection = "Crescente";
+                    }
+
+                    break;
+
+                default:
+                    ResetClienteFilters();
+                    break;
+            }
+        }
+
+        private static string NormalizeClienteSituacaoFilter(string? value)
+        {
+            var normalized = value?.Trim();
+            return normalized switch
+            {
+                "Vencido" => "Vencido",
+                "Vencendo" => "Vencendo",
+                "OK" => "OK",
+                _ => "Todos"
+            };
+        }
+
+        private static string MapSortDisplayToMember(string? display)
+        {
+            return display?.Trim() switch
+            {
+                "CPF/CNPJ" => nameof(Cliente.CPF),
+                "Telefone" => nameof(Cliente.Telefone1),
+                "Cidade" => nameof(Cliente.Cidade),
+                "Vencimento Extintores" => nameof(Cliente.VencimentoExtintores),
+                "Situação" => nameof(Cliente.SituacaoTexto),
+                _ => nameof(Cliente.NomeFantasia)
+            };
+        }
+
+        private static string MapSortMemberToDisplay(string? member)
+        {
+            return member switch
+            {
+                nameof(Cliente.CPF) => "CPF/CNPJ",
+                nameof(Cliente.Telefone1) => "Telefone",
+                nameof(Cliente.Cidade) => "Cidade",
+                nameof(Cliente.VencimentoExtintores) => "Vencimento Extintores",
+                nameof(Cliente.SituacaoTexto) => "Situação",
+                _ => "Nome"
+            };
+        }
+
+        private static System.ComponentModel.ListSortDirection ParseSortDirection(string? direction)
+        {
+            return string.Equals(direction?.Trim(), "Decrescente", System.StringComparison.OrdinalIgnoreCase)
+                ? System.ComponentModel.ListSortDirection.Descending
+                : System.ComponentModel.ListSortDirection.Ascending;
+        }
+
+        private void ApplyClientesSortingAndRefreshPage()
+        {
+            ApplyClientesSorting();
+            ApplyClientesPage();
         }
 
         private void ApplyClientesSorting()

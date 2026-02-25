@@ -26,9 +26,9 @@ namespace ExtintorCrm.App.Presentation
             }
             else
             {
-                MainWindowWidth = DefaultWindowWidth;
-                MainWindowHeight = DefaultWindowHeight;
                 var workArea = SystemParameters.WorkArea;
+                MainWindowWidth = FitWindowDimension(DefaultWindowWidth, workArea.Width, minimumSize: 980, safePadding: 26);
+                MainWindowHeight = FitWindowDimension(DefaultWindowHeight, workArea.Height, minimumSize: 680, safePadding: 28);
                 MainWindowLeft = workArea.Left + Math.Max(0, (workArea.Width - MainWindowWidth) / 2);
                 MainWindowTop = workArea.Top + Math.Max(0, (workArea.Height - MainWindowHeight) / 2);
             }
@@ -39,22 +39,40 @@ namespace ExtintorCrm.App.Presentation
             OnPropertyChanged(nameof(MainTopmost));
         }
 
+        private static double FitWindowDimension(double preferredSize, double availableSize, double minimumSize, double safePadding)
+        {
+            var usableSize = Math.Max(0, availableSize - safePadding);
+            if (usableSize <= 0)
+            {
+                return availableSize;
+            }
+
+            var clampedMinimum = Math.Min(minimumSize, usableSize);
+            var clampedPreferred = Math.Min(preferredSize, usableSize);
+            return Math.Max(clampedPreferred, clampedMinimum);
+        }
+
         private void SaveAppSettings(string theme)
         {
-            _appSettingsService.Save(new AppSettings
-            {
-                Theme = theme,
-                Fullscreen = IsFullscreen,
-                BackupEnabled = BackupAutomatico,
-                BackupFolder = BackupFolder,
-                BackupIntervalHours = BackupIntervalHours,
-                BackupRetentionCount = BackupRetentionCount,
-                LastAutoBackupUtc = _lastAutoBackupUtc,
-                ExportPreferredEntity = _exportPreferredEntity,
-                ExportPreferExcel = _exportPreferExcel,
-                ExportClienteSelectedFields = string.Join(';', _preferredClienteExportFields.OrderBy(x => x)),
-                ExportPagamentoSelectedFields = string.Join(';', _preferredPagamentoExportFields.OrderBy(x => x))
-            });
+            var current = _appSettingsService.Load();
+            current.Theme = theme;
+            current.Fullscreen = IsFullscreen;
+            current.BackupEnabled = BackupAutomatico;
+            current.BackupFolder = BackupFolder;
+            current.BackupIntervalHours = BackupIntervalHours;
+            current.BackupRetentionCount = BackupRetentionCount;
+            current.LastAutoBackupUtc = _lastAutoBackupUtc;
+            current.NotificationShowExtintores = NotificationShowExtintores;
+            current.NotificationShowAlvaras = NotificationShowAlvaras;
+            current.NotificationShowPagamentos = NotificationShowPagamentos;
+            current.NotificationIncludeOverdue = NotificationIncludeOverdue;
+            current.NotificationDaysWindow = NotificationDaysWindow;
+            current.NotificationMaxItems = NotificationMaxItems;
+            current.ExportPreferredEntity = _exportPreferredEntity;
+            current.ExportPreferExcel = _exportPreferExcel;
+            current.ExportClienteSelectedFields = string.Join(';', _preferredClienteExportFields.OrderBy(x => x));
+            current.ExportPagamentoSelectedFields = string.Join(';', _preferredPagamentoExportFields.OrderBy(x => x));
+            _appSettingsService.Save(current);
             OnPropertyChanged(nameof(LastBackupLabel));
         }
 
@@ -227,7 +245,7 @@ namespace ExtintorCrm.App.Presentation
                 var backupService = new BackupService();
                 var result = await backupService.RestoreBackupAsync(dialog.FileName);
 
-                if (!result.DatabaseRestored && !result.SettingsRestored)
+                if (!result.DatabaseRestored && !result.SettingsRestored && !result.DocumentsRestored)
                 {
                     await ShowToastAsync("Arquivo de backup inválido ou vazio.", "Error");
                     return;

@@ -9,6 +9,7 @@ namespace ExtintorCrm.App.Infrastructure
         public DbSet<Cliente> Clientes => Set<Cliente>();
         public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
         public DbSet<ConfiguracaoAlerta> ConfiguracoesAlerta => Set<ConfiguracaoAlerta>();
+        public DbSet<DocumentoAnexo> DocumentosAnexo => Set<DocumentoAnexo>();
 
         public AppDbContext()
         {
@@ -58,6 +59,27 @@ namespace ExtintorCrm.App.Infrastructure
             modelBuilder.Entity<ConfiguracaoAlerta>(entity =>
             {
                 entity.HasKey(x => x.Id);
+            });
+
+            modelBuilder.Entity<DocumentoAnexo>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Contexto).IsRequired().HasMaxLength(32);
+                entity.Property(x => x.TipoDocumento).IsRequired().HasMaxLength(64);
+                entity.Property(x => x.NomeOriginal).IsRequired().HasMaxLength(260);
+                entity.Property(x => x.CaminhoRelativo).IsRequired().HasMaxLength(1024);
+                entity.HasIndex(x => x.PagamentoId);
+                entity.HasIndex(x => x.ClienteId);
+
+                entity.HasOne<Pagamento>()
+                    .WithMany()
+                    .HasForeignKey(x => x.PagamentoId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne<Cliente>()
+                    .WithMany()
+                    .HasForeignKey(x => x.ClienteId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
 

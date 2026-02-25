@@ -99,6 +99,8 @@ namespace ExtintorCrm.App.Presentation
                 CriticalItems.Add(item);
             }
 
+            RefreshBellNotifications(alertItems);
+
             var next7 = alertItems
                 .Where(x => x.DiasParaVencer.HasValue && x.DiasParaVencer.Value >= 0 && x.DiasParaVencer.Value <= 7)
                 .OrderBy(x => x.DiasParaVencer)
@@ -128,12 +130,6 @@ namespace ExtintorCrm.App.Presentation
             Dashboard.AlertasOk = alertItems.Count(x => x.Status == "OK");
             Dashboard.AlertasVencendo = alertItems.Count(x => x.Status == "Vencendo");
             Dashboard.AlertasVencidos = alertItems.Count(x => x.Status == "Vencido");
-            OnPropertyChanged(nameof(PendingNotificationCount));
-            OnPropertyChanged(nameof(HasPendingNotifications));
-            if (!HasPendingNotifications)
-            {
-                IsNotificationPanelOpen = false;
-            }
 
             var total = Dashboard.AlertasOk + Dashboard.AlertasVencendo + Dashboard.AlertasVencidos;
             if (total == 0)
@@ -148,6 +144,71 @@ namespace ExtintorCrm.App.Presentation
                 Dashboard.AlertasVencendoPercent = (double)Dashboard.AlertasVencendo / total * 100;
                 Dashboard.AlertasVencidosPercent = (double)Dashboard.AlertasVencidos / total * 100;
             }
+        }
+
+        private void RefreshBellNotifications(IReadOnlyCollection<DashboardAlertItem> alertItems)
+        {
+            var orderedCandidates = alertItems
+                .Where(ShouldDisplayOnNotificationBell)
+                .OrderBy(x => x.Status == "Vencido" ? 0 : 1)
+                .ThenBy(x => x.DiasParaVencer ?? int.MaxValue)
+                .ThenBy(x => x.DataVencimento ?? DateTime.MaxValue)
+                .ThenBy(x => x.ClienteNome)
+                .ToList();
+
+            _notificationEligibleCount = orderedCandidates.Count;
+            var visibleItems = orderedCandidates.Take(NotificationMaxItems).ToList();
+
+            BellNotificationItems.Clear();
+            foreach (var item in visibleItems)
+            {
+                BellNotificationItems.Add(item);
+            }
+
+            OnPropertyChanged(nameof(VisibleNotificationCount));
+            OnPropertyChanged(nameof(PendingNotificationCount));
+            OnPropertyChanged(nameof(HasPendingNotifications));
+
+            if (!HasPendingNotifications)
+            {
+                IsNotificationPanelOpen = false;
+            }
+        }
+
+        private bool ShouldDisplayOnNotificationBell(DashboardAlertItem item)
+        {
+            if (item is null)
+            {
+                return false;
+            }
+
+            if (item.Tipo == "Extintor" && !NotificationShowExtintores)
+            {
+                return false;
+            }
+
+            if (item.Tipo == "Alvará" && !NotificationShowAlvaras)
+            {
+                return false;
+            }
+
+            if (item.Tipo == "Pagamento" && !NotificationShowPagamentos)
+            {
+                return false;
+            }
+
+            if (!item.DiasParaVencer.HasValue)
+            {
+                return false;
+            }
+
+            var days = item.DiasParaVencer.Value;
+            if (days < 0)
+            {
+                return NotificationIncludeOverdue;
+            }
+
+            return days <= NotificationDaysWindow;
         }
 
         private List<DashboardAlertItem> BuildDashboardAlertItems()

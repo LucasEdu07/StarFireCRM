@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using ExtintorCrm.App.Infrastructure.Documents;
 using ExtintorCrm.App.UseCases;
 using ExtintorCrm.App.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -100,6 +101,20 @@ namespace ExtintorCrm.App.Infrastructure
             if (entity == null)
             {
                 return;
+            }
+
+            var anexos = await db.DocumentosAnexo
+                .Where(x => x.ClienteId == id)
+                .ToListAsync();
+            if (anexos.Count > 0)
+            {
+                var storage = new DocumentoStorageService();
+                foreach (var anexo in anexos)
+                {
+                    storage.DeleteByRelativePath(anexo.CaminhoRelativo);
+                }
+
+                db.DocumentosAnexo.RemoveRange(anexos);
             }
 
             db.Clientes.Remove(entity);

@@ -1,10 +1,11 @@
-﻿<Window x:Class="ExtintorCrm.App.Presentation.PagamentoFormWindow"
+<Window x:Class="ExtintorCrm.App.Presentation.PagamentoFormWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Pagamento"
-        Height="740"
-        MinHeight="680"
-        Width="640"
+        Height="780"
+        MinHeight="720"
+        Width="1120"
+        MinWidth="980"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         ResizeMode="NoResize"
@@ -29,10 +30,96 @@
             <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
             <Setter Property="Margin" Value="0,0,0,6" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style x:Key="SectionCard" TargetType="Border" BasedOn="{StaticResource CardStyle}">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style x:Key="StatusChip" TargetType="Border">
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="Background" Value="{DynamicResource BadgeMutedBg}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style x:Key="StatusChipText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource BadgeMutedFg}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="InnerTabControlStyle" TargetType="TabControl">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0"
+                                    Background="{DynamicResource SurfaceBackground}"
+                                    BorderBrush="{DynamicResource ControlBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="6,4">
+                                <TabPanel IsItemsHost="True" />
+                            </Border>
+                            <ContentPresenter Grid.Row="1"
+                                              Margin="0,10,0,0"
+                                              x:Name="PART_SelectedContentHost"
+                                              ContentSource="SelectedContent" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="InnerTabItemStyle" TargetType="TabItem">
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder"
+                                Margin="0,0,8,0"
+                                CornerRadius="8"
+                                BorderThickness="0,0,0,2"
+                                BorderBrush="Transparent"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource ControlBackgroundHover}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource CardBackground}" />
+                                <Setter TargetName="TabBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource PrimaryRed}" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid Background="{DynamicResource SurfaceBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -46,8 +133,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding WindowTitle}"
-                           Style="{StaticResource AppTitleBarTextStyle}" />
+                <TextBlock Text="{Binding WindowTitle}" Style="{StaticResource AppTitleBarTextStyle}" />
                 <Button Grid.Column="1"
                         Style="{StaticResource AppTitleBarCloseButtonStyle}"
                         Click="CloseButton_Click"
@@ -55,26 +141,53 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" Margin="24">
+        <Grid Grid.Row="1" Margin="22" Background="{DynamicResource SurfaceBackground}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                <TextBlock Text="{Binding WindowTitle}"
-                           FontSize="22"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource TextPrimary}" />
-                <TextBlock Text="{Binding WindowSubtitle}"
-                           Margin="0,4,0,0"
-                           Foreground="{DynamicResource TextSecondary}" />
-            </StackPanel>
+            <Border Grid.Row="0" Style="{StaticResource SectionCard}" Margin="0,0,0,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="{Binding WindowTitle}"
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimary}" />
+                        <TextBlock Text="{Binding WindowSubtitle}"
+                                   Margin="0,4,0,0"
+                                   Foreground="{DynamicResource TextSecondary}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="Cliente:" Style="{StaticResource SectionLabel}" Margin="0,0,6,0" />
+                            <TextBlock Text="{Binding ClienteNomeSelecionado}" Margin="0,0,16,0" />
+                            <TextBlock Text="Vencimento:" Style="{StaticResource SectionLabel}" Margin="0,0,6,0" />
+                            <TextBlock Text="{Binding DataVencimento, StringFormat=dd/MM/yyyy}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Grid.Column="1" Style="{StaticResource StatusChip}" VerticalAlignment="Top">
+                        <TextBlock Text="{Binding StatusFinanceiro}" Style="{StaticResource StatusChipText}" />
+                    </Border>
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="7*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource SectionCard}">
                         <StackPanel>
                             <TextBlock Text="Dados da cobrança"
                                        FontSize="16"
@@ -105,9 +218,7 @@
                                          Height="40"
                                          IsReadOnly="True"
                                          Text="{Binding ClienteNomeSelecionado, Mode=OneWay}" />
-                                <TextBlock Text="CPF/CNPJ"
-                                           Style="{StaticResource SectionLabel}"
-                                           Margin="0,10,0,6" />
+                                <TextBlock Text="CPF/CNPJ" Style="{StaticResource SectionLabel}" Margin="0,10,0,6" />
                                 <TextBox Style="{StaticResource ModernTextBox}"
                                          Height="40"
                                          IsReadOnly="True"
@@ -197,7 +308,7 @@
                                        Style="{StaticResource SectionLabel}"
                                        Margin="0,12,0,6" />
                             <TextBox Style="{StaticResource ModernTextBox}"
-                                     MinHeight="74"
+                                     MinHeight="90"
                                      TextWrapping="Wrap"
                                      AcceptsReturn="True"
                                      VerticalScrollBarVisibility="Auto"
@@ -205,40 +316,162 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Status do pagamento"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,12"
-                                       Foreground="{DynamicResource TextPrimary}" />
+                    <Border Grid.Column="2" Style="{StaticResource SectionCard}">
+                        <TabControl Style="{StaticResource InnerTabControlStyle}"
+                                    ItemContainerStyle="{StaticResource InnerTabItemStyle}">
+                            <TabItem Header="Status">
+                                <StackPanel>
+                                    <TextBlock Text="Situação de pagamento"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,12"
+                                               Foreground="{DynamicResource TextPrimary}" />
 
-                            <CheckBox Content="Pagamento já foi realizado"
-                                      IsChecked="{Binding Pago}"
-                                      Style="{StaticResource ModernCheckBox}"
-                                      Margin="0,0,0,10" />
+                                    <CheckBox Content="Pagamento já foi realizado"
+                                              IsChecked="{Binding Pago}"
+                                              Style="{StaticResource ModernCheckBox}"
+                                              Margin="0,0,0,10" />
 
-                            <TextBlock Text="Data de pagamento" Style="{StaticResource SectionLabel}" />
-                            <DatePicker SelectedDate="{Binding DataPagamento}"
-                                        IsEnabled="{Binding Pago}" />
-                        </StackPanel>
+                                    <TextBlock Text="Data de pagamento" Style="{StaticResource SectionLabel}" />
+                                    <DatePicker SelectedDate="{Binding DataPagamento}"
+                                                IsEnabled="{Binding Pago}" />
+                                </StackPanel>
+                            </TabItem>
+
+                            <TabItem Header="Documentos">
+                                <StackPanel>
+                                    <Border Background="{DynamicResource SurfaceMuted}"
+                                            BorderBrush="{DynamicResource BorderStrong}"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Padding="10,9">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Documentos do pagamento"
+                                                           VerticalAlignment="Center"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextPrimary}" />
+                                                <TextBlock x:Name="PagamentoAnexosCountText"
+                                                           Grid.Column="1"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource TextSecondary}"
+                                                           FontSize="12" />
+                                            </Grid>
+
+                                            <Grid Margin="0,10,0,0"
+                                                  Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                                                    <Button x:Name="AnexarPagamentoButton"
+                                                            Style="{StaticResource AccentButton}"
+                                                            Height="34"
+                                                            MinWidth="132"
+                                                            Margin="0,0,10,0"
+                                                            Click="AnexarPagamentoDocumento_Click">
+                                                        <StackPanel Style="{StaticResource IconButtonContent}">
+                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE898;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                            <TextBlock Text="Anexar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                        </StackPanel>
+                                                    </Button>
+
+                                                    <Button x:Name="AbrirPagamentoButton"
+                                                            Style="{StaticResource SecondaryButton}"
+                                                            Height="34"
+                                                            MinWidth="122"
+                                                            Margin="0,0,10,0"
+                                                            Click="AbrirPagamentoDocumento_Click">
+                                                        <StackPanel Style="{StaticResource IconButtonContent}">
+                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8A7;" />
+                                                            <TextBlock Text="Abrir" />
+                                                        </StackPanel>
+                                                    </Button>
+
+                                                    <Button x:Name="ExcluirPagamentoButton"
+                                                            Style="{StaticResource DangerButton}"
+                                                            Height="34"
+                                                            MinWidth="122"
+                                                            Click="ExcluirPagamentoDocumento_Click">
+                                                        <StackPanel Style="{StaticResource IconButtonContent}">
+                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE74D;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                            <TextBlock Text="Excluir" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                </WrapPanel>
+
+                                                <DataGrid x:Name="PagamentoAnexosDataGrid"
+                                                          Grid.Row="1"
+                                                          Style="{StaticResource CleanDataGrid}"
+                                                          AutoGenerateColumns="False"
+                                                          IsReadOnly="True"
+                                                          CanUserAddRows="False"
+                                                          CanUserDeleteRows="False"
+                                                          CanUserResizeRows="False"
+                                                          SelectionMode="Single"
+                                                          Height="300"
+                                                          RowHeight="34"
+                                                          ColumnHeaderHeight="36"
+                                                          FontSize="12.4"
+                                                          SelectionChanged="PagamentoAnexosDataGrid_SelectionChanged">
+                                                    <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="Tipo" Binding="{Binding TipoDocumento}" Width="130" />
+                                                        <DataGridTextColumn Header="Documento" Binding="{Binding NomeOriginal}" Width="2*" />
+                                                        <DataGridTextColumn Header="Tamanho" Binding="{Binding TamanhoTexto}" Width="110" />
+                                                        <DataGridTextColumn Header="Incluído em" Binding="{Binding CriadoEmTexto}" Width="150" />
+                                                    </DataGrid.Columns>
+                                                </DataGrid>
+                                            </Grid>
+
+                                            <TextBlock Text="Anexe documentos após salvar o pagamento."
+                                                       Margin="0,10,0,0"
+                                                       Foreground="{DynamicResource TextSecondary}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsEditMode}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
                     </Border>
-                </StackPanel>
+                </Grid>
             </ScrollViewer>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                <Button Style="{StaticResource PrimaryButton}" Width="138" Margin="0,0,8,0" Click="Salvar_Click">
+                <Button Style="{StaticResource SecondaryButton}"
+                        Width="128"
+                        Margin="0,0,8,0"
+                        IsCancel="True">
+                    <StackPanel Style="{StaticResource IconButtonContent}">
+                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8BB;" />
+                        <TextBlock Text="Fechar" />
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource PrimaryButton}"
+                        Width="174"
+                        Click="Salvar_Click">
                     <StackPanel Style="{StaticResource IconButtonContent}">
                         <TextBlock Style="{StaticResource ToolbarIconStyle}"
                                    Text="&#xE74E;"
                                    Foreground="{DynamicResource ButtonPrimaryFg}" />
-                        <TextBlock Text="Salvar" Foreground="{DynamicResource ButtonPrimaryFg}" />
-                    </StackPanel>
-                </Button>
-                <Button Style="{StaticResource SecondaryButton}" Width="138" IsCancel="True">
-                    <StackPanel Style="{StaticResource IconButtonContent}">
-                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
-                        <TextBlock Text="Cancelar" />
+                        <TextBlock Text="Salvar alterações"
+                                   Foreground="{DynamicResource ButtonPrimaryFg}" />
                     </StackPanel>
                 </Button>
             </StackPanel>

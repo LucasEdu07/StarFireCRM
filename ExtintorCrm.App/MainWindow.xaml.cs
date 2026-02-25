@@ -287,7 +287,7 @@ public partial class MainWindow : Window
             [
                 new TourStep(ClientesActionBar, "Barra de ações", "Novo, detalhes, edição e ações de sistema (Importar/Exportar/Backup)."),
                 new TourStep(ClientesSearchCard, "Busca", "Filtre por nome, CPF/CNPJ ou telefone para localizar rapidamente."),
-                new TourStep(ClientesStatusTabsCard, "Ativos e inativos", "Alterne a visualização para gerenciar a base por status."),
+                new TourStep(ClientesStatusTabsCard, "Filtros e ordenação", "Alterne ativos/inativos, filtre por situação e ordene a lista de clientes."),
                 new TourStep(ClientesGridCard, "Listagem", "Grade principal com situação e vencimentos dos clientes.")
             ],
             "Pagamentos" =>
@@ -301,6 +301,7 @@ public partial class MainWindow : Window
                 new TourStep(ConfigAppearanceCard, "Aparência", "Controle o tema claro/escuro e o modo de janela."),
                 new TourStep(ConfigBackupCard, "Backup", "Defina pasta, frequência e execute backup/restauração."),
                 new TourStep(ConfigAlertsCard, "Alertas", "Configure os prazos de aviso para vencimentos."),
+                new TourStep(ConfigNotificationsCard, "Notificações", "Defina filtros e prioridade do sino para exibir só o que importa."),
                 new TourStep(ConfigSaveButton, "Salvar", "Persista as alterações de configuração.")
             ],
             _ => []

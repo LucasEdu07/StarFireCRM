@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -98,35 +99,182 @@ namespace ExtintorCrm.App.Presentation
         {
             var phoneStatus = hasWhatsApp
                 ? $"WhatsApp: {telefoneRaw}"
-                : "WhatsApp não disponível";
+                : "WhatsApp nao disponivel";
 
             var emailStatus = hasEmail
                 ? $"E-mail: {email}"
-                : "E-mail não disponível";
+                : "E-mail nao disponivel";
 
             return $"{phoneStatus}  •  {emailStatus}";
         }
 
-        private static (string Subject, string Message) BuildCobrancaMessage(string clienteNome, Pagamento pagamento)
+        private static string ResolveCobrancaEtapa(Pagamento pagamento, DateTime? referenceDate = null)
+        {
+            var today = (referenceDate ?? DateTime.Today).Date;
+            var dias = (pagamento.DataVencimento.Date - today).Days;
+
+            if (dias > 0)
+            {
+                return "Lembrete preventivo";
+            }
+
+            if (dias == 0)
+            {
+                return "Vencimento hoje";
+            }
+
+            if (dias >= -7)
+            {
+                return "Atraso leve";
+            }
+
+            return "Atraso critico";
+        }
+
+        private static string ResolvePrazoResumo(Pagamento pagamento, DateTime? referenceDate = null)
+        {
+            var today = (referenceDate ?? DateTime.Today).Date;
+            var dias = (pagamento.DataVencimento.Date - today).Days;
+
+            return dias switch
+            {
+                > 0 => $"Vence em {dias} dia(s)",
+                0 => "Vence hoje",
+                _ => $"Vencido ha {Math.Abs(dias)} dia(s)"
+            };
+        }
+
+        private static IReadOnlyList<string> BuildCobrancaEtapaOptions(Pagamento pagamento)
+        {
+            return new[]
+            {
+                ResolveCobrancaEtapa(pagamento),
+                "Lembrete preventivo",
+                "Vencimento hoje",
+                "Atraso leve",
+                "Atraso critico",
+                "Negociacao"
+            }
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        }
+
+        private static IReadOnlyList<string> BuildCobrancaToneOptions()
+        {
+            return new[] { "Cordial", "Profissional", "Urgente" };
+        }
+
+        private static IReadOnlyList<string> ExtractCobrancaHistory(string? observacoes, int maxItems = 8)
+        {
+            if (string.IsNullOrWhiteSpace(observacoes))
+            {
+                return Array.Empty<string>();
+            }
+
+            var entries = observacoes
+                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(line => line.Trim())
+                .Where(line => line.StartsWith("[COBRANCA ", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (entries.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            entries.Reverse();
+            return entries.Take(Math.Max(1, maxItems)).ToList();
+        }
+
+        private static string AppendCobrancaHistory(string? observacoes, string historicoEntry)
+        {
+            var existing = string.IsNullOrWhiteSpace(observacoes)
+                ? string.Empty
+                : observacoes.Trim();
+
+            return string.IsNullOrWhiteSpace(existing)
+                ? historicoEntry.Trim()
+                : $"{existing}{Environment.NewLine}{historicoEntry.Trim()}";
+        }
+
+        private static string SummarizeMessageForHistory(string? mensagem, int maxLength = 120)
+        {
+            if (string.IsNullOrWhiteSpace(mensagem))
+            {
+                return string.Empty;
+            }
+
+            var compact = mensagem
+                .Replace("\r", " ", StringComparison.Ordinal)
+                .Replace("\n", " ", StringComparison.Ordinal)
+                .Trim();
+
+            if (compact.Length <= maxLength)
+            {
+                return compact;
+            }
+
+            return $"{compact[..maxLength]}...";
+        }
+
+        private static string BuildCobrancaHistoryEntry(string canal, string etapa, string tom, string mensagem)
+        {
+            var timestamp = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+            var resumo = SummarizeMessageForHistory(mensagem, 100);
+            return $"[COBRANCA {timestamp}] Canal={canal} | Etapa={etapa} | Tom={tom} | Msg=\"{resumo}\"";
+        }
+
+        private static (string Subject, string Message) BuildCobrancaMessage(
+            string clienteNome,
+            Pagamento pagamento,
+            string? etapa = null,
+            string? tom = null)
         {
             var culture = new CultureInfo("pt-BR");
             var vencimento = pagamento.DataVencimento.ToString("dd/MM/yyyy");
             var valor = pagamento.Valor.ToString("C2", culture);
             var descricao = string.IsNullOrWhiteSpace(pagamento.Descricao) ? "pagamento" : pagamento.Descricao.Trim();
-            var dias = (pagamento.DataVencimento.Date - DateTime.Today).Days;
+            var etapaResolvida = string.IsNullOrWhiteSpace(etapa) ? ResolveCobrancaEtapa(pagamento) : etapa.Trim();
+            var tomResolvido = string.IsNullOrWhiteSpace(tom) ? "Profissional" : tom.Trim();
+            var prazoResumo = ResolvePrazoResumo(pagamento);
 
-            var status = dias switch
+            var abertura = tomResolvido switch
             {
-                < 0 => $"está vencido há {Math.Abs(dias)} dia(s)",
-                0 => "vence hoje",
-                _ => $"vence em {dias} dia(s)"
+                "Cordial" => $"Ola, {clienteNome}! Tudo bem?",
+                "Urgente" => $"Ola, {clienteNome}. Precisamos tratar este pagamento com prioridade.",
+                _ => $"Ola, {clienteNome}."
             };
 
-            var subject = $"Cobrança - {clienteNome} - {vencimento}";
+            var orientacao = etapaResolvida switch
+            {
+                "Lembrete preventivo" =>
+                    "Este e um lembrete preventivo para manter o financeiro em dia.",
+                "Vencimento hoje" =>
+                    "O vencimento e hoje e recomendamos a regularizacao ainda neste periodo.",
+                "Atraso leve" =>
+                    "Identificamos atraso recente e queremos apoiar a regularizacao sem juros adicionais.",
+                "Atraso critico" =>
+                    "Identificamos atraso relevante e precisamos alinhar um plano imediato de regularizacao.",
+                "Negociacao" =>
+                    "Podemos construir uma proposta de negociacao para facilitar a regularizacao.",
+                _ =>
+                    "Seguimos disponiveis para apoiar a regularizacao."
+            };
+
+            var fechamento = etapaResolvida == "Negociacao"
+                ? "Se preferir, responda com a melhor data para fecharmos a negociacao."
+                : "Pode nos confirmar o melhor canal e horario para concluir esta regularizacao?";
+
+            var subject = $"Cobranca - {clienteNome} - {vencimento}";
             var message =
-                $"Olá, {clienteNome}! Tudo bem?{Environment.NewLine}{Environment.NewLine}" +
-                $"Passando para lembrar que o pagamento \"{descricao}\" no valor de {valor} {status} (vencimento: {vencimento}).{Environment.NewLine}" +
-                $"Podemos seguir com a regularização?{Environment.NewLine}{Environment.NewLine}" +
+                $"{abertura}{Environment.NewLine}{Environment.NewLine}" +
+                $"Pagamento: \"{descricao}\"{Environment.NewLine}" +
+                $"Valor: {valor}{Environment.NewLine}" +
+                $"Vencimento: {vencimento} ({prazoResumo}){Environment.NewLine}" +
+                $"Etapa: {etapaResolvida}{Environment.NewLine}" +
+                $"{orientacao}{Environment.NewLine}{Environment.NewLine}" +
+                $"{fechamento}{Environment.NewLine}{Environment.NewLine}" +
                 "_Equipe Star Fire_";
 
             return (subject, message);

@@ -24,6 +24,7 @@ namespace ExtintorCrm.App.Infrastructure.Backup
             var backupFile = Path.Combine(folderPath, $"star-fire-backup-{timestamp}.zip");
             var dbPath = AppDbContext.GetDatabasePath();
             var settingsPath = AppSettingsService.GetFilePath();
+            var documentsPath = AppDataPaths.DocumentsDirectory;
             var stagingDir = Path.Combine(Path.GetTempPath(), $"star-fire-backup-stage-{Guid.NewGuid():N}");
             Directory.CreateDirectory(stagingDir);
 
@@ -33,6 +34,7 @@ namespace ExtintorCrm.App.Infrastructure.Backup
                 StageIfExists($"{dbPath}-wal", Path.Combine(stagingDir, "crm.db-wal"), cancellationToken);
                 StageIfExists($"{dbPath}-shm", Path.Combine(stagingDir, "crm.db-shm"), cancellationToken);
                 StageIfExists(settingsPath, Path.Combine(stagingDir, "appsettings.json"), cancellationToken);
+                StageDirectoryIfExists(documentsPath, Path.Combine(stagingDir, "documents"), cancellationToken);
 
                 if (File.Exists(backupFile))
                 {
@@ -44,6 +46,7 @@ namespace ExtintorCrm.App.Infrastructure.Backup
                 AddIfExists(archive, Path.Combine(stagingDir, "crm.db-wal"), "data/crm.db-wal", cancellationToken);
                 AddIfExists(archive, Path.Combine(stagingDir, "crm.db-shm"), "data/crm.db-shm", cancellationToken);
                 AddIfExists(archive, Path.Combine(stagingDir, "appsettings.json"), "data/appsettings.json", cancellationToken);
+                AddDirectoryIfExists(archive, Path.Combine(stagingDir, "documents"), "data/documents", cancellationToken);
             }
             finally
             {
@@ -76,11 +79,16 @@ namespace ExtintorCrm.App.Infrastructure.Backup
                     Path.Combine(extractedDataDir, "appsettings.json"),
                     AppSettingsService.GetFilePath(),
                     cancellationToken);
+                var documentsRestored = CopyDirectoryIfExists(
+                    Path.Combine(extractedDataDir, "documents"),
+                    AppDataPaths.DocumentsDirectory,
+                    cancellationToken);
 
                 return Task.FromResult(new BackupRestoreResult
                 {
                     DatabaseRestored = databaseRestored,
-                    SettingsRestored = settingsRestored
+                    SettingsRestored = settingsRestored,
+                    DocumentsRestored = documentsRestored
                 });
             }
             finally
@@ -115,6 +123,32 @@ namespace ExtintorCrm.App.Infrastructure.Backup
             }
 
             File.Copy(sourcePath, destinationPath, true);
+            return true;
+        }
+
+        private static bool CopyDirectoryIfExists(string sourceDirectory, string destinationDirectory, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!Directory.Exists(sourceDirectory))
+            {
+                return false;
+            }
+
+            Directory.CreateDirectory(destinationDirectory);
+            foreach (var sourceFile in Directory.GetFiles(sourceDirectory, "*", SearchOption.AllDirectories))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var relativePath = Path.GetRelativePath(sourceDirectory, sourceFile);
+                var destinationFile = Path.Combine(destinationDirectory, relativePath);
+                var destinationDir = Path.GetDirectoryName(destinationFile);
+                if (!string.IsNullOrWhiteSpace(destinationDir))
+                {
+                    Directory.CreateDirectory(destinationDir);
+                }
+
+                File.Copy(sourceFile, destinationFile, true);
+            }
+
             return true;
         }
 
@@ -180,6 +214,49 @@ namespace ExtintorCrm.App.Infrastructure.Backup
             input.CopyTo(output);
         }
 
+        private static void StageDirectoryIfExists(string sourceDirectory, string stagingDirectory, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!Directory.Exists(sourceDirectory))
+            {
+                return;
+            }
+
+            foreach (var sourceFile in Directory.GetFiles(sourceDirectory, "*", SearchOption.AllDirectories))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var relativePath = Path.GetRelativePath(sourceDirectory, sourceFile);
+                var destinationPath = Path.Combine(stagingDirectory, relativePath);
+                var destinationDir = Path.GetDirectoryName(destinationPath);
+                if (!string.IsNullOrWhiteSpace(destinationDir))
+                {
+                    Directory.CreateDirectory(destinationDir);
+                }
+
+                using var input = new FileStream(sourceFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                using var output = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                input.CopyTo(output);
+            }
+        }
+
+        private static void AddDirectoryIfExists(ZipArchive archive, string sourceDirectory, string entryRoot, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!Directory.Exists(sourceDirectory))
+            {
+                return;
+            }
+
+            foreach (var sourceFile in Directory.GetFiles(sourceDirectory, "*", SearchOption.AllDirectories))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var relativePath = Path.GetRelativePath(sourceDirectory, sourceFile)
+                    .Replace('\\', '/');
+                var entryName = $"{entryRoot.TrimEnd('/')}/{relativePath}";
+                archive.CreateEntryFromFile(sourceFile, entryName, CompressionLevel.Optimal);
+            }
+        }
+
         private static void TryDeleteDirectory(string path)
         {
             try
@@ -200,5 +277,6 @@ namespace ExtintorCrm.App.Infrastructure.Backup
     {
         public bool DatabaseRestored { get; set; }
         public bool SettingsRestored { get; set; }
+        public bool DocumentsRestored { get; set; }
     }
 }

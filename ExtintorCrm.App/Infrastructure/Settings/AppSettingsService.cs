@@ -56,6 +56,8 @@ namespace ExtintorCrm.App.Infrastructure.Settings
             settings.BackupIntervalHours = settings.BackupIntervalHours <= 0 ? 24 : settings.BackupIntervalHours;
             settings.BackupRetentionCount = settings.BackupRetentionCount <= 0 ? 10 : settings.BackupRetentionCount;
             settings.ExportPreferredEntity = settings.ExportPreferredEntity == "Pagamentos" ? "Pagamentos" : "Clientes";
+            settings.NotificationDaysWindow = settings.NotificationDaysWindow <= 0 ? 30 : Math.Clamp(settings.NotificationDaysWindow, 1, 365);
+            settings.NotificationMaxItems = settings.NotificationMaxItems <= 0 ? 10 : Math.Clamp(settings.NotificationMaxItems, 1, 50);
             return settings;
         }
     }

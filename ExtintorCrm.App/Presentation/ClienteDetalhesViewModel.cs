@@ -98,6 +98,8 @@ namespace ExtintorCrm.App.Presentation
             }
         }
 
+        public Guid ClienteId => _source.Id;
+
         public string? RG { get; }
 
         public string? CPF

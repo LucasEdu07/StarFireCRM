@@ -10,7 +10,9 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using ExtintorCrm.App.Domain;
 using ExtintorCrm.App.Infrastructure;
+using ExtintorCrm.App.Infrastructure.Documents;
 using ExtintorCrm.App.Infrastructure.Export;
+using ExtintorCrm.App.Infrastructure.Logging;
 using ExtintorCrm.App.Infrastructure.Settings;
 using ExtintorCrm.App.UseCases;
 using ExtintorCrm.App.UseCases.Alerts;
@@ -21,6 +23,8 @@ namespace ExtintorCrm.App.Presentation
         private readonly IClienteRepository _clienteRepository;
         private readonly IPagamentoRepository _pagamentoRepository;
         private readonly IConfiguracaoAlertaRepository _configuracaoAlertaRepository;
+        private readonly IDocumentoAnexoRepository _documentoAnexoRepository;
+        private readonly DocumentoStorageService _documentoStorageService;
         private readonly RelayCommand _editCommand;
         private readonly RelayCommand _deleteCommand;
         private readonly RelayCommand _detailsCommand;
@@ -33,6 +37,7 @@ namespace ExtintorCrm.App.Presentation
         private readonly RelayCommand _editPagamentoCommand;
         private readonly RelayCommand _deletePagamentoCommand;
         private readonly RelayCommand _cobrancaCommand;
+        private readonly RelayCommand _openPagamentoAttachmentsCommand;
         private readonly RelayCommand _saveAlertSettingsCommand;
         private readonly RelayCommand _selectBackupFolderCommand;
         private readonly RelayCommand _restoreBackupCommand;
@@ -47,6 +52,10 @@ namespace ExtintorCrm.App.Presentation
         private readonly RelayCommand _openDashboardAlertsCommand;
         private readonly RelayCommand _selectConfigSectionCommand;
         private readonly RelayCommand _goToPageCommand;
+        private readonly RelayCommand _resetClienteFiltersCommand;
+        private readonly RelayCommand _removeClienteFilterCommand;
+        private readonly RelayCommand _searchPagamentosCommand;
+        private readonly RelayCommand _resetPagamentoFiltersCommand;
         private readonly RelayCommand _contactSupportWhatsAppCommand;
         private readonly RelayCommand _contactSupportEmailCommand;
         private readonly AlertService _alertService;
@@ -66,7 +75,9 @@ namespace ExtintorCrm.App.Presentation
         private Cliente? _selectedCliente;
         private Pagamento? _selectedPagamento;
         private string _searchTerm = string.Empty;
+        private string _pagamentoSearchTerm = string.Empty;
         private string _pagamentoFilter = "Todos";
+        private string _clienteSituacaoFilter = "Todos";
         private bool _isImporting;
         private int _pageNumber = 1;
         private int _pageCount = 1;
@@ -81,6 +92,13 @@ namespace ExtintorCrm.App.Presentation
         private int _toastVersion;
         private int _selectedMainTabIndex;
         private bool _isNotificationPanelOpen;
+        private int _notificationEligibleCount;
+        private bool _notificationShowExtintores = true;
+        private bool _notificationShowAlvaras = true;
+        private bool _notificationShowPagamentos = true;
+        private bool _notificationIncludeOverdue = true;
+        private int _notificationDaysWindow = 30;
+        private int _notificationMaxItems = 10;
         private int _clienteStatusTabIndex;
         private bool _isDarkMode;
         private bool _isFullscreen;
@@ -99,24 +117,34 @@ namespace ExtintorCrm.App.Presentation
         private double _mainWindowTop = double.NaN;
         private DispatcherTimer? _backupTimer;
         private CancellationTokenSource? _searchDebounceCts;
+        private CancellationTokenSource? _pagamentoSearchDebounceCts;
         private readonly string _appVersion;
         private readonly string _buildDateTimeDisplay;
         private string _clientesSortMember = nameof(Cliente.NomeFantasia);
         private ListSortDirection _clientesSortDirection = ListSortDirection.Ascending;
 
         public ClientesViewModel()
-            : this(new ClienteRepository(), new PagamentoRepository(), new ConfiguracaoAlertaRepository())
+            : this(
+                new ClienteRepository(),
+                new PagamentoRepository(),
+                new ConfiguracaoAlertaRepository(),
+                new DocumentoAnexoRepository(),
+                new DocumentoStorageService())
         {
         }
 
         public ClientesViewModel(
             IClienteRepository clienteRepository,
             IPagamentoRepository pagamentoRepository,
-            IConfiguracaoAlertaRepository configuracaoAlertaRepository)
+            IConfiguracaoAlertaRepository configuracaoAlertaRepository,
+            IDocumentoAnexoRepository documentoAnexoRepository,
+            DocumentoStorageService documentoStorageService)
         {
             _clienteRepository = clienteRepository;
             _pagamentoRepository = pagamentoRepository;
             _configuracaoAlertaRepository = configuracaoAlertaRepository;
+            _documentoAnexoRepository = documentoAnexoRepository;
+            _documentoStorageService = documentoStorageService;
             _alertRules = new AlertRules();
             _alertService = new AlertService(_alertRules);
             _appSettingsService = new AppSettingsService();
@@ -137,10 +165,15 @@ namespace ExtintorCrm.App.Presentation
             _previousPageCommand = new RelayCommand(_ => ChangeClientesPage(-1), _ => CanGoPrev);
             _nextPageCommand = new RelayCommand(_ => ChangeClientesPage(1), _ => CanGoNext);
             _goToPageCommand = new RelayCommand(page => GoToPage(page), page => CanGoToPage(page));
+            _resetClienteFiltersCommand = new RelayCommand(_ => ResetClienteFilters(), _ => CanResetClienteFilters);
+            _removeClienteFilterCommand = new RelayCommand(filter => RemoveClienteFilter(filter as string), _ => CanResetClienteFilters);
+            _searchPagamentosCommand = new RelayCommand(_ => ApplyPagamentoFilter());
+            _resetPagamentoFiltersCommand = new RelayCommand(_ => ResetPagamentoFilters(), _ => CanResetPagamentoFilters);
             _newPagamentoCommand = new RelayCommand(async _ => await NewPagamentoAsync());
             _editPagamentoCommand = new RelayCommand(async _ => await EditPagamentoAsync(), _ => SelectedPagamento != null);
             _deletePagamentoCommand = new RelayCommand(async _ => await DeletePagamentoAsync(), _ => SelectedPagamento != null);
             _cobrancaCommand = new RelayCommand(async _ => await SendCobrancaAsync(), _ => SelectedPagamento != null);
+            _openPagamentoAttachmentsCommand = new RelayCommand(async _ => await OpenPagamentoAttachmentsAsync(), _ => SelectedPagamento != null);
             _saveAlertSettingsCommand = new RelayCommand(async _ => await SaveAlertSettingsAsync());
             _selectBackupFolderCommand = new RelayCommand(_ => SelectBackupFolder());
             _restoreBackupCommand = new RelayCommand(async _ => await RestoreBackupAsync(), _ => !IsImporting && !IsBackupRunning);
@@ -169,10 +202,15 @@ namespace ExtintorCrm.App.Presentation
             PreviousPageCommand = _previousPageCommand;
             NextPageCommand = _nextPageCommand;
             GoToPageCommand = _goToPageCommand;
+            ResetClienteFiltersCommand = _resetClienteFiltersCommand;
+            RemoveClienteFilterCommand = _removeClienteFilterCommand;
+            SearchPagamentosCommand = _searchPagamentosCommand;
+            ResetPagamentoFiltersCommand = _resetPagamentoFiltersCommand;
             NewPagamentoCommand = _newPagamentoCommand;
             EditPagamentoCommand = _editPagamentoCommand;
             DeletePagamentoCommand = _deletePagamentoCommand;
             CobrancaCommand = _cobrancaCommand;
+            OpenPagamentoAttachmentsCommand = _openPagamentoAttachmentsCommand;
             SaveAlertSettingsCommand = _saveAlertSettingsCommand;
             SelectBackupFolderCommand = _selectBackupFolderCommand;
             RestoreBackupCommand = _restoreBackupCommand;
@@ -198,10 +236,16 @@ namespace ExtintorCrm.App.Presentation
         public ObservableCollection<CriticalAlertItem> CriticalAlertsTop { get; } = new();
         public ObservableCollection<CriticalAlertItem> CriticalAlertsAll { get; } = new();
         public ObservableCollection<DashboardAlertItem> CriticalItems { get; } = new();
+        public ObservableCollection<DashboardAlertItem> BellNotificationItems { get; } = new();
         public ObservableCollection<DashboardAlertItem> Next7Days { get; } = new();
         public ObservableCollection<DashboardAlertItem> Next30Days { get; } = new();
+        public ObservableCollection<string> ClienteSituacaoFilterOptions { get; } = new() { "Todos", "Vencido", "Vencendo", "OK" };
+        public ObservableCollection<string> ClienteSortFieldOptions { get; } = new() { "Nome", "CPF/CNPJ", "Telefone", "Cidade", "Vencimento Extintores", "Situação" };
+        public ObservableCollection<string> ClienteSortDirectionOptions { get; } = new() { "Crescente", "Decrescente" };
         public ObservableCollection<int> BackupIntervalOptions { get; } = new() { 1, 6, 12, 24 };
         public ObservableCollection<int> BackupRetentionOptions { get; } = new() { 5, 10, 20, 30 };
+        public ObservableCollection<int> NotificationDaysWindowOptions { get; } = new() { 7, 15, 30, 45, 60, 90 };
+        public ObservableCollection<int> NotificationMaxItemsOptions { get; } = new() { 5, 10, 15, 20, 30 };
         public ObservableCollection<int> PageIndexes { get; } = new();
 
         public Cliente? SelectedCliente
@@ -228,6 +272,76 @@ namespace ExtintorCrm.App.Presentation
         public bool CanDeleteSelectedClientes => SelectedClientesCount >= 1;
         public string ClientesSortMember => _clientesSortMember;
         public ListSortDirection ClientesSortDirection => _clientesSortDirection;
+        public string ClienteSortField
+        {
+            get => MapSortMemberToDisplay(_clientesSortMember);
+            set
+            {
+                var member = MapSortDisplayToMember(value);
+                if (string.Equals(_clientesSortMember, member, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _clientesSortMember = member;
+                _clientesSortDirection = ListSortDirection.Ascending;
+                ApplyClientesSortingAndRefreshPage();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ClientesSortMember));
+                OnPropertyChanged(nameof(ClientesSortDirection));
+                OnPropertyChanged(nameof(ClienteSortDirection));
+                OnPropertyChanged(nameof(CanResetClienteFilters));
+                _resetClienteFiltersCommand.RaiseCanExecuteChanged();
+                _removeClienteFilterCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public string ClienteSortDirection
+        {
+            get => _clientesSortDirection == ListSortDirection.Ascending ? "Crescente" : "Decrescente";
+            set
+            {
+                var direction = ParseSortDirection(value);
+                if (_clientesSortDirection == direction)
+                {
+                    return;
+                }
+
+                _clientesSortDirection = direction;
+                ApplyClientesSortingAndRefreshPage();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ClientesSortDirection));
+                OnPropertyChanged(nameof(CanResetClienteFilters));
+                _resetClienteFiltersCommand.RaiseCanExecuteChanged();
+                _removeClienteFilterCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public string ClienteSituacaoFilter
+        {
+            get => _clienteSituacaoFilter;
+            set
+            {
+                var normalized = NormalizeClienteSituacaoFilter(value);
+                if (string.Equals(_clienteSituacaoFilter, normalized, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _clienteSituacaoFilter = normalized;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(CanResetClienteFilters));
+                _resetClienteFiltersCommand.RaiseCanExecuteChanged();
+                _removeClienteFilterCommand.RaiseCanExecuteChanged();
+                ApplyClienteStatusFilter();
+            }
+        }
+
+        public bool CanResetClienteFilters =>
+            ClienteStatusTabIndex != 0 ||
+            !string.Equals(ClienteSituacaoFilter, "Todos", StringComparison.Ordinal) ||
+            !string.Equals(_clientesSortMember, nameof(Cliente.NomeFantasia), StringComparison.Ordinal) ||
+            _clientesSortDirection != ListSortDirection.Ascending;
         public string SelectedClientesSummary => SelectedClientesCount == 0
             ? "Nenhum cliente selecionado"
             : SelectedClientesCount == 1
@@ -244,6 +358,7 @@ namespace ExtintorCrm.App.Presentation
                 _editPagamentoCommand.RaiseCanExecuteChanged();
                 _deletePagamentoCommand.RaiseCanExecuteChanged();
                 _cobrancaCommand.RaiseCanExecuteChanged();
+                _openPagamentoAttachmentsCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -258,19 +373,51 @@ namespace ExtintorCrm.App.Presentation
             }
         }
 
+        public string PagamentoSearchTerm
+        {
+            get => _pagamentoSearchTerm;
+            set
+            {
+                var normalized = value ?? string.Empty;
+                if (string.Equals(_pagamentoSearchTerm, normalized, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _pagamentoSearchTerm = normalized;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(CanResetPagamentoFilters));
+                _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
+                QueuePagamentoSearch();
+            }
+        }
+
         public string PagamentoFilter
         {
             get => _pagamentoFilter;
             set
             {
-                _pagamentoFilter = value;
+                var normalized = string.IsNullOrWhiteSpace(value) ? "Todos" : value;
+                if (string.Equals(_pagamentoFilter, normalized, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _pagamentoFilter = normalized;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CanResetPagamentoFilters));
+                _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
                 ApplyPagamentoFilter();
             }
         }
 
+        public bool CanResetPagamentoFilters =>
+            !string.Equals(PagamentoFilter, "Todos", StringComparison.Ordinal) ||
+            !string.IsNullOrWhiteSpace(PagamentoSearchTerm);
+
         public ICommand LoadCommand { get; }
         public ICommand SearchCommand { get; }
+        public ICommand SearchPagamentosCommand { get; }
         public ICommand NewCommand { get; }
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
@@ -281,10 +428,14 @@ namespace ExtintorCrm.App.Presentation
         public ICommand PreviousPageCommand { get; }
         public ICommand NextPageCommand { get; }
         public ICommand GoToPageCommand { get; }
+        public ICommand ResetClienteFiltersCommand { get; }
+        public ICommand ResetPagamentoFiltersCommand { get; }
+        public ICommand RemoveClienteFilterCommand { get; }
         public ICommand NewPagamentoCommand { get; }
         public ICommand EditPagamentoCommand { get; }
         public ICommand DeletePagamentoCommand { get; }
         public ICommand CobrancaCommand { get; }
+        public ICommand OpenPagamentoAttachmentsCommand { get; }
         public ICommand SaveAlertSettingsCommand { get; }
         public ICommand SelectBackupFolderCommand { get; }
         public ICommand RestoreBackupCommand { get; }
@@ -313,6 +464,7 @@ namespace ExtintorCrm.App.Presentation
                 OnPropertyChanged(nameof(IsConfigAparenciaSection));
                 OnPropertyChanged(nameof(IsConfigBackupSection));
                 OnPropertyChanged(nameof(IsConfigAlertasSection));
+                OnPropertyChanged(nameof(IsConfigNotificacoesSection));
                 OnPropertyChanged(nameof(IsConfigAtualizacoesSection));
                 OnPropertyChanged(nameof(IsConfigAvancadoSection));
                 OnPropertyChanged(nameof(IsConfigSobreSection));
@@ -322,6 +474,7 @@ namespace ExtintorCrm.App.Presentation
         public bool IsConfigAparenciaSection => SelectedConfigSection == "Aparencia";
         public bool IsConfigBackupSection => SelectedConfigSection == "Backup";
         public bool IsConfigAlertasSection => SelectedConfigSection == "Alertas";
+        public bool IsConfigNotificacoesSection => SelectedConfigSection == "Notificacoes";
         public bool IsConfigAtualizacoesSection => SelectedConfigSection == "Atualizacoes";
         public bool IsConfigAvancadoSection => SelectedConfigSection == "Avancado";
         public bool IsConfigSobreSection => SelectedConfigSection == "Sobre";
@@ -332,6 +485,7 @@ namespace ExtintorCrm.App.Presentation
             {
                 "Backup" => "Backup",
                 "Alertas" => "Alertas",
+                "Notificacoes" => "Notificacoes",
                 "Atualizacoes" => "Atualizacoes",
                 "Avancado" => "Avancado",
                 "Sobre" => "Sobre",
@@ -417,7 +571,106 @@ namespace ExtintorCrm.App.Presentation
             }
         }
 
-        public int PendingNotificationCount => Dashboard.AlertasVencendo + Dashboard.AlertasVencidos;
+        public bool NotificationShowExtintores
+        {
+            get => _notificationShowExtintores;
+            set
+            {
+                if (_notificationShowExtintores == value)
+                {
+                    return;
+                }
+
+                _notificationShowExtintores = value;
+                OnPropertyChanged();
+                RefreshDashboardExecutiveData();
+            }
+        }
+
+        public bool NotificationShowAlvaras
+        {
+            get => _notificationShowAlvaras;
+            set
+            {
+                if (_notificationShowAlvaras == value)
+                {
+                    return;
+                }
+
+                _notificationShowAlvaras = value;
+                OnPropertyChanged();
+                RefreshDashboardExecutiveData();
+            }
+        }
+
+        public bool NotificationShowPagamentos
+        {
+            get => _notificationShowPagamentos;
+            set
+            {
+                if (_notificationShowPagamentos == value)
+                {
+                    return;
+                }
+
+                _notificationShowPagamentos = value;
+                OnPropertyChanged();
+                RefreshDashboardExecutiveData();
+            }
+        }
+
+        public bool NotificationIncludeOverdue
+        {
+            get => _notificationIncludeOverdue;
+            set
+            {
+                if (_notificationIncludeOverdue == value)
+                {
+                    return;
+                }
+
+                _notificationIncludeOverdue = value;
+                OnPropertyChanged();
+                RefreshDashboardExecutiveData();
+            }
+        }
+
+        public int NotificationDaysWindow
+        {
+            get => _notificationDaysWindow;
+            set
+            {
+                var normalized = value <= 0 ? 30 : value;
+                if (_notificationDaysWindow == normalized)
+                {
+                    return;
+                }
+
+                _notificationDaysWindow = normalized;
+                OnPropertyChanged();
+                RefreshDashboardExecutiveData();
+            }
+        }
+
+        public int NotificationMaxItems
+        {
+            get => _notificationMaxItems;
+            set
+            {
+                var normalized = value <= 0 ? 10 : value;
+                if (_notificationMaxItems == normalized)
+                {
+                    return;
+                }
+
+                _notificationMaxItems = normalized;
+                OnPropertyChanged();
+                RefreshDashboardExecutiveData();
+            }
+        }
+
+        public int VisibleNotificationCount => BellNotificationItems.Count;
+        public int PendingNotificationCount => _notificationEligibleCount;
         public bool HasPendingNotifications => PendingNotificationCount > 0;
 
         public bool IsImporting
@@ -464,6 +717,9 @@ namespace ExtintorCrm.App.Presentation
 
                 _clienteStatusTabIndex = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CanResetClienteFilters));
+                _resetClienteFiltersCommand.RaiseCanExecuteChanged();
+                _removeClienteFilterCommand.RaiseCanExecuteChanged();
                 ApplyClienteStatusFilter();
             }
         }
@@ -617,7 +873,6 @@ namespace ExtintorCrm.App.Presentation
         public string LastBackupLabel => _lastAutoBackupUtc.HasValue
             ? _lastAutoBackupUtc.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
             : "Nunca executado";
-
         public WindowState MainWindowState => IsFullscreen ? WindowState.Maximized : WindowState.Normal;
         public WindowStyle MainWindowStyle => WindowStyle.SingleBorderWindow;
         public ResizeMode MainResizeMode => ResizeMode.CanMinimize;
@@ -682,6 +937,12 @@ namespace ExtintorCrm.App.Presentation
             BackupIntervalHours = settings.BackupIntervalHours;
             BackupRetentionCount = settings.BackupRetentionCount;
             _lastAutoBackupUtc = settings.LastAutoBackupUtc;
+            NotificationShowExtintores = settings.NotificationShowExtintores;
+            NotificationShowAlvaras = settings.NotificationShowAlvaras;
+            NotificationShowPagamentos = settings.NotificationShowPagamentos;
+            NotificationIncludeOverdue = settings.NotificationIncludeOverdue;
+            NotificationDaysWindow = settings.NotificationDaysWindow;
+            NotificationMaxItems = settings.NotificationMaxItems;
             _exportPreferredEntity = settings.ExportPreferredEntity == "Pagamentos" ? "Pagamentos" : "Clientes";
             _exportPreferExcel = settings.ExportPreferExcel;
             ApplyPreferredExportFields(settings.ExportClienteSelectedFields, _preferredClienteExportFields);
@@ -708,9 +969,6 @@ namespace ExtintorCrm.App.Presentation
                 IsToastVisible = false;
             }
         }
-
-
-
 
     }
 }

@@ -4,43 +4,43 @@
         <ResourceDictionary Source="../Styles/Themes/DarkTheme.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <SolidColorBrush x:Key="BackgroundApp" Color="#0B1220" />
-    <SolidColorBrush x:Key="BackgroundSurface" Color="#0F172A" />
-    <SolidColorBrush x:Key="BackgroundCard" Color="#111827" />
-    <SolidColorBrush x:Key="BorderSubtle" Color="#374151" />
-    <SolidColorBrush x:Key="BorderStrong" Color="#4B5563" />
-    <SolidColorBrush x:Key="AccentPrimary" Color="#C1121F" />
-    <SolidColorBrush x:Key="AccentHover" Color="#9B0F18" />
-    <SolidColorBrush x:Key="AccentPressed" Color="#7F1D1D" />
-    <SolidColorBrush x:Key="Danger" Color="#991B1B" />
-    <SolidColorBrush x:Key="Warning" Color="#B45309" />
-    <SolidColorBrush x:Key="Success" Color="#15803D" />
-    <SolidColorBrush x:Key="Info" Color="#60A5FA" />
+    <SolidColorBrush x:Key="BackgroundApp" Color="#101C2B" />
+    <SolidColorBrush x:Key="BackgroundSurface" Color="#162638" />
+    <SolidColorBrush x:Key="BackgroundCard" Color="#1B2D42" />
+    <SolidColorBrush x:Key="BorderSubtle" Color="#486584" />
+    <SolidColorBrush x:Key="BorderStrong" Color="#56779B" />
+    <SolidColorBrush x:Key="AccentPrimary" Color="#D35D5D" />
+    <SolidColorBrush x:Key="AccentHover" Color="#B74D4D" />
+    <SolidColorBrush x:Key="AccentPressed" Color="#9A3D3D" />
+    <SolidColorBrush x:Key="Danger" Color="#C85B5B" />
+    <SolidColorBrush x:Key="Warning" Color="#C08B2E" />
+    <SolidColorBrush x:Key="Success" Color="#2AA56A" />
+    <SolidColorBrush x:Key="Info" Color="#3E79CD" />
 
-    <SolidColorBrush x:Key="ButtonPrimaryBg" Color="#C1121F" />
+    <SolidColorBrush x:Key="ButtonPrimaryBg" Color="#D05A5A" />
     <SolidColorBrush x:Key="ButtonPrimaryFg" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="ButtonSecondaryBg" Color="#334155" />
-    <SolidColorBrush x:Key="ButtonSecondaryFg" Color="#F1F5F9" />
+    <SolidColorBrush x:Key="ButtonSecondaryBg" Color="#2D4764" />
+    <SolidColorBrush x:Key="ButtonSecondaryFg" Color="#EAF1FA" />
     <SolidColorBrush x:Key="ButtonGhostBg" Color="#00000000" />
-    <SolidColorBrush x:Key="ButtonGhostFg" Color="#D1D5DB" />
+    <SolidColorBrush x:Key="ButtonGhostFg" Color="#B6C3D5" />
 
-    <SolidColorBrush x:Key="InputBg" Color="#1F2937" />
-    <SolidColorBrush x:Key="InputBorder" Color="#374151" />
-    <SolidColorBrush x:Key="InputFg" Color="#F9FAFB" />
-    <SolidColorBrush x:Key="PlaceholderFg" Color="#94A3B8" />
-    <SolidColorBrush x:Key="RowHoverBg" Color="#2D3A4F" />
-    <SolidColorBrush x:Key="RowSelectedBg" Color="#332563EB" />
-    <SolidColorBrush x:Key="RowSelectedBorder" Color="#662563EB" />
-    <SolidColorBrush x:Key="DataGridHeaderBg" Color="#1F2937" />
-    <SolidColorBrush x:Key="DataGridHeaderFg" Color="#D1D5DB" />
+    <SolidColorBrush x:Key="InputBg" Color="#263C54" />
+    <SolidColorBrush x:Key="InputBorder" Color="#486584" />
+    <SolidColorBrush x:Key="InputFg" Color="#E8EEF7" />
+    <SolidColorBrush x:Key="PlaceholderFg" Color="#8D9DB3" />
+    <SolidColorBrush x:Key="RowHoverBg" Color="#2E4866" />
+    <SolidColorBrush x:Key="RowSelectedBg" Color="#33557D" />
+    <SolidColorBrush x:Key="RowSelectedBorder" Color="#5A8ED3" />
+    <SolidColorBrush x:Key="DataGridHeaderBg" Color="#243C56" />
+    <SolidColorBrush x:Key="DataGridHeaderFg" Color="#C5D4E7" />
 
-    <SolidColorBrush x:Key="ToastSuccessBg" Color="#14532D" />
-    <SolidColorBrush x:Key="ToastSuccessBorder" Color="#166534" />
-    <SolidColorBrush x:Key="ToastSuccessFg" Color="#DCFCE7" />
-    <SolidColorBrush x:Key="ToastErrorBg" Color="#7F1D1D" />
-    <SolidColorBrush x:Key="ToastErrorBorder" Color="#991B1B" />
-    <SolidColorBrush x:Key="ToastErrorFg" Color="#FEE2E2" />
-    <SolidColorBrush x:Key="ToastInfoBg" Color="#1E3A8A" />
-    <SolidColorBrush x:Key="ToastInfoBorder" Color="#2563EB" />
-    <SolidColorBrush x:Key="ToastInfoFg" Color="#DBEAFE" />
+    <SolidColorBrush x:Key="ToastSuccessBg" Color="#1A5A3D" />
+    <SolidColorBrush x:Key="ToastSuccessBorder" Color="#2AA56A" />
+    <SolidColorBrush x:Key="ToastSuccessFg" Color="#D9F6E5" />
+    <SolidColorBrush x:Key="ToastErrorBg" Color="#6E2A2A" />
+    <SolidColorBrush x:Key="ToastErrorBorder" Color="#C85B5B" />
+    <SolidColorBrush x:Key="ToastErrorFg" Color="#F4D2D2" />
+    <SolidColorBrush x:Key="ToastInfoBg" Color="#1F4578" />
+    <SolidColorBrush x:Key="ToastInfoBorder" Color="#3A71C0" />
+    <SolidColorBrush x:Key="ToastInfoFg" Color="#D7E7FF" />
 </ResourceDictionary>

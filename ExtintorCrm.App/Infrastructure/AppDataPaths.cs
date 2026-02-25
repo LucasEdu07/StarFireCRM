@@ -9,6 +9,7 @@ public static class AppDataPaths
     private const string AppFolderName = "StarFire";
     private const string DataFolderName = "data";
     private const string BackupFolderName = "backups";
+    private const string DocumentsFolderName = "documents";
     private static readonly object SyncRoot = new();
     private static bool _initialized;
     private static string _appRootDirectory = string.Empty;
@@ -16,6 +17,7 @@ public static class AppDataPaths
     private static string _backupDirectory = string.Empty;
     private static string _databasePath = string.Empty;
     private static string _settingsPath = string.Empty;
+    private static string _documentsDirectory = string.Empty;
 
     public static string AppRootDirectory
     {
@@ -59,6 +61,15 @@ public static class AppDataPaths
         {
             EnsureInitialized();
             return _settingsPath;
+        }
+    }
+
+    public static string DocumentsDirectory
+    {
+        get
+        {
+            EnsureInitialized();
+            return _documentsDirectory;
         }
     }
 
@@ -116,12 +127,14 @@ public static class AppDataPaths
             var root = Path.GetFullPath(candidateRoot);
             var dataDir = Path.Combine(root, DataFolderName);
             var backupDir = Path.Combine(dataDir, BackupFolderName);
+            var documentsDir = Path.Combine(dataDir, DocumentsFolderName);
             var dbPath = Path.Combine(dataDir, "crm.db");
             var settingsPath = Path.Combine(dataDir, "appsettings.json");
 
             Directory.CreateDirectory(root);
             Directory.CreateDirectory(dataDir);
             Directory.CreateDirectory(backupDir);
+            Directory.CreateDirectory(documentsDir);
             ValidateWriteAccess(dataDir);
 
             _appRootDirectory = root;
@@ -129,6 +142,7 @@ public static class AppDataPaths
             _backupDirectory = backupDir;
             _databasePath = dbPath;
             _settingsPath = settingsPath;
+            _documentsDirectory = documentsDir;
 
             MigrateLegacyDataIfNeeded();
             return true;
@@ -162,6 +176,7 @@ public static class AppDataPaths
         CopyIfDestinationMissing(Path.Combine(LegacyDataDirectory, "crm.db-wal"), $"{_databasePath}-wal");
         CopyIfDestinationMissing(Path.Combine(LegacyDataDirectory, "crm.db-shm"), $"{_databasePath}-shm");
         CopyIfDestinationMissing(Path.Combine(LegacyDataDirectory, "appsettings.json"), _settingsPath);
+        CopyDirectoryIfDestinationMissing(Path.Combine(LegacyDataDirectory, DocumentsFolderName), _documentsDirectory);
 
         var legacyBackupDir = Path.Combine(LegacyDataDirectory, BackupFolderName);
         if (!Directory.Exists(legacyBackupDir))
@@ -196,5 +211,30 @@ public static class AppDataPaths
         }
 
         File.Copy(sourcePath, destinationPath, overwrite: false);
+    }
+
+    private static void CopyDirectoryIfDestinationMissing(string sourceDirectory, string destinationDirectory)
+    {
+        if (!Directory.Exists(sourceDirectory))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(destinationDirectory);
+        foreach (var sourceFile in Directory.GetFiles(sourceDirectory, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(sourceDirectory, sourceFile);
+            var destinationFile = Path.Combine(destinationDirectory, relativePath);
+            var destinationDir = Path.GetDirectoryName(destinationFile);
+            if (!string.IsNullOrWhiteSpace(destinationDir))
+            {
+                Directory.CreateDirectory(destinationDir);
+            }
+
+            if (!File.Exists(destinationFile))
+            {
+                File.Copy(sourceFile, destinationFile, overwrite: false);
+            }
+        }
     }
 }

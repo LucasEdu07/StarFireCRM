@@ -4,29 +4,63 @@
                     xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase">
         <DropShadowEffect x:Key="SoftShadow"
                           Color="{DynamicResource ShadowColor}"
-                          BlurRadius="14"
-                          ShadowDepth="2"
-                          Opacity="0.12" />
+                          BlurRadius="20"
+                          ShadowDepth="1"
+                          Opacity="0.20" />
 
         <DropShadowEffect x:Key="PrimaryButtonShadow"
                           Color="{DynamicResource ShadowColor}"
-                          BlurRadius="8"
+                          BlurRadius="12"
                           ShadowDepth="1"
-                          Opacity="0.16" />
+                          Opacity="0.24" />
 
         <DropShadowEffect x:Key="SoftShadowHover"
                           Color="{DynamicResource ShadowColor}"
-                          BlurRadius="16"
-                          ShadowDepth="3"
-                          Opacity="0.14" />
+                          BlurRadius="24"
+                          ShadowDepth="2"
+                          Opacity="0.26" />
 
         <Style TargetType="Window">
             <Setter Property="FontFamily" Value="Segoe UI Variable" />
             <Setter Property="FontSize" Value="14" />
+            <Setter Property="AllowsTransparency" Value="True" />
             <Setter Property="Background" Value="{DynamicResource AppBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+            <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
             <Setter Property="TextElement.Foreground" Value="{DynamicResource TextPrimary}" />
+            <Setter Property="MaxWidth" Value="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Width}" />
+            <Setter Property="MaxHeight" Value="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}" />
             <Setter Property="Icon" Value="/Assets/AppIcon/startfire.ico" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Window">
+                        <Border x:Name="WindowShell"
+                                Background="{DynamicResource SurfaceBackground}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                ClipToBounds="False"
+                                SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <DropShadowEffect Color="{DynamicResource ShadowColor}"
+                                                  BlurRadius="26"
+                                                  ShadowDepth="0"
+                                                  Opacity="0.30" />
+                            </Border.Effect>
+                            <Border x:Name="ContentHost"
+                                    Margin="1"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="15"
+                                    ClipToBounds="True">
+                                <AdornerDecorator>
+                                    <ContentPresenter />
+                                </AdornerDecorator>
+                            </Border>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="TextBlock">
@@ -429,10 +463,10 @@
         </Style>
 
         <Style x:Key="ActionBar" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource CardBackground}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtle}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderStrong}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="CornerRadius" Value="16" />
             <Setter Property="Padding" Value="16,14" />
             <Setter Property="Effect" Value="{StaticResource SoftShadow}" />
         </Style>
@@ -448,38 +482,39 @@
 
         <Style x:Key="CardContainer" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackground}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderStrong}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="CornerRadius" Value="18" />
             <Setter Property="Padding" Value="18" />
             <Setter Property="Effect" Value="{StaticResource SoftShadow}" />
         </Style>
 
         <Style x:Key="AppTitleBarStyle" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+            <Setter Property="Background" Value="{DynamicResource TitleBarBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TitleBarBorder}" />
             <Setter Property="BorderThickness" Value="0,0,0,1" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="Height" Value="44" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="Height" Value="50" />
+            <Setter Property="CornerRadius" Value="15,15,0,0" />
         </Style>
 
         <Style x:Key="AppTitleBarTextStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontSize" Value="13.5" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
         <Style x:Key="AppTitleBarButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostButton}">
-            <Setter Property="Width" Value="34" />
-            <Setter Property="Height" Value="28" />
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="30" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
             <Setter Property="FontSize" Value="11.5" />
-            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TitleBarBorder}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
-            <Setter Property="Background" Value="{DynamicResource ControlBackground}" />
+            <Setter Property="Background" Value="{DynamicResource TitleBarButtonBg}" />
             <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
             <Setter Property="RenderTransform">
                 <Setter.Value>
@@ -493,14 +528,14 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
+                                CornerRadius="9">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"
                                               TextElement.Foreground="{TemplateBinding Foreground}" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource ControlBackgroundHover}" />
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource TitleBarButtonHoverBg}" />
                                 <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
@@ -562,17 +597,17 @@
 
         <Style x:Key="StatusBadgeSuccess" TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
             <Setter Property="Background" Value="{DynamicResource BadgeSuccessBg}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BadgeSuccessBg}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
         </Style>
 
         <Style x:Key="StatusBadgeWarning" TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
             <Setter Property="Background" Value="{DynamicResource BadgeWarningBg}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BadgeWarningBg}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
         </Style>
 
         <Style x:Key="StatusBadgeDanger" TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
             <Setter Property="Background" Value="{DynamicResource BadgeDangerBg}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BadgeDangerBg}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
         </Style>
 
         <Style x:Key="StatusBadge" TargetType="Border" BasedOn="{StaticResource StatusBadgeSuccess}" />
@@ -594,7 +629,7 @@
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
+                                CornerRadius="10">
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="{TemplateBinding Padding}" />
                         </Border>
@@ -637,24 +672,26 @@
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="32" />
+                                            <ColumnDefinition Width="34" />
                                         </Grid.ColumnDefinitions>
-                                        <ContentPresenter Margin="10,0,6,0"
+                                        <ContentPresenter Margin="12,0,10,0"
                                                           VerticalAlignment="Center"
                                                           HorizontalAlignment="Left"
                                                           Content="{TemplateBinding SelectionBoxItem}"
                                                           ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" />
-                                        <Border Grid.Column="1"
-                                                Background="{DynamicResource SurfaceBackground}"
-                                                BorderBrush="{DynamicResource ControlBorder}"
+                                        <Border x:Name="ChevronHost"
+                                                Grid.Column="1"
+                                                Background="Transparent"
+                                                BorderBrush="{DynamicResource BorderSubtle}"
                                                 BorderThickness="1,0,0,0"
-                                                CornerRadius="0,9,9,0" />
-                                        <TextBlock Grid.Column="1"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   FontFamily="Segoe MDL2 Assets"
-                                                   Text="&#xE70D;"
-                                                   Foreground="{TemplateBinding Foreground}" />
+                                                CornerRadius="0,10,10,0">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="10"
+                                                       Text="&#xE70D;"
+                                                       Foreground="{TemplateBinding Foreground}" />
+                                        </Border>
                                     </Grid>
                                 </Border>
                             </ToggleButton>
@@ -663,14 +700,14 @@
                                    Placement="Bottom"
                                    AllowsTransparency="True"
                                    Focusable="False"
-                                   PopupAnimation="Slide">
-                                <Border Margin="0,4,0,0"
+                                    PopupAnimation="Slide">
+                                <Border Margin="0,6,0,0"
                                         MinWidth="{TemplateBinding ActualWidth}"
                                         Background="{DynamicResource CardBackground}"
                                         BorderBrush="{DynamicResource ControlBorder}"
                                         BorderThickness="1"
-                                        CornerRadius="10"
-                                        Padding="4"
+                                        CornerRadius="11"
+                                        Padding="5"
                                         Effect="{StaticResource SoftShadow}">
                                     <ScrollViewer MaxHeight="260">
                                         <ItemsPresenter />
@@ -681,13 +718,18 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Root" Property="Background" Value="{DynamicResource ControlBackgroundHover}" />
+                                <Setter TargetName="ChevronHost" Property="Background" Value="{DynamicResource ControlBackgroundHover}" />
+                                <Setter TargetName="ChevronHost" Property="BorderBrush" Value="{DynamicResource AccentBlueBorder}" />
                             </Trigger>
                             <Trigger Property="IsKeyboardFocusWithin" Value="True">
                                 <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AccentBlueBorder}" />
+                                <Setter TargetName="ChevronHost" Property="BorderBrush" Value="{DynamicResource AccentBlueBorder}" />
                             </Trigger>
                             <Trigger SourceName="DropDownToggle" Property="IsChecked" Value="True">
                                 <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AccentBlueBorder}" />
                                 <Setter TargetName="Root" Property="Background" Value="{DynamicResource ControlBackgroundHover}" />
+                                <Setter TargetName="ChevronHost" Property="Background" Value="{DynamicResource AccentBlueBg}" />
+                                <Setter TargetName="ChevronHost" Property="BorderBrush" Value="{DynamicResource AccentBlueBorder}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="Root" Property="Opacity" Value="0.65" />
@@ -1201,7 +1243,7 @@
                             <Border Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="8" />
+                                    CornerRadius="10" />
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE721;"
                                        FontSize="14"

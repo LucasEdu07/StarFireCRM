@@ -10,23 +10,24 @@ public class DashboardKpiItemWidthConverter : IValueConverter
     {
         if (value is not double width || double.IsNaN(width) || width <= 0)
         {
-            return 290d;
+            return 250d;
         }
-        // Accounts for window chrome + tab padding/margins so cards keep comfortable density.
-        var usable = Math.Max(900d, width - 170d);
+        // Accounts for window chrome + tab padding/margins while keeping KPI cards compact.
+        var usable = Math.Max(820d, width - 170d);
         var columns = usable switch
         {
-            < 1220d => 2d,
-            < 1720d => 3d,
-            < 2140d => 4d,
-            _ => 5d
+            < 1180d => 2d,
+            < 1560d => 3d,
+            < 1940d => 4d,
+            < 2320d => 5d,
+            _ => 6d
         };
 
-        const double itemGap = 14d;
+        const double itemGap = 12d;
         var calculated = (usable - ((columns - 1d) * itemGap)) / columns;
 
-        // Prioritize label readability and avoid text clipping/wrapping in normal window mode.
-        return Math.Clamp(Math.Floor(calculated), 262d, 340d);
+        // Keep cards tight and aligned while preserving label readability.
+        return Math.Clamp(Math.Floor(calculated), 228d, 296d);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

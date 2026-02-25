@@ -1,5 +1,7 @@
-﻿using System;
+using System;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using ExtintorCrm.App.Domain;
@@ -42,7 +44,7 @@ namespace ExtintorCrm.App.Presentation
                 }
                 else
                 {
-                    pagamento.ClienteNome = "Cliente não identificado";
+                    pagamento.ClienteNome = "Cliente nao identificado";
                 }
             }
 
@@ -68,12 +70,82 @@ namespace ExtintorCrm.App.Presentation
                 query = query.Where(p => p.Pago);
             }
 
+            if (!string.IsNullOrWhiteSpace(PagamentoSearchTerm))
+            {
+                var term = PagamentoSearchTerm.Trim();
+                query = query.Where(p =>
+                    ContainsIgnoreCase(p.ClienteNome, term) ||
+                    ContainsIgnoreCase(p.Descricao, term) ||
+                    ContainsIgnoreCase(p.CpfCnpjCliente, term));
+            }
+
             Pagamentos.Clear();
             foreach (var pagamento in query.OrderBy(p => p.DataVencimento))
             {
                 Pagamentos.Add(pagamento);
             }
             SelectedPagamento = null;
+            OnPropertyChanged(nameof(CanResetPagamentoFilters));
+            _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
+        }
+
+        private void ResetPagamentoFilters()
+        {
+            _pagamentoSearchDebounceCts?.Cancel();
+            _pagamentoSearchDebounceCts?.Dispose();
+            _pagamentoSearchDebounceCts = null;
+
+            _pagamentoSearchTerm = string.Empty;
+            _pagamentoFilter = "Todos";
+            ApplyPagamentoFilter();
+            OnPropertyChanged(nameof(PagamentoSearchTerm));
+            OnPropertyChanged(nameof(PagamentoFilter));
+            OnPropertyChanged(nameof(CanResetPagamentoFilters));
+            _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
+        }
+
+        private void QueuePagamentoSearch()
+        {
+            _pagamentoSearchDebounceCts?.Cancel();
+            _pagamentoSearchDebounceCts?.Dispose();
+            _pagamentoSearchDebounceCts = new CancellationTokenSource();
+            var token = _pagamentoSearchDebounceCts.Token;
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(220, token);
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (token.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
+                        ApplyPagamentoFilter();
+                    });
+                }
+                catch (TaskCanceledException)
+                {
+                    // debounce cancelado
+                }
+            }, token);
+        }
+
+        private static bool ContainsIgnoreCase(string? value, string term)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            return value.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private async Task NewPagamentoAsync()
@@ -136,7 +208,7 @@ namespace ExtintorCrm.App.Presentation
 
             await _pagamentoRepository.DeleteAsync(SelectedPagamento.Id);
             await LoadPagamentosAsync();
-            await ShowToastAsync("Pagamento excluído com sucesso.", "Success");
+            await ShowToastAsync("Pagamento excluido com sucesso.", "Success");
         }
 
         private async Task SendCobrancaAsync()
@@ -156,9 +228,10 @@ namespace ExtintorCrm.App.Presentation
                         .FirstOrDefault(c => NormalizeDigits(c.CPF ?? c.Documento) == cpf);
                 }
             }
+
             if (cliente == null)
             {
-                await ShowToastAsync("Cliente não encontrado para este pagamento.", "Error");
+                await ShowToastAsync("Cliente nao encontrado para este pagamento.", "Error");
                 return;
             }
 
@@ -169,16 +242,26 @@ namespace ExtintorCrm.App.Presentation
             var canSendWhatsApp = IsValidWhatsAppPhone(whatsappPhone);
             var canSendEmail = IsValidEmail(email);
 
-            var payload = BuildCobrancaMessage(clienteNome, SelectedPagamento);
+            var etapaDefault = ResolveCobrancaEtapa(SelectedPagamento);
+            var tomDefault = "Profissional";
+            var payload = BuildCobrancaMessage(clienteNome, SelectedPagamento, etapaDefault, tomDefault);
             var contactInfo = BuildContatoInfo(telefoneRaw, email, canSendWhatsApp, canSendEmail);
-            var model = new CobrancaWindowModel
-            {
-                ClienteNome = clienteNome,
-                ContatoInfo = contactInfo,
-                Mensagem = payload.Message,
-                CanSendEmail = canSendEmail,
-                CanSendWhatsApp = canSendWhatsApp
-            };
+            var historico = ExtractCobrancaHistory(SelectedPagamento.Observacoes);
+
+            var model = new CobrancaWindowModel(
+                clienteNome: clienteNome,
+                contatoInfo: contactInfo,
+                valorResumo: SelectedPagamento.Valor.ToString("C2", new CultureInfo("pt-BR")),
+                vencimentoResumo: SelectedPagamento.DataVencimento.ToString("dd/MM/yyyy"),
+                prazoResumo: ResolvePrazoResumo(SelectedPagamento),
+                canSendEmail: canSendEmail,
+                canSendWhatsApp: canSendWhatsApp,
+                etapaOptions: BuildCobrancaEtapaOptions(SelectedPagamento),
+                etapaSelecionada: etapaDefault,
+                tomOptions: BuildCobrancaToneOptions(),
+                tomSelecionado: tomDefault,
+                historicoItens: historico,
+                messageFactory: (etapa, tom) => BuildCobrancaMessage(clienteNome, SelectedPagamento, etapa, tom).Message);
 
             var dialog = new CobrancaWindow(model, Application.Current?.MainWindow);
             if (dialog.ShowDialog() != true || dialog.SelectedAction == CobrancaAction.None)
@@ -192,40 +275,100 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
+                var canalRegistrado = string.Empty;
+                var interactionExecuted = false;
+                var subject = BuildCobrancaMessage(clienteNome, SelectedPagamento, model.EtapaSelecionada, model.TomSelecionado).Subject;
+
                 switch (dialog.SelectedAction)
                 {
+                    case CobrancaAction.Register:
+                        canalRegistrado = "Registro manual";
+                        interactionExecuted = true;
+                        await ShowToastAsync("Contato registrado no historico da cobranca.", "Success");
+                        break;
+
                     case CobrancaAction.Copy:
                         Clipboard.SetText(messageToSend);
-                        await ShowToastAsync("Mensagem de cobrança copiada.", "Success");
+                        canalRegistrado = "Copia";
+                        interactionExecuted = true;
+                        await ShowToastAsync("Mensagem de cobranca copiada.", "Success");
                         break;
 
                     case CobrancaAction.Email:
                         if (!canSendEmail)
                         {
-                            await ShowToastAsync("Cliente sem e-mail válido.", "Info");
+                            await ShowToastAsync("Cliente sem e-mail valido.", "Info");
                             break;
                         }
 
-                        OpenUri(BuildMailToUri(email, payload.Subject, messageToSend));
-                        await ShowToastAsync("Cliente de e-mail aberto com a cobrança.", "Info");
+                        OpenUri(BuildMailToUri(email, subject, messageToSend));
+                        canalRegistrado = "E-mail";
+                        interactionExecuted = true;
+                        await ShowToastAsync("Cliente de e-mail aberto com a cobranca.", "Info");
                         break;
 
                     case CobrancaAction.WhatsApp:
                         if (!canSendWhatsApp)
                         {
-                            await ShowToastAsync("Cliente sem telefone válido para WhatsApp.", "Info");
+                            await ShowToastAsync("Cliente sem telefone valido para WhatsApp.", "Info");
                             break;
                         }
 
                         OpenUri($"https://wa.me/{whatsappPhone}?text={Uri.EscapeDataString(messageToSend)}");
+                        canalRegistrado = "WhatsApp";
+                        interactionExecuted = true;
                         await ShowToastAsync("WhatsApp aberto com a mensagem pronta.", "Info");
                         break;
+                }
+
+                if (interactionExecuted)
+                {
+                    await RegisterCobrancaInteractionAsync(
+                        SelectedPagamento,
+                        canalRegistrado,
+                        model.EtapaSelecionada,
+                        model.TomSelecionado,
+                        messageToSend);
+
+                    await LoadPagamentosAsync();
                 }
             }
             catch (Exception ex)
             {
-                await LogAndToastErrorAsync("Falha ao abrir canal de cobrança.", "Falha ao abrir canal de cobrança", ex);
+                await LogAndToastErrorAsync("Falha ao abrir canal de cobranca.", "Falha ao abrir canal de cobranca", ex);
             }
+        }
+
+        private async Task RegisterCobrancaInteractionAsync(
+            Pagamento pagamento,
+            string canal,
+            string etapa,
+            string tom,
+            string mensagem)
+        {
+            var historicoEntry = BuildCobrancaHistoryEntry(canal, etapa, tom, mensagem);
+            pagamento.Observacoes = AppendCobrancaHistory(pagamento.Observacoes, historicoEntry);
+            await _pagamentoRepository.UpdateAsync(pagamento);
+        }
+
+        private Task OpenPagamentoAttachmentsAsync()
+        {
+            if (SelectedPagamento == null)
+            {
+                return Task.CompletedTask;
+            }
+
+            var referencia = string.IsNullOrWhiteSpace(SelectedPagamento.Descricao)
+                ? $"Pagamento {SelectedPagamento.DataVencimento:dd/MM/yyyy}"
+                : SelectedPagamento.Descricao;
+            var context = DocumentoAnexosContext.ForPagamento(SelectedPagamento.Id, referencia);
+            var vm = new DocumentoAnexosViewModel(_documentoAnexoRepository, _documentoStorageService, context);
+            var window = new DocumentoAnexosWindow(vm)
+            {
+                Owner = Application.Current?.MainWindow
+            };
+            window.ShowDialog();
+            return Task.CompletedTask;
         }
     }
 }

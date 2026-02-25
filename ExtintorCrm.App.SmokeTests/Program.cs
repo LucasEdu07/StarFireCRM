@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ExtintorCrm.App.Domain;
 using ExtintorCrm.App.UseCases.Alerts;
@@ -84,10 +84,10 @@ internal static class SmokeTests
 
         AssertEx.Equal("Vencido", cliente.ExtintorStatus, "Status do extintor incorreto");
         AssertEx.Equal(-1, cliente.ExtintorDaysToDue ?? 0, "Dias do extintor incorreto");
-        AssertEx.Equal("Vencendo", cliente.AlvaraStatus, "Status do alvará incorreto");
-        AssertEx.Equal(5, cliente.AlvaraDaysToDue ?? -1, "Dias do alvará incorreto");
-        AssertEx.Equal("Vencido", cliente.SituacaoNivel, "Situação geral incorreta");
-        AssertEx.Equal("Vencido", cliente.SituacaoTexto, "Texto da situação geral incorreto");
+        AssertEx.Equal("Vencendo", cliente.AlvaraStatus, "Status do alvara incorreto");
+        AssertEx.Equal(5, cliente.AlvaraDaysToDue ?? -1, "Dias do alvara incorreto");
+        AssertEx.Equal("Vencido", cliente.SituacaoNivel, "Situacao geral incorreta");
+        AssertEx.Equal("Vencido", cliente.SituacaoTexto, "Texto da situacao geral incorreto");
     }
 
     private static void AlertService_Counts_Clientes_ComputaVencidosEVencendo()
@@ -107,8 +107,8 @@ internal static class SmokeTests
 
         AssertEx.Equal(1, ext.Vencidos, "Contagem de extintores vencidos incorreta");
         AssertEx.Equal(1, ext.Vencendo, "Contagem de extintores vencendo incorreta");
-        AssertEx.Equal(1, alv.Vencidos, "Contagem de alvarás vencidos incorreta");
-        AssertEx.Equal(1, alv.Vencendo, "Contagem de alvarás vencendo incorreta");
+        AssertEx.Equal(1, alv.Vencidos, "Contagem de alvaras vencidos incorreta");
+        AssertEx.Equal(1, alv.Vencendo, "Contagem de alvaras vencendo incorreta");
     }
 
     private static void AlertService_ApplyAlerts_Pagamentos_ComputaSituacao()
@@ -152,7 +152,7 @@ internal static class SmokeTests
 
         var result = service.CountPagamentos(pagamentos);
 
-        AssertEx.Equal(1, result.Vencidos, "CountPagamentos não deve incluir pagos em vencidos");
+        AssertEx.Equal(1, result.Vencidos, "CountPagamentos nao deve incluir pagos em vencidos");
         AssertEx.Equal(1, result.Vencendo, "CountPagamentos vencendo incorreto");
     }
 }

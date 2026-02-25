@@ -1,9 +1,9 @@
 ; Star Fire Installer (upgrade-safe)
 ; Build:
-;   iscc /DMyAppVersion=1.0.0 /DPublishDir="D:\path\to\publish" installer\StarFire.iss
+;   iscc /DMyAppVersion=1.0.5 /DPublishDir="D:\path\to\publish" installer\StarFire.iss
 
 #ifndef MyAppVersion
-  #define MyAppVersion "1.0.0"
+  #define MyAppVersion "1.0.5"
 #endif
 
 #ifndef PublishDir
@@ -34,6 +34,8 @@ CloseApplications=yes
 RestartApplications=no
 UninstallDisplayIcon={app}\{#MyAppExeName}
 SetupIconFile=..\ExtintorCrm.App\Assets\AppIcon\startfire.ico
+WizardImageFile=..\installer\assets\WizardImage.bmp
+WizardSmallImageFile=..\installer\assets\WizardSmallImage.bmp
 DisableDirPage=no
 InfoBeforeFile=..\installer\UpgradeNotice.txt
 
@@ -57,3 +59,4 @@ Filename: "{app}\{#MyAppExeName}"; Description: "Executar Star Fire"; Flags: now
 ; Remove apenas pasta de instalação.
 ; Dados do cliente ficam em %LocalAppData%\StarFire\data e NÃO são removidos.
 Type: filesandordirs; Name: "{app}"
+

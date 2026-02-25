@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.0.0",
+    [string]$Version = "1.0.5",
     [string]$Configuration = "Release",
     [switch]$BuildInstaller
 )
@@ -34,7 +34,6 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host ">> Publish concluído em: $outputDir"
-
 $exePath = Join-Path $outputDir "ExtintorCrm.App.exe"
 if (-not (Test-Path $exePath)) {
     throw "Executável não encontrado após publish: $exePath"
@@ -77,3 +76,4 @@ if ($BuildInstaller) {
     }
     Write-Host ">> Instalador gerado em artifacts\installer"
 }
+

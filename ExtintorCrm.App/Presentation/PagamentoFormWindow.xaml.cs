@@ -1,22 +1,215 @@
-﻿using System;
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using ExtintorCrm.App.Domain;
+using ExtintorCrm.App.Infrastructure;
+using ExtintorCrm.App.Infrastructure.Documents;
+using Microsoft.Win32;
 
 namespace ExtintorCrm.App.Presentation
 {
     public partial class PagamentoFormWindow : Window
     {
         private readonly CultureInfo _ptBr = new("pt-BR");
+        private readonly DocumentoAnexoRepository _documentoAnexoRepository = new();
+        private readonly DocumentoStorageService _documentoStorageService = new();
+        private readonly ObservableCollection<DocumentoAnexoItem> _anexos = new();
         private bool _isFormattingValor;
 
         public PagamentoFormWindow(PagamentoFormViewModel viewModel)
         {
             InitializeComponent();
             DataContext = viewModel;
+            PagamentoAnexosDataGrid.ItemsSource = _anexos;
             SyncValorFromViewModel();
+            if (viewModel.IsEditMode)
+            {
+                _ = LoadAnexosAsync();
+            }
+            UpdateAnexosUi();
+        }
+
+        private async Task LoadAnexosAsync()
+        {
+            if (DataContext is not PagamentoFormViewModel vm || vm.PagamentoId == Guid.Empty)
+            {
+                return;
+            }
+
+            var anexos = await _documentoAnexoRepository.ListByPagamentoAsync(vm.PagamentoId);
+            _anexos.Clear();
+            foreach (var anexo in anexos)
+            {
+                _anexos.Add(new DocumentoAnexoItem(anexo));
+            }
+
+            PagamentoAnexosDataGrid.SelectedIndex = _anexos.Count > 0 ? 0 : -1;
+            UpdateAnexosUi();
+        }
+
+        private void UpdateAnexosUi()
+        {
+            if (PagamentoAnexosCountText != null)
+            {
+                PagamentoAnexosCountText.Text = _anexos.Count == 0
+                    ? "Nenhum documento anexado"
+                    : $"{_anexos.Count} documento(s) anexado(s)";
+            }
+
+            var hasSelection = PagamentoAnexosDataGrid.SelectedItem is DocumentoAnexoItem;
+            AbrirPagamentoButton.IsEnabled = hasSelection;
+            ExcluirPagamentoButton.IsEnabled = hasSelection;
+        }
+
+        private void PagamentoAnexosDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateAnexosUi();
+        }
+
+        private async void AnexarPagamentoDocumento_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not PagamentoFormViewModel vm || vm.PagamentoId == Guid.Empty)
+            {
+                DialogService.Info("Anexos", "Salve o pagamento antes de anexar documentos.", this);
+                return;
+            }
+
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecionar documentos do pagamento",
+                Filter = "Documentos (*.*)|*.*",
+                CheckFileExists = true,
+                Multiselect = true
+            };
+
+            if (dialog.ShowDialog() != true || dialog.FileNames.Length == 0)
+            {
+                return;
+            }
+
+            foreach (var fileName in dialog.FileNames)
+            {
+                StoredDocumentoArquivo? storedFile = null;
+                try
+                {
+                    storedFile = _documentoStorageService.StoreForPagamento(vm.PagamentoId, fileName);
+                    await _documentoAnexoRepository.AddAsync(new DocumentoAnexo
+                    {
+                        Id = storedFile.DocumentoId,
+                        PagamentoId = vm.PagamentoId,
+                        Contexto = "Pagamento",
+                        TipoDocumento = ResolvePagamentoDocumentType(Path.GetFileName(fileName)),
+                        NomeOriginal = storedFile.NomeOriginal,
+                        CaminhoRelativo = storedFile.CaminhoRelativo,
+                        TamanhoBytes = storedFile.TamanhoBytes,
+                        CriadoEm = DateTime.UtcNow,
+                        AtualizadoEm = DateTime.UtcNow
+                    });
+                }
+                catch (Exception ex)
+                {
+                    if (storedFile != null)
+                    {
+                        _documentoStorageService.DeleteByRelativePath(storedFile.CaminhoRelativo);
+                    }
+
+                    DialogService.Error(
+                        "Anexos",
+                        $"Falha ao anexar '{Path.GetFileName(fileName)}': {ex.Message}",
+                        this);
+                }
+            }
+
+            await LoadAnexosAsync();
+        }
+
+        private void AbrirPagamentoDocumento_Click(object sender, RoutedEventArgs e)
+        {
+            if (PagamentoAnexosDataGrid.SelectedItem is not DocumentoAnexoItem selected)
+            {
+                return;
+            }
+
+            try
+            {
+                var absolutePath = _documentoStorageService.ResolveAbsolutePath(selected.CaminhoRelativo);
+                if (!File.Exists(absolutePath))
+                {
+                    DialogService.Info("Anexos", "Arquivo não encontrado no armazenamento local.", this);
+                    return;
+                }
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = absolutePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                DialogService.Error("Anexos", $"Falha ao abrir arquivo: {ex.Message}", this);
+            }
+        }
+
+        private async void ExcluirPagamentoDocumento_Click(object sender, RoutedEventArgs e)
+        {
+            if (PagamentoAnexosDataGrid.SelectedItem is not DocumentoAnexoItem selected)
+            {
+                return;
+            }
+
+            var confirmed = DialogService.Confirm(
+                "Excluir anexo",
+                $"Deseja realmente excluir o anexo '{selected.NomeOriginal}'?",
+                this);
+            if (!confirmed)
+            {
+                return;
+            }
+
+            try
+            {
+                await _documentoAnexoRepository.DeleteAsync(selected.Id);
+                _documentoStorageService.DeleteByRelativePath(selected.CaminhoRelativo);
+                await LoadAnexosAsync();
+            }
+            catch (Exception ex)
+            {
+                DialogService.Error("Anexos", $"Falha ao excluir anexo: {ex.Message}", this);
+            }
+        }
+
+        private static string ResolvePagamentoDocumentType(string? fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return "Outro";
+            }
+
+            var lower = fileName.ToLowerInvariant();
+            if (lower.Contains("nf") || lower.Contains("nota"))
+            {
+                return "Nota fiscal";
+            }
+
+            if (lower.Contains("boleto"))
+            {
+                return "Boleto";
+            }
+
+            if (lower.Contains("comprovante") || lower.Contains("recibo"))
+            {
+                return "Comprovante";
+            }
+
+            return "Outro";
         }
 
         private void Salvar_Click(object sender, RoutedEventArgs e)
@@ -160,6 +353,17 @@ namespace ExtintorCrm.App.Presentation
             vm.Valor = value;
         }
 
+        private void SetValorValidationState(bool isInvalid, string message)
+        {
+            if (ValorValidationText == null)
+            {
+                return;
+            }
+
+            ValorValidationText.Text = message;
+            ValorValidationText.Visibility = isInvalid ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         private bool TryParseMoneyFlexible(string input, out decimal value)
         {
             value = 0m;
@@ -205,7 +409,6 @@ namespace ExtintorCrm.App.Presentation
             var normalized = sanitized;
             if (lastComma >= 0 && lastDot >= 0)
             {
-                // Quando há os dois separadores, o último é decimal e o outro vira milhar.
                 var decimalSep = lastComma > lastDot ? ',' : '.';
                 var thousandSep = decimalSep == ',' ? '.' : ',';
                 normalized = normalized.Replace(thousandSep.ToString(), string.Empty);
@@ -213,7 +416,6 @@ namespace ExtintorCrm.App.Presentation
             }
             else if (lastDot >= 0)
             {
-                // Somente ponto: se padrão milhar (ex.: 1.000), remove; senão trata como decimal.
                 var dotCount = normalized.Count(ch => ch == '.');
                 if (dotCount > 1)
                 {
@@ -230,7 +432,6 @@ namespace ExtintorCrm.App.Presentation
             }
             else if (lastComma >= 0)
             {
-                // Somente vírgula: padrão pt-BR decimal.
                 var commaCount = normalized.Count(ch => ch == ',');
                 if (commaCount > 1)
                 {
@@ -248,62 +449,5 @@ namespace ExtintorCrm.App.Presentation
                 CultureInfo.InvariantCulture,
                 out value);
         }
-
-        private static int CountDigitsBeforeCaret(string text, int caretIndex)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                return 0;
-            }
-
-            var limit = Math.Min(Math.Max(caretIndex, 0), text.Length);
-            var count = 0;
-            for (var i = 0; i < limit; i++)
-            {
-                if (char.IsDigit(text[i]))
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-
-        private static int FindCaretIndexByDigits(string formattedText, int digitsAtLeft)
-        {
-            if (digitsAtLeft <= 0)
-            {
-                return 0;
-            }
-
-            var seen = 0;
-            for (var i = 0; i < formattedText.Length; i++)
-            {
-                if (!char.IsDigit(formattedText[i]))
-                {
-                    continue;
-                }
-
-                seen++;
-                if (seen >= digitsAtLeft)
-                {
-                    return Math.Min(i + 1, formattedText.Length);
-                }
-            }
-
-            return formattedText.Length;
-        }
-
-        private void SetValorValidationState(bool hasError, string message)
-        {
-            ValorValidationText.Text = string.IsNullOrWhiteSpace(message)
-                ? "Informe um valor válido."
-                : message;
-            ValorValidationText.Visibility = hasError ? Visibility.Visible : Visibility.Collapsed;
-            ValorTextBox.BorderBrush = hasError
-                ? System.Windows.Media.Brushes.IndianRed
-                : (System.Windows.Media.Brush)FindResource("ControlBorder");
-        }
     }
 }
-

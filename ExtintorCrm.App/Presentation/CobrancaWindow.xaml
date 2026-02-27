@@ -32,7 +32,7 @@
 
         <Style x:Key="SectionCard" TargetType="Border" BasedOn="{StaticResource CardStyle}">
             <Setter Property="Padding" Value="14" />
-            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="CornerRadius" Value="14" />
         </Style>
 
         <Style x:Key="SectionLabel" TargetType="TextBlock">

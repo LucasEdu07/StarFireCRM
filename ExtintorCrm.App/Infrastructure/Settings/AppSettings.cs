@@ -6,6 +6,7 @@ namespace ExtintorCrm.App.Infrastructure.Settings
     {
         public string Theme { get; set; } = AppThemeManager.LightTheme;
         public bool Fullscreen { get; set; }
+        public string WindowResolutionPreset { get; set; } = WindowResolutionPresets.Auto;
         public bool BackupEnabled { get; set; }
         public string BackupFolder { get; set; } = string.Empty;
         public int BackupIntervalHours { get; set; } = 24;
@@ -21,5 +22,10 @@ namespace ExtintorCrm.App.Infrastructure.Settings
         public bool NotificationIncludeOverdue { get; set; } = true;
         public int NotificationDaysWindow { get; set; } = 30;
         public int NotificationMaxItems { get; set; } = 10;
+        public string UiBorderColorHex { get; set; } = string.Empty;
+        public string UiTitleBarColorHex { get; set; } = string.Empty;
+        public string UiVanillaColorHex { get; set; } = string.Empty;
+        public int UiVanillaIntensityPercent { get; set; } = 100;
+        public string AdvancedSectionPassword { get; set; } = string.Empty;
     }
 }

@@ -26,8 +26,8 @@ public class DashboardKpiItemWidthConverter : IValueConverter
         const double itemGap = 12d;
         var calculated = (usable - ((columns - 1d) * itemGap)) / columns;
 
-        // Keep cards tight and aligned while preserving label readability.
-        return Math.Clamp(Math.Floor(calculated), 228d, 296d);
+        // Keep cards readable on compact widths while preserving balanced columns.
+        return Math.Clamp(Math.Floor(calculated), 240d, 312d);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

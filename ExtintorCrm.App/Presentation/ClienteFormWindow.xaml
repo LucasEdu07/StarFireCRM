@@ -38,49 +38,7 @@
             <Setter Property="Height" Value="40" />
         </Style>
 
-        <Style x:Key="SwitchStyle" TargetType="ToggleButton" BasedOn="{StaticResource ModernToggleSwitch}">
-            <Setter Property="Width" Value="98" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Grid>
-                            <Border x:Name="Track"
-                                    CornerRadius="18"
-                                    Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="1" />
-                            <Border x:Name="Knob"
-                                    Width="30"
-                                    Height="30"
-                                    Margin="3"
-                                    HorizontalAlignment="Left"
-                                    CornerRadius="15"
-                                    Background="{DynamicResource CardBackground}"
-                                    BorderBrush="{DynamicResource ControlBorder}"
-                                    BorderThickness="1" />
-                            <TextBlock x:Name="StateLabel"
-                                       Text="Inativo"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextSecondary}"
-                                       Margin="38,0,12,0"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Left" />
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Track" Property="Background" Value="{DynamicResource PrimaryRed}" />
-                                <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource PrimaryRed}" />
-                                <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
-                                <Setter TargetName="StateLabel" Property="Text" Value="Ativo" />
-                                <Setter TargetName="StateLabel" Property="Margin" Value="12,0,0,0" />
-                                <Setter TargetName="StateLabel" Property="Foreground" Value="{DynamicResource ButtonPrimaryFg}" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <Style x:Key="SwitchStyle" TargetType="ToggleButton" BasedOn="{StaticResource ModernLightSwitch3D}" />
     </Window.Resources>
 
     <Grid>
@@ -223,12 +181,14 @@
 
                             <StackPanel Grid.Row="2" Margin="0,12,0,0">
                                 <TextBlock Text="Vencimento dos extintores" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
-                                <DatePicker SelectedDate="{Binding VencimentoExtintores}" />
+                                <DatePicker Style="{StaticResource ModernDatePickerStyle}"
+                                            SelectedDate="{Binding VencimentoExtintores}" />
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
                                 <TextBlock Text="Vencimento do alvará" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
-                                <DatePicker SelectedDate="{Binding VencimentoAlvara}" />
+                                <DatePicker Style="{StaticResource ModernDatePickerStyle}"
+                                            SelectedDate="{Binding VencimentoAlvara}" />
                             </StackPanel>
 
                             <StackPanel Grid.Row="3" Margin="0,12,0,0">
@@ -253,7 +213,8 @@
 
                             <StackPanel>
                                 <TextBlock Text="Status da recarga" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
-                                <ComboBox Height="40"
+                                <ComboBox Style="{StaticResource ModernComboBox}"
+                                          Height="40"
                                           SelectedValuePath="Content"
                                           SelectedValue="{Binding StatusRecarga, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     <ComboBoxItem Content="Não informado" />
@@ -265,7 +226,8 @@
 
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Status do alvará" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
-                                <ComboBox Height="40"
+                                <ComboBox Style="{StaticResource ModernComboBox}"
+                                          Height="40"
                                           SelectedValuePath="Content"
                                           SelectedValue="{Binding StatusAlvara, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     <ComboBoxItem Content="Não informado" />

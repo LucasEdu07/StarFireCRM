@@ -50,6 +50,7 @@ namespace ExtintorCrm.App.Infrastructure.Settings
         private static AppSettings Normalize(AppSettings settings)
         {
             settings.Theme = AppThemeManager.NormalizeTheme(settings.Theme);
+            settings.WindowResolutionPreset = WindowResolutionPresets.Normalize(settings.WindowResolutionPreset);
             settings.BackupFolder = string.IsNullOrWhiteSpace(settings.BackupFolder)
                 ? GetDefaultBackupFolder()
                 : settings.BackupFolder.Trim();
@@ -58,6 +59,13 @@ namespace ExtintorCrm.App.Infrastructure.Settings
             settings.ExportPreferredEntity = settings.ExportPreferredEntity == "Pagamentos" ? "Pagamentos" : "Clientes";
             settings.NotificationDaysWindow = settings.NotificationDaysWindow <= 0 ? 30 : Math.Clamp(settings.NotificationDaysWindow, 1, 365);
             settings.NotificationMaxItems = settings.NotificationMaxItems <= 0 ? 10 : Math.Clamp(settings.NotificationMaxItems, 1, 50);
+            settings.UiBorderColorHex = AppThemeManager.NormalizeOptionalHexColor(settings.UiBorderColorHex);
+            settings.UiTitleBarColorHex = AppThemeManager.NormalizeOptionalHexColor(settings.UiTitleBarColorHex);
+            settings.UiVanillaColorHex = AppThemeManager.NormalizeOptionalHexColor(settings.UiVanillaColorHex);
+            settings.UiVanillaIntensityPercent = AppThemeManager.NormalizeVanillaIntensityPercent(settings.UiVanillaIntensityPercent);
+            settings.AdvancedSectionPassword = string.IsNullOrWhiteSpace(settings.AdvancedSectionPassword)
+                ? string.Empty
+                : settings.AdvancedSectionPassword.Trim();
             return settings;
         }
     }

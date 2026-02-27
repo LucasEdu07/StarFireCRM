@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 D:\CRMDesktopProjectCodex\ExtintorCrm\ExtintorCrm.App\App.xaml
-1727076856
-
-682113882297
-2231533030096
-MainWindow.xaml;Presentation\ClienteDetalhesWindow.xaml;Presentation\ClienteFormWindow.xaml;Presentation\CobrancaWindow.xaml;Presentation\ConfirmDialogWindow.xaml;Presentation\ConfirmTextWindow.xaml;Presentation\ExportOptionsWindow.xaml;Presentation\HelpTourWindow.xaml;Presentation\InfoDialogWindow.xaml;Presentation\PagamentoFormWindow.xaml;Presentation\Styles\Themes\DarkTheme.xaml;Presentation\Styles\Themes\LightTheme.xaml;Presentation\Theme\StarFireTheme.xaml;Presentation\Theme\Theme.Controls.xaml;Presentation\Theme\Theme.Dark.xaml;Presentation\Theme\Theme.Light.xaml;Presentation\Theme\Theme.Merge.xaml;
+23686449875
+166419897
+91-1635847607
+2251318463990
+MainWindow.xaml;Presentation\ClienteDetalhesWindow.xaml;Presentation\ClienteFormWindow.xaml;Presentation\CobrancaWindow.xaml;Presentation\ColorPickerWindow.xaml;Presentation\ConfirmDialogWindow.xaml;Presentation\ConfirmTextWindow.xaml;Presentation\Controls\MarkdownViewerControl.xaml;Presentation\Controls\ThemeRockerSwitchControl.xaml;Presentation\DashboardAlertsWindow.xaml;Presentation\DocumentoAnexosWindow.xaml;Presentation\ExportOptionsWindow.xaml;Presentation\HelpTourWindow.xaml;Presentation\InfoDialogWindow.xaml;Presentation\PagamentoFormWindow.xaml;Presentation\SplashScreenWindow.xaml;Presentation\Styles\Themes\DarkTheme.xaml;Presentation\Styles\Themes\LightTheme.xaml;Presentation\Theme\StarFireTheme.xaml;Presentation\Theme\Theme.Controls.xaml;Presentation\Theme\Theme.Dark.xaml;Presentation\Theme\Theme.Light.xaml;Presentation\Theme\Theme.Merge.xaml;
 
 False
 

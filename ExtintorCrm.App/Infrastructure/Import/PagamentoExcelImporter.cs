@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
 using ExtintorCrm.App.Domain;
+using ExtintorCrm.App.UseCases.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExtintorCrm.App.Infrastructure.Import
@@ -16,17 +17,29 @@ namespace ExtintorCrm.App.Infrastructure.Import
         public async Task<ImportResult> ImportAsync(string filePath)
         {
             var result = new ImportResult();
+            var fileValidation = ImportValidation.ValidateSourceFile(
+                filePath,
+                ".xlsx",
+                ".xlsm",
+                ".xltx",
+                ".xltm");
+            result.Validation.Merge(fileValidation);
+            if (!fileValidation.IsValid)
+            {
+                result.Errors.AddRange(fileValidation.Issues.Select(x => x.Message));
+                return result;
+            }
 
             if (!File.Exists(filePath))
             {
-                result.Errors.Add("Arquivo não encontrado.");
+                result.Errors.Add("Arquivo nao encontrado.");
                 return result;
             }
 
             var extension = Path.GetExtension(filePath).ToLowerInvariant();
             if (extension is not (".xlsx" or ".xlsm" or ".xltx" or ".xltm"))
             {
-                result.Errors.Add("Formato não suportado para importação de pagamentos. Use .xlsx.");
+                result.Errors.Add("Formato nao suportado para importacao de pagamentos. Use .xlsx.");
                 return result;
             }
 
@@ -36,6 +49,7 @@ namespace ExtintorCrm.App.Infrastructure.Import
             if (worksheet == null)
             {
                 result.Errors.Add("Planilha sem abas.");
+                result.Validation.AddError("Planilha", "worksheet_required", "Planilha sem abas.");
                 return result;
             }
 
@@ -43,13 +57,18 @@ namespace ExtintorCrm.App.Infrastructure.Import
             if (usedRange == null)
             {
                 AddSkip(result, "Planilha sem dados");
+                result.Validation.AddWarning("Planilha", "no_data", "Planilha sem dados para importar.");
                 return result;
             }
 
             var headers = BuildHeaderMap(usedRange.FirstRowUsed());
-            if (!headers.ContainsKey("cpfcnpj") || !headers.ContainsKey("descricao"))
+            ImportValidation.EnsureRequiredHeaders(result.Validation, headers, "cpfcnpj", "descricao");
+            if (!result.Validation.IsValid)
             {
-                result.Errors.Add("Cabeçalhos esperados não encontrados (CPF/CNPJ e Descrição).");
+                result.Errors.AddRange(
+                    result.Validation.Issues
+                        .Where(x => x.Severity == ValidationSeverity.Error)
+                        .Select(x => x.Message));
                 return result;
             }
 
@@ -101,7 +120,7 @@ namespace ExtintorCrm.App.Infrastructure.Import
 
                     if (!clientesByCpf.TryGetValue(cpf!, out var cliente))
                     {
-                        AddSkip(result, "Cliente não encontrado para CPF/CNPJ");
+                        AddSkip(result, "Cliente nao encontrado para CPF/CNPJ");
                         continue;
                     }
 
@@ -217,8 +236,8 @@ namespace ExtintorCrm.App.Infrastructure.Import
                 .Replace("/", string.Empty)
                 .Replace("-", string.Empty)
                 .Replace(" ", string.Empty)
-                .Replace("º", string.Empty)
-                .Replace("ª", string.Empty);
+                .Replace("\u00BA", string.Empty)
+                .Replace("\u00AA", string.Empty);
             return text;
         }
 
@@ -309,3 +328,4 @@ namespace ExtintorCrm.App.Infrastructure.Import
         }
     }
 }
+

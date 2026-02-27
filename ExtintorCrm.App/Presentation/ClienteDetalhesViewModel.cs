@@ -422,6 +422,37 @@ namespace ExtintorCrm.App.Presentation
                 .ToList();
         }
 
+        public void AcceptCurrentStateAsSaved()
+        {
+            var savedCliente = BuildUpdatedCliente();
+            _source.NomeFantasia = savedCliente.NomeFantasia;
+            _source.Documento = savedCliente.Documento;
+            _source.CPF = savedCliente.CPF;
+            _source.Telefone = savedCliente.Telefone;
+            _source.Telefone1 = savedCliente.Telefone1;
+            _source.Email = savedCliente.Email;
+            _source.Contato = savedCliente.Contato;
+            _source.RazaoSocial = savedCliente.RazaoSocial;
+            _source.Endereco = savedCliente.Endereco;
+            _source.Cidade = savedCliente.Cidade;
+            _source.UF = savedCliente.UF;
+            _source.TipoServico = savedCliente.TipoServico;
+            _source.NumeroAlvara = savedCliente.NumeroAlvara;
+            _source.Status = savedCliente.Status;
+            _source.StatusRecarga = savedCliente.StatusRecarga;
+            _source.VencimentoServico = savedCliente.VencimentoServico;
+            _source.VencimentoExtintores = savedCliente.VencimentoExtintores;
+            _source.VencimentoAlvara = savedCliente.VencimentoAlvara;
+            _source.Observacoes = savedCliente.Observacoes;
+            _source.IsAtivo = savedCliente.IsAtivo;
+
+            _pagamentosOriginais.Clear();
+            foreach (var pagamento in BuildUpdatedPagamentos().Select(ClonePagamento))
+            {
+                _pagamentosOriginais.Add(pagamento);
+            }
+        }
+
         private static (string Texto, string Nivel) BuildDueStatus(DateTime? dueDate, DateTime today)
         {
             if (!dueDate.HasValue)

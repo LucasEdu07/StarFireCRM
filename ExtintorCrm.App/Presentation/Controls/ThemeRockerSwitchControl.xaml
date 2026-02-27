@@ -1,0 +1,109 @@
+<UserControl x:Class="ExtintorCrm.App.Presentation.Controls.ThemeRockerSwitchControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="50"
+             d:DesignWidth="88"
+             Width="84"
+             Height="48"
+             MinWidth="84"
+             MinHeight="48">
+    <UserControl.Resources>
+        <Style x:Key="RockerFallbackStyle" TargetType="ToggleButton">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid Width="84"
+                              Height="34"
+                              SnapsToDevicePixels="True">
+                            <Border x:Name="BaseFrame"
+                                    CornerRadius="7"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1" />
+
+                            <Grid Margin="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border x:Name="LeftPlate"
+                                        Margin="0,0,2,0"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource ActionAccentBg}"
+                                        BorderBrush="{DynamicResource ActionAccentBorder}"
+                                        BorderThickness="1">
+                                    <TextBlock x:Name="LeftText"
+                                               Text="{Binding LeftLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               Foreground="{DynamicResource ButtonPrimaryFg}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+
+                                <Border x:Name="RightPlate"
+                                        Grid.Column="1"
+                                        Margin="2,0,0,0"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource ControlBackground}"
+                                        BorderBrush="{DynamicResource ControlBorder}"
+                                        BorderThickness="1">
+                                    <TextBlock x:Name="RightText"
+                                               Text="{Binding RightLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="LeftPlate" Property="Background" Value="{DynamicResource ControlBackground}" />
+                                <Setter TargetName="LeftPlate" Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+                                <Setter TargetName="LeftText" Property="Foreground" Value="{DynamicResource TextSecondary}" />
+                                <Setter TargetName="RightPlate" Property="Background" Value="{DynamicResource ActionAccentBg}" />
+                                <Setter TargetName="RightPlate" Property="BorderBrush" Value="{DynamicResource ActionAccentBorder}" />
+                                <Setter TargetName="RightText" Property="Foreground" Value="{DynamicResource ButtonPrimaryFg}" />
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="BaseFrame" Property="Opacity" Value="0.64" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid ClipToBounds="True"
+          SnapsToDevicePixels="True"
+          UseLayoutRounding="True">
+        <Border x:Name="RockerHost"
+                Visibility="Collapsed"
+                Opacity="0"
+                Background="Transparent">
+            <Grid x:Name="RockerWebHostContainer" />
+        </Border>
+
+        <ToggleButton x:Name="FallbackToggle"
+                      Visibility="Visible"
+                      Width="84"
+                      Height="34"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Style="{StaticResource RockerFallbackStyle}"
+                      IsChecked="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                      IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+    </Grid>
+</UserControl>

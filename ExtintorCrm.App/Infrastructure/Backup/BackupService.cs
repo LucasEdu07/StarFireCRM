@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 using ExtintorCrm.App.Infrastructure.Settings;
+using ExtintorCrm.App.UseCases.Common;
 using Microsoft.Data.Sqlite;
 
 namespace ExtintorCrm.App.Infrastructure.Backup
@@ -56,12 +58,46 @@ namespace ExtintorCrm.App.Infrastructure.Backup
             return Task.FromResult(backupFile);
         }
 
+        public async Task<OperationResult> TryCreateBackupAsync(string folderPath, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(folderPath))
+            {
+                return OperationResult.Failure(
+                    title: "Backup nao executado",
+                    message: "A pasta de backup nao foi informada.",
+                    code: "BACKUP_FOLDER_REQUIRED",
+                    nextStep: "Defina a pasta em Configuracoes > Backup e tente novamente.");
+            }
+
+            try
+            {
+                var backupPath = await CreateBackupAsync(folderPath, cancellationToken);
+                return OperationResult.Success(
+                    title: "Backup executado",
+                    message: "Backup concluido com sucesso.",
+                    code: "BACKUP_CREATE_OK",
+                    nextStep: "Confira o arquivo gerado na pasta de backup.",
+                    details: new[] { $"Arquivo: {backupPath}" });
+            }
+            catch (Exception ex)
+            {
+                return OperationResult.Failure(
+                    title: "Falha no backup",
+                    message: "Nao foi possivel concluir o backup.",
+                    code: "BACKUP_CREATE_ERROR",
+                    nextStep: "Valide permissao da pasta e espaco em disco antes de tentar novamente.",
+                    details: new[] { ex.Message });
+            }
+        }
+
         public Task<BackupRestoreResult> RestoreBackupAsync(string backupFilePath, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(backupFilePath) || !File.Exists(backupFilePath))
             {
                 throw new InvalidOperationException("Arquivo de backup não encontrado.");
             }
+
+            ValidateBackupArchive(backupFilePath, cancellationToken);
 
             var tempDir = Path.Combine(Path.GetTempPath(), $"star-fire-restore-{Guid.NewGuid():N}");
             Directory.CreateDirectory(tempDir);
@@ -94,6 +130,63 @@ namespace ExtintorCrm.App.Infrastructure.Backup
             finally
             {
                 TryDeleteDirectory(tempDir);
+            }
+        }
+
+        public async Task<OperationResult> TryRestoreBackupAsync(string backupFilePath, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(backupFilePath) || !File.Exists(backupFilePath))
+            {
+                return OperationResult.Failure(
+                    title: "Restauracao nao executada",
+                    message: "Arquivo de backup nao encontrado.",
+                    code: "BACKUP_FILE_NOT_FOUND",
+                    nextStep: "Selecione um arquivo .zip valido e tente novamente.");
+            }
+
+            try
+            {
+                var restoreResult = await RestoreBackupAsync(backupFilePath, cancellationToken);
+                if (!restoreResult.DatabaseRestored && !restoreResult.SettingsRestored && !restoreResult.DocumentsRestored)
+                {
+                    return OperationResult.Failure(
+                        title: "Restauracao incompleta",
+                        message: "Arquivo de backup invalido ou sem dados restauraveis.",
+                        code: "BACKUP_RESTORE_EMPTY",
+                        nextStep: "Escolha outro arquivo de backup e repita a operacao.");
+                }
+
+                var details = new List<string>();
+                if (restoreResult.DatabaseRestored)
+                {
+                    details.Add("Banco restaurado.");
+                }
+
+                if (restoreResult.SettingsRestored)
+                {
+                    details.Add("Configuracoes restauradas.");
+                }
+
+                if (restoreResult.DocumentsRestored)
+                {
+                    details.Add("Documentos restaurados.");
+                }
+
+                return OperationResult.Success(
+                    title: "Backup restaurado",
+                    message: "Restauracao concluida com sucesso.",
+                    code: "BACKUP_RESTORE_OK",
+                    nextStep: "Confira clientes, pagamentos e anexos apos recarregar a tela.",
+                    details: details);
+            }
+            catch (Exception ex)
+            {
+                return OperationResult.Failure(
+                    title: "Falha na restauracao",
+                    message: "Nao foi possivel restaurar o backup selecionado.",
+                    code: "BACKUP_RESTORE_ERROR",
+                    nextStep: "Valide o arquivo e tente novamente. Se o erro persistir, acione o suporte.",
+                    details: new[] { ex.Message });
             }
         }
 
@@ -255,6 +348,51 @@ namespace ExtintorCrm.App.Infrastructure.Backup
                 var entryName = $"{entryRoot.TrimEnd('/')}/{relativePath}";
                 archive.CreateEntryFromFile(sourceFile, entryName, CompressionLevel.Optimal);
             }
+        }
+
+        private static void ValidateBackupArchive(string backupFilePath, CancellationToken cancellationToken)
+        {
+            using var archive = ZipFile.OpenRead(backupFilePath);
+            if (archive.Entries.Count == 0)
+            {
+                throw new InvalidOperationException("Arquivo de backup vazio ou invalido.");
+            }
+
+            var hasExpectedContent = false;
+            foreach (var entry in archive.Entries)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var normalized = NormalizeZipEntryName(entry.FullName);
+                if (string.IsNullOrWhiteSpace(normalized))
+                {
+                    continue;
+                }
+
+                if (normalized.Contains("../", StringComparison.Ordinal) ||
+                    normalized.Contains("..\\", StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException("Arquivo de backup invalido: caminho inseguro encontrado.");
+                }
+
+                if (normalized.Equals("data/crm.db", StringComparison.OrdinalIgnoreCase) ||
+                    normalized.Equals("data/appsettings.json", StringComparison.OrdinalIgnoreCase) ||
+                    normalized.StartsWith("data/documents/", StringComparison.OrdinalIgnoreCase))
+                {
+                    hasExpectedContent = true;
+                }
+            }
+
+            if (!hasExpectedContent)
+            {
+                throw new InvalidOperationException("Arquivo de backup invalido: conteudo esperado nao encontrado.");
+            }
+        }
+
+        private static string NormalizeZipEntryName(string rawEntryName)
+        {
+            return rawEntryName
+                .Replace('\\', '/')
+                .TrimStart('/');
         }
 
         private static void TryDeleteDirectory(string path)

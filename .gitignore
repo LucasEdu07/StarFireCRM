@@ -1,6 +1,8 @@
 # Build artifacts
 bin/
 obj/
+**/bin/
+**/obj/
 out/
 _build_tmp/
 artifacts/

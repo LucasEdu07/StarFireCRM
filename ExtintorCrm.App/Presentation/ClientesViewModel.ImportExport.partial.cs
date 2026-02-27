@@ -45,24 +45,8 @@ namespace ExtintorCrm.App.Presentation
                     }
 
                     var result = await importer.ImportAsync(sourcePath);
-
-                    var message = $"Importação concluída: {result.Inserted} clientes inseridos, {result.Updated} clientes atualizados, {result.Skipped} ignorados.";
-                    if (result.BlankRowsIgnored > 0)
-                    {
-                        message = $"{message} Linhas vazias desconsideradas: {result.BlankRowsIgnored}.";
-                    }
-                    if (result.SkippedReasons.Count > 0)
-                    {
-                        var principais = result.SkippedReasons
-                            .GroupBy(x => x)
-                            .OrderByDescending(g => g.Count())
-                            .Take(3)
-                            .Select(g => $"{g.Key}: {g.Count()}")
-                            .ToList();
-
-                        message = $"{message} Motivos: {string.Join(" | ", principais)}";
-                    }
-                    await ShowToastAsync(message, "Success");
+                    var operation = result.ToOperationResult("clientes");
+                    await ShowOperationResultAsync(operation);
                 }
                 finally
                 {

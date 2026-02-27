@@ -142,6 +142,7 @@ namespace ExtintorCrm.App.Presentation
             {
                 Owner = Application.Current?.MainWindow
             };
+            detalhesWindow.SaveChangesAsync = () => SaveClienteDetalhesAsync(detalhesViewModel);
 
             detalhesWindow.ShowDialog();
 
@@ -149,24 +150,37 @@ namespace ExtintorCrm.App.Presentation
             {
                 return;
             }
+            await SaveClienteDetalhesAsync(detalhesViewModel);
+        }
+
+        private async Task<bool> SaveClienteDetalhesAsync(ClienteDetalhesViewModel detalhesViewModel)
+        {
+            if (SelectedCliente == null)
+            {
+                return false;
+            }
 
             var clienteAtualizado = detalhesViewModel.BuildUpdatedCliente();
             if (!string.IsNullOrWhiteSpace(clienteAtualizado.CPF) &&
                 await _clienteRepository.ExistsByCpfAsync(NormalizeDigits(clienteAtualizado.CPF)!, SelectedCliente.Id))
             {
                 await ShowToastAsync("Já existe outro cliente com este CPF/CNPJ.", "Error");
-                return;
+                return false;
             }
+
             var pagamentosAtualizados = detalhesViewModel.BuildUpdatedPagamentos();
             await _clienteRepository.UpdateAsync(clienteAtualizado);
             foreach (var pagamento in pagamentosAtualizados)
             {
                 await _pagamentoRepository.UpdateAsync(pagamento);
             }
+
+            detalhesViewModel.AcceptCurrentStateAsSaved();
             await ReloadListAsync();
             var reselected = _allClientes.FirstOrDefault(c => c.Id == clienteAtualizado.Id);
             UpdateSelectedClientes(reselected is null ? [] : [reselected]);
             await ShowToastAsync("Cliente atualizado com sucesso.", "Success");
+            return true;
         }
 
         private async Task ReloadListAsync()
@@ -294,6 +308,7 @@ namespace ExtintorCrm.App.Presentation
             ApplyClienteStatusFilter();
 
             OnPropertyChanged(nameof(ClienteStatusTabIndex));
+            OnPropertyChanged(nameof(IsClienteAtivosMode));
             OnPropertyChanged(nameof(ClienteSituacaoFilter));
             OnPropertyChanged(nameof(ClienteSortField));
             OnPropertyChanged(nameof(ClienteSortDirection));

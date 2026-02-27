@@ -1,6 +1,6 @@
 # Testes Smoke (Offline)
 
-Este projeto possui um runner de testes sem dependências externas:
+Este projeto possui um runner de testes sem dependencias externas:
 
 - Projeto: `ExtintorCrm.App.SmokeTests`
 - Comando:
@@ -9,14 +9,19 @@ Este projeto possui um runner de testes sem dependências externas:
 dotnet run --project .\ExtintorCrm.App.SmokeTests\
 ```
 
-Saída esperada:
+Saida esperada:
 
 ```text
-OK: 5/5 smoke tests passaram.
+OK: 12/12 smoke tests passaram.
 ```
 
 Os testes cobrem:
 
 - Regras de alerta (`AlertRules`)
-- Cálculo de situação para clientes e pagamentos (`AlertService`)
+- Calculo de situacao para clientes e pagamentos (`AlertService`)
 - Contadores de vencidos/vencendo
+- Contratos de validacao (`ValidationResult`)
+- Contratos de operacao (`OperationResult`)
+- Resultado agregado de importacao (`ImportResult`)
+- Validacao de arquivo/cabecalho na importacao (`ImportValidation`)
+- Erros de pre-condicao em backup e restore (`BackupService`)

@@ -1,6 +1,7 @@
 ﻿<Window x:Class="ExtintorCrm.App.Presentation.ClienteDetalhesWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:ExtintorCrm.App.Presentation.Controls"
         Title="Perfil do Cliente"
         Height="780"
         Width="1120"
@@ -27,7 +28,7 @@
 
         <Style x:Key="SectionCard" TargetType="Border" BasedOn="{StaticResource CardStyle}">
             <Setter Property="Padding" Value="16" />
-            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="CornerRadius" Value="14" />
         </Style>
 
         <Style x:Key="SmallLabel" TargetType="TextBlock">
@@ -207,6 +208,75 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="VisibleWhenEditModeElement" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="VisibleWhenReadModeElement" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MarkdownRibbonHost" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="Padding" Value="10,8,10,6" />
+        </Style>
+
+        <Style x:Key="MarkdownRibbonButton" TargetType="Button" BasedOn="{StaticResource GhostButton}">
+            <Setter Property="Width" Value="48" />
+            <Setter Property="Height" Value="46" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource CardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+
+        <Style x:Key="MarkdownRibbonGlyph" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="MarkdownRibbonLabel" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="FontSize" Value="9" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+        </Style>
+
+        <Style x:Key="MarkdownRibbonGroupTitle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Margin" Value="0,6,0,0" />
+        </Style>
+
+        <Style x:Key="MarkdownQuickActionButton" TargetType="Button" BasedOn="{StaticResource GhostButton}">
+            <Setter Property="Height" Value="34" />
+            <Setter Property="MinWidth" Value="42" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+            <Setter Property="Background" Value="{DynamicResource CardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
     </Window.Resources>
 
     <Grid Background="{DynamicResource SurfaceBackground}">
@@ -311,7 +381,58 @@
                         </Grid>
 
                         <TextBlock Text="Status" Style="{StaticResource SmallLabel}" />
-                        <ToggleButton Style="{StaticResource ModernToggleSwitch}" Margin="0,2,0,12" IsChecked="{Binding IsAtivo, Mode=TwoWay}" IsEnabled="{Binding IsEditMode}" />
+                        <Grid Margin="0,2,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Ativo"
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource SmallLabel}">
+                                        <Setter Property="Margin" Value="0" />
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+                                        <Setter Property="FontWeight" Value="Normal" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAtivo}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <controls:ThemeRockerSwitchControl x:Name="PerfilClienteStatusRockerControl"
+                                                               Grid.Column="2"
+                                                               LeftLabel="✔"
+                                                               RightLabel="✖"
+                                                               ToolTip="Ativo (✔) / Inativo (✖)"
+                                                               IsChecked="{Binding IsAtivo, Mode=TwoWay}"
+                                                               IsEnabled="{Binding IsEditMode}" />
+
+                            <TextBlock Grid.Column="4"
+                                       Text="Inativo"
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource SmallLabel}">
+                                        <Setter Property="Margin" Value="0" />
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+                                        <Setter Property="FontWeight" Value="Normal" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAtivo}" Value="False">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
 
                             <TextBlock Text="Data de cadastro" Style="{StaticResource SmallLabel}" />
                             <TextBlock Text="{Binding CriadoEm, StringFormat=dd/MM/yyyy}" Style="{StaticResource SmallValue}" />
@@ -323,13 +444,17 @@
                         <TabItem Header="Extintores">
                             <StackPanel>
                                 <TextBlock Text="Vencimento dos extintores" Style="{StaticResource SmallLabel}" />
-                                <DatePicker Margin="0,6,0,12" SelectedDate="{Binding VencimentoExtintores, Mode=TwoWay}" IsEnabled="{Binding IsEditMode}" />
+                                <DatePicker Style="{StaticResource ModernDatePickerStyle}"
+                                            Margin="0,6,0,12"
+                                            SelectedDate="{Binding VencimentoExtintores, Mode=TwoWay}"
+                                            IsEnabled="{Binding IsEditMode}" />
 
                                 <TextBlock Text="Tipo" Style="{StaticResource SmallLabel}" />
                                 <TextBox Style="{StaticResource ModernTextBox}" Height="38" Margin="0,6,0,12" Text="{Binding Tipo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditMode}" />
 
                                 <TextBlock Text="Status da recarga" Style="{StaticResource SmallLabel}" />
-                                <ComboBox Height="38"
+                                <ComboBox Style="{StaticResource ModernComboBox}"
+                                          Height="38"
                                           Margin="0,6,0,12"
                                           IsEnabled="{Binding IsEditMode}"
                                           SelectedValuePath="Content"
@@ -369,7 +494,8 @@
                                 <TextBox Style="{StaticResource ModernTextBox}" Height="38" Margin="0,6,0,12" Text="{Binding NumeroAlvara, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditMode}" />
 
                                 <TextBlock Text="Status do alvará" Style="{StaticResource SmallLabel}" />
-                                <ComboBox Height="38"
+                                <ComboBox Style="{StaticResource ModernComboBox}"
+                                          Height="38"
                                           Margin="0,6,0,12"
                                           IsEnabled="{Binding IsEditMode}"
                                           SelectedValuePath="Content"
@@ -381,7 +507,10 @@
                                 </ComboBox>
 
                                 <TextBlock Text="Vencimento do alvará" Style="{StaticResource SmallLabel}" />
-                                <DatePicker Margin="0,6,0,12" SelectedDate="{Binding VencimentoAlvara, Mode=TwoWay}" IsEnabled="{Binding IsEditMode}" />
+                                <DatePicker Style="{StaticResource ModernDatePickerStyle}"
+                                            Margin="0,6,0,12"
+                                            SelectedDate="{Binding VencimentoAlvara, Mode=TwoWay}"
+                                            IsEnabled="{Binding IsEditMode}" />
                                 <Border HorizontalAlignment="Left">
                                     <Border.Style>
                                         <Style TargetType="Border" BasedOn="{StaticResource SituacaoBadge}">
@@ -538,8 +667,9 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                         <DataGridTemplateColumn.CellEditingTemplate>
                                             <DataTemplate>
-                                                <DatePicker SelectedDate="{Binding DataVencimento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                            IsEnabled="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                                <DatePicker Style="{StaticResource ModernDatePickerStyle}"
+                                                            SelectedDate="{Binding DataVencimento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                             IsEnabled="{Binding DataContext.IsEditMode, RelativeSource={RelativeSource AncestorType=Window}}" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellEditingTemplate>
                                     </DataGridTemplateColumn>
@@ -588,14 +718,121 @@
                         </TabItem>
 
                         <TabItem Header="Observações">
-                            <Border Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource ControlBorder}" BorderThickness="1" CornerRadius="10" Padding="14">
-                                <TextBox Text="{Binding Observacoes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         TextWrapping="Wrap"
-                                         AcceptsReturn="True"
-                                         VerticalScrollBarVisibility="Auto"
-                                         MinHeight="110"
-                                         IsEnabled="{Binding IsEditMode}" />
-                            </Border>
+                            <Grid>
+                                <Border Background="{DynamicResource CardBackground}"
+                                        BorderBrush="{DynamicResource ControlBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="10"
+                                        Padding="14"
+                                        Height="286"
+                                        VerticalAlignment="Top"
+                                        Style="{StaticResource VisibleWhenReadModeElement}">
+                                    <controls:MarkdownViewerControl MarkdownText="{Binding Observacoes}" />
+                                </Border>
+
+                                <Grid Style="{StaticResource VisibleWhenEditModeElement}" VerticalAlignment="Top">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="10" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Row="0"
+                                            Grid.ColumnSpan="3"
+                                            Style="{StaticResource MarkdownRibbonHost}">
+                                        <DockPanel LastChildFill="False" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal"
+                                                        DockPanel.Dock="Left"
+                                                        VerticalAlignment="Center">
+                                                <TextBlock Text="Ações rápidas"
+                                                           Style="{StaticResource SmallLabel}"
+                                                           Margin="0,0,12,0" />
+                                                <Button Style="{StaticResource MarkdownQuickActionButton}" Content="⟲" Tag="undo" Click="MarkdownTool_Click" ToolTip="Desfazer (Ctrl+Z)" />
+                                                <Button Style="{StaticResource MarkdownQuickActionButton}" Content="⟳" Tag="redo" Click="MarkdownTool_Click" ToolTip="Refazer (Ctrl+Y)" />
+                                                <Button Style="{StaticResource MarkdownQuickActionButton}" Content="H1" Tag="h1" Click="MarkdownTool_Click" ToolTip="Título" />
+                                                <Button Style="{StaticResource MarkdownQuickActionButton}" Content="B" Tag="bold" Click="MarkdownTool_Click" ToolTip="Negrito" />
+                                                <Button Style="{StaticResource MarkdownQuickActionButton}" Content="I" Tag="italic" Click="MarkdownTool_Click" ToolTip="Itálico" />
+                                                <Button Style="{StaticResource MarkdownQuickActionButton}" Content="•" Tag="ul" Click="MarkdownTool_Click" ToolTip="Lista" />
+                                                <Button Style="{StaticResource MarkdownQuickActionButton}" Content="Link" Tag="link" Click="MarkdownTool_Click" ToolTip="Link" />
+                                                <Button Style="{StaticResource MarkdownQuickActionButton}" Content="&quot;" Tag="quote" Click="MarkdownTool_Click" ToolTip="Citação" />
+                                            </StackPanel>
+
+                                            <Button DockPanel.Dock="Right"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Height="38"
+                                                    Width="162"
+                                                    Margin="10,0,0,0"
+                                                    Click="OpenMarkdownEditorModal_Click">
+                                                <StackPanel Style="{StaticResource IconButtonContent}">
+                                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE70F;" />
+                                                    <TextBlock Text="Editor Avançado" />
+                                                </StackPanel>
+                                            </Button>
+                                        </DockPanel>
+                                    </Border>
+
+                                    <Border Grid.Row="2"
+                                            Grid.Column="0"
+                                            Background="{DynamicResource CardBackground}"
+                                            BorderBrush="{DynamicResource ControlBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Padding="12">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="246" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="Editor .md"
+                                                       Style="{StaticResource SmallLabel}"
+                                                       Margin="0,0,0,8" />
+                                            <TextBox x:Name="ObservacoesMarkdownEditor"
+                                                     Grid.Row="1"
+                                                     Text="{Binding Observacoes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     TextWrapping="Wrap"
+                                                     AcceptsReturn="True"
+                                                     VerticalScrollBarVisibility="Auto"
+                                                     PreviewKeyDown="ObservacoesEditor_PreviewKeyDown"
+                                                     FontFamily="Consolas"
+                                                     FontSize="13"
+                                                     Padding="10"
+                                                     BorderBrush="{DynamicResource ControlBorder}"
+                                                     BorderThickness="1"
+                                                     Background="{DynamicResource InputBackground}"
+                                                     Foreground="{DynamicResource TextPrimary}"
+                                                     CaretBrush="{DynamicResource TextPrimary}"
+                                                     IsEnabled="{Binding IsEditMode}" />
+                                        </Grid>
+                                    </Border>
+
+                                    <Border Grid.Row="2"
+                                            Grid.Column="2"
+                                            Background="{DynamicResource CardBackground}"
+                                            BorderBrush="{DynamicResource ControlBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Padding="12">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="246" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="Prévia renderizada"
+                                                       Style="{StaticResource SmallLabel}"
+                                                       Margin="0,0,0,8" />
+                                            <controls:MarkdownViewerControl Grid.Row="1"
+                                                                            MarkdownText="{Binding Observacoes}" />
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Grid>
                         </TabItem>
                     </TabControl>
                 </Border>
@@ -603,6 +840,12 @@
             </ScrollViewer>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <TextBlock x:Name="SaveStatusText"
+                           Style="{StaticResource SmallLabel}"
+                           Visibility="Collapsed"
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0" />
+
                 <Button Style="{StaticResource SecondaryButton}" Width="128" Margin="0,0,8,0" IsCancel="True">
                     <StackPanel Style="{StaticResource IconButtonContent}">
                         <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8BB;" />
@@ -624,13 +867,244 @@
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource PrimaryWhenEditModeButton}" Width="174" Click="Salvar_Click">
+                <Button x:Name="SalvarAlteracoesButton"
+                        Style="{StaticResource PrimaryWhenEditModeButton}"
+                        Width="174"
+                        Click="Salvar_Click">
                     <StackPanel Style="{StaticResource IconButtonContent}">
                         <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE74E;" Foreground="{DynamicResource ButtonPrimaryFg}" />
                         <TextBlock Text="Salvar alterações" Foreground="{DynamicResource ButtonPrimaryFg}" />
                     </StackPanel>
                 </Button>
             </StackPanel>
+        </Grid>
+
+        <Grid x:Name="MarkdownEditorOverlay"
+              Grid.RowSpan="2"
+              Panel.ZIndex="50"
+              Visibility="Collapsed"
+              Background="#8A000000"
+              MouseDown="MarkdownOverlay_MouseDown">
+            <Border Width="980"
+                    Height="640"
+                    Padding="16"
+                    CornerRadius="16"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource ControlBorder}"
+                    Background="{DynamicResource SurfaceBackground}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    MouseDown="MarkdownModalCard_MouseDown">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Editor de Observações (.md)"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimary}" />
+
+                        <Button Grid.Column="1"
+                                Style="{StaticResource GhostButton}"
+                                Width="38"
+                                Height="34"
+                                Click="CloseMarkdownEditorModal_Click"
+                                ToolTip="Fechar editor">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Text="&#xE711;" />
+                        </Button>
+                    </Grid>
+
+                    <Border Grid.Row="1" Style="{StaticResource MarkdownRibbonHost}" Margin="0,12,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Margin="0,0,10,0">
+                                <WrapPanel>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="undo" Click="MarkdownToolModal_Click" ToolTip="Desfazer (Ctrl+Z)">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="⟲" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Desfazer" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="redo" Click="MarkdownToolModal_Click" ToolTip="Refazer (Ctrl+Y)">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="⟳" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Refazer" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                                <TextBlock Text="Histórico" Style="{StaticResource MarkdownRibbonGroupTitle}" />
+                            </StackPanel>
+
+                            <Border Width="1"
+                                    Margin="0,4,10,4"
+                                    Background="{DynamicResource ControlBorder}" />
+
+                            <StackPanel Margin="0,0,10,0">
+                                <WrapPanel>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="h1" Click="MarkdownToolModal_Click" ToolTip="Título principal">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="H1" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Título" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="h2" Click="MarkdownToolModal_Click" ToolTip="Subtítulo">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="H2" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Subtítulo" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="bold" Click="MarkdownToolModal_Click" ToolTip="Negrito">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="B" FontWeight="Bold" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Negrito" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="italic" Click="MarkdownToolModal_Click" ToolTip="Itálico">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="I" FontStyle="Italic" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Itálico" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="link" Click="MarkdownToolModal_Click" ToolTip="Inserir link">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" FontFamily="Segoe MDL2 Assets" Text="&#xE71B;" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Link" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                                <TextBlock Text="Texto" Style="{StaticResource MarkdownRibbonGroupTitle}" />
+                            </StackPanel>
+
+                            <Border Width="1"
+                                    Margin="0,4,10,4"
+                                    Background="{DynamicResource ControlBorder}" />
+
+                            <StackPanel Margin="0,0,10,0">
+                                <WrapPanel>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="ul" Click="MarkdownToolModal_Click" ToolTip="Lista com marcadores">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="•" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Lista" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="ol" Click="MarkdownToolModal_Click" ToolTip="Lista numerada">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="1." />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Numerada" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="quote" Click="MarkdownToolModal_Click" ToolTip="Citação">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="&quot;" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Citar" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="clear_formatting" Click="MarkdownToolModal_Click" ToolTip="Limpar formatação">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="Tx" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Limpar" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                                <TextBlock Text="Estrutura" Style="{StaticResource MarkdownRibbonGroupTitle}" />
+                            </StackPanel>
+
+                            <Border Width="1"
+                                    Margin="0,4,10,4"
+                                    Background="{DynamicResource ControlBorder}" />
+
+                            <StackPanel>
+                                <WrapPanel>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="duplicate_line" Click="MarkdownToolModal_Click" ToolTip="Duplicar linha (Ctrl+D)">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="+" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Duplicar" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="move_line_up" Click="MarkdownToolModal_Click" ToolTip="Mover linha para cima (Alt+↑)">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="↑" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Subir" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource MarkdownRibbonButton}" Tag="move_line_down" Click="MarkdownToolModal_Click" ToolTip="Mover linha para baixo (Alt+↓)">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource MarkdownRibbonGlyph}" Text="↓" />
+                                            <TextBlock Style="{StaticResource MarkdownRibbonLabel}" Text="Descer" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                                <TextBlock Text="Linha" Style="{StaticResource MarkdownRibbonGroupTitle}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                CornerRadius="10"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource ControlBorder}"
+                                Background="{DynamicResource CardBackground}"
+                                Padding="12">
+                            <TextBox x:Name="ObservacoesMarkdownEditorModal"
+                                     Text="{Binding Observacoes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     PreviewKeyDown="ObservacoesEditor_PreviewKeyDown"
+                                     FontFamily="Consolas"
+                                     FontSize="14"
+                                     Padding="10"
+                                     BorderBrush="{DynamicResource ControlBorder}"
+                                     BorderThickness="1"
+                                     Background="{DynamicResource InputBackground}"
+                                     Foreground="{DynamicResource TextPrimary}"
+                                     CaretBrush="{DynamicResource TextPrimary}"
+                                     IsEnabled="{Binding IsEditMode}" />
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                CornerRadius="10"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource ControlBorder}"
+                                Background="{DynamicResource CardBackground}"
+                                Padding="12">
+                            <controls:MarkdownViewerControl MarkdownText="{Binding Observacoes}" />
+                        </Border>
+                    </Grid>
+
+                    <StackPanel Grid.Row="3"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Margin="0,14,0,0">
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Width="128"
+                                Click="CloseMarkdownEditorModal_Click">
+                            <StackPanel Style="{StaticResource IconButtonContent}">
+                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8BB;" />
+                                <TextBlock Text="Concluir" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Window>

@@ -1,13 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using ExtintorCrm.App.Infrastructure.Logging;
 using ExtintorCrm.App.Presentation;
@@ -25,18 +28,23 @@ public partial class MainWindow : Window
     private const int ScMove = 0xF010;
     private const int ScKeyMenu = 0xF100;
     private const int ScRestore = 0xF120;
+    private const int StartupOverlayMinVisibleMs = 980;
 
     private readonly ClientesViewModel _viewModel;
     private readonly List<TourStep> _tourSteps = [];
     private int _tourStepIndex = -1;
     private int _lastAutoScrolledStepIndex = -1;
     private bool _allowCloseWithoutConfirmation;
+    private bool _startupOverlayHidden;
+    private DateTime _startupOverlayVisibleSinceUtc = DateTime.MinValue;
+    private bool _isApplyingWindowGeometry;
 
     public MainWindow()
     {
         InitializeComponent();
         _viewModel = new ClientesViewModel();
         DataContext = _viewModel;
+        _viewModel.PropertyChanged += ViewModel_PropertyChanged;
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -49,6 +57,8 @@ public partial class MainWindow : Window
             _viewModel.LoadCommand.Execute(null);
         }
 
+        ApplyWindowGeometryFromViewModel();
+
         SizeChanged += (_, _) =>
         {
             if (TourOverlay.Visibility == Visibility.Visible)
@@ -56,6 +66,376 @@ public partial class MainWindow : Window
                 UpdateTourVisual();
             }
         };
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ClientesViewModel.MainWindowWidth)
+            or nameof(ClientesViewModel.MainWindowHeight)
+            or nameof(ClientesViewModel.MainWindowLeft)
+            or nameof(ClientesViewModel.MainWindowTop)
+            or nameof(ClientesViewModel.MainWindowState)
+            or nameof(ClientesViewModel.IsFullscreen))
+        {
+            ApplyWindowGeometryFromViewModel();
+        }
+    }
+
+    private void ApplyWindowGeometryFromViewModel()
+    {
+        if (_isApplyingWindowGeometry)
+        {
+            return;
+        }
+
+        _isApplyingWindowGeometry = true;
+        try
+        {
+            if (_viewModel.IsFullscreen)
+            {
+                if (WindowState != WindowState.Maximized)
+                {
+                    WindowState = WindowState.Maximized;
+                }
+
+                return;
+            }
+
+            if (WindowState != WindowState.Normal)
+            {
+                WindowState = WindowState.Normal;
+            }
+
+            if (_viewModel.MainWindowWidth > 0)
+            {
+                Width = _viewModel.MainWindowWidth;
+            }
+
+            if (_viewModel.MainWindowHeight > 0)
+            {
+                Height = _viewModel.MainWindowHeight;
+            }
+
+            if (!double.IsNaN(_viewModel.MainWindowLeft))
+            {
+                Left = _viewModel.MainWindowLeft;
+            }
+
+            if (!double.IsNaN(_viewModel.MainWindowTop))
+            {
+                Top = _viewModel.MainWindowTop;
+            }
+        }
+        finally
+        {
+            _isApplyingWindowGeometry = false;
+        }
+    }
+
+    public async Task WarmupVisualsAsync()
+    {
+        await Dispatcher.InvokeAsync(UpdateLayout, DispatcherPriority.Render);
+        await Dispatcher.InvokeAsync(static () => { }, DispatcherPriority.Background);
+    }
+
+    public async Task PrewarmRockerControlsAsync()
+    {
+        var originalTabIndex = _viewModel.SelectedMainTabIndex;
+        var originalConfigSection = _viewModel.SelectedConfigSection;
+        var rockerTasks = new List<Task>(8);
+
+        try
+        {
+            _viewModel.SelectedMainTabIndex = 1; // Clientes
+            await Dispatcher.InvokeAsync(UpdateLayout, DispatcherPriority.Render);
+            if (ClientesStatusRockerControl != null)
+            {
+                ClientesStatusRockerControl.PrepareForDisplay();
+                rockerTasks.Add(ClientesStatusRockerControl.ReadyTask);
+            }
+
+            _viewModel.SelectedMainTabIndex = 3; // Configuracoes
+            await Dispatcher.InvokeAsync(UpdateLayout, DispatcherPriority.Render);
+            if (ThemeModeRockerControl != null)
+            {
+                ThemeModeRockerControl.PrepareForDisplay();
+                rockerTasks.Add(ThemeModeRockerControl.ReadyTask);
+            }
+
+            if (FullscreenModeRockerControl != null)
+            {
+                FullscreenModeRockerControl.PrepareForDisplay();
+                rockerTasks.Add(FullscreenModeRockerControl.ReadyTask);
+            }
+
+            _viewModel.SelectedConfigSection = "Backup";
+            await Dispatcher.InvokeAsync(UpdateLayout, DispatcherPriority.Render);
+            if (BackupAutomaticoRockerControl != null)
+            {
+                BackupAutomaticoRockerControl.PrepareForDisplay();
+                rockerTasks.Add(BackupAutomaticoRockerControl.ReadyTask);
+            }
+            await Task.Delay(140);
+
+            _viewModel.SelectedConfigSection = "Alertas";
+            await Dispatcher.InvokeAsync(UpdateLayout, DispatcherPriority.Render);
+            if (Alerta7DiasRockerControl != null)
+            {
+                Alerta7DiasRockerControl.PrepareForDisplay();
+                rockerTasks.Add(Alerta7DiasRockerControl.ReadyTask);
+            }
+
+            if (Alerta15DiasRockerControl != null)
+            {
+                Alerta15DiasRockerControl.PrepareForDisplay();
+                rockerTasks.Add(Alerta15DiasRockerControl.ReadyTask);
+            }
+
+            if (Alerta30DiasRockerControl != null)
+            {
+                Alerta30DiasRockerControl.PrepareForDisplay();
+                rockerTasks.Add(Alerta30DiasRockerControl.ReadyTask);
+            }
+            await Task.Delay(140);
+
+            _viewModel.SelectedConfigSection = "Notificacoes";
+            await Dispatcher.InvokeAsync(UpdateLayout, DispatcherPriority.Render);
+            if (NotificationIncludeOverdueRockerControl != null)
+            {
+                NotificationIncludeOverdueRockerControl.PrepareForDisplay();
+                rockerTasks.Add(NotificationIncludeOverdueRockerControl.ReadyTask);
+            }
+            await Task.Delay(140);
+
+            var readyTask = rockerTasks.Count > 0 ? Task.WhenAll(rockerTasks) : Task.CompletedTask;
+            await Task.WhenAny(readyTask, Task.Delay(7000));
+        }
+        finally
+        {
+            _viewModel.SelectedConfigSection = originalConfigSection;
+            _viewModel.SelectedMainTabIndex = originalTabIndex;
+            await Dispatcher.InvokeAsync(UpdateLayout, DispatcherPriority.Render);
+        }
+    }
+
+    public async Task PrepareForRevealAsync()
+    {
+        if (!IsLoaded)
+        {
+            var loadedTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            RoutedEventHandler? loadedHandler = null;
+            loadedHandler = (_, _) =>
+            {
+                if (loadedHandler != null)
+                {
+                    Loaded -= loadedHandler;
+                }
+
+                loadedTcs.TrySetResult(true);
+            };
+
+            Loaded += loadedHandler;
+            await loadedTcs.Task;
+        }
+
+        _startupOverlayHidden = false;
+        UpdateLayout();
+        StartupTransitionOverlay.Visibility = Visibility.Visible;
+        StartupTransitionOverlay.Opacity = 1;
+        StartupTransitionCard.Opacity = 0.94;
+        StartupCardScaleTransform.ScaleX = 1.012;
+        StartupCardScaleTransform.ScaleY = 1.012;
+        StartupCardTranslateTransform.Y = 6;
+        _startupOverlayVisibleSinceUtc = DateTime.UtcNow;
+        await Dispatcher.InvokeAsync(UpdateLayout, DispatcherPriority.Render);
+        await Dispatcher.InvokeAsync(static () => { }, DispatcherPriority.Render);
+        await Dispatcher.InvokeAsync(static () => { }, DispatcherPriority.ApplicationIdle);
+        await Task.Delay(280);
+        await Dispatcher.InvokeAsync(static () => { }, DispatcherPriority.Render);
+    }
+
+    public async Task PlayStartupHandoffAsync(int durationMs = 620)
+    {
+        if (StartupTransitionOverlay.Visibility != Visibility.Visible)
+        {
+            return;
+        }
+
+        if (durationMs <= 0)
+        {
+            StartupTransitionOverlay.Opacity = 1;
+            StartupTransitionCard.Opacity = 1;
+            StartupCardScaleTransform.ScaleX = 1;
+            StartupCardScaleTransform.ScaleY = 1;
+            StartupCardTranslateTransform.Y = 0;
+            return;
+        }
+
+        var doneTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+
+        var overlayFadeIn = new DoubleAnimation
+        {
+            From = StartupTransitionOverlay.Opacity,
+            To = 1,
+            Duration = TimeSpan.FromMilliseconds(durationMs),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        var cardFadeIn = new DoubleAnimation
+        {
+            From = StartupTransitionCard.Opacity,
+            To = 1,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs - 30)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        var scaleUpX = new DoubleAnimation
+        {
+            From = StartupCardScaleTransform.ScaleX,
+            To = 1,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs - 35)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        var scaleUpY = new DoubleAnimation
+        {
+            From = StartupCardScaleTransform.ScaleY,
+            To = 1,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs - 35)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        var slideToZero = new DoubleAnimation
+        {
+            From = StartupCardTranslateTransform.Y,
+            To = 0,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs - 35)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        overlayFadeIn.Completed += (_, _) =>
+        {
+            StartupTransitionOverlay.Opacity = 1;
+            StartupTransitionCard.Opacity = 1;
+            StartupCardScaleTransform.ScaleX = 1;
+            StartupCardScaleTransform.ScaleY = 1;
+            StartupCardTranslateTransform.Y = 0;
+            doneTcs.TrySetResult(true);
+        };
+
+        StartupTransitionOverlay.BeginAnimation(OpacityProperty, overlayFadeIn);
+        StartupTransitionCard.BeginAnimation(OpacityProperty, cardFadeIn);
+        StartupCardScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleUpX);
+        StartupCardScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleUpY);
+        StartupCardTranslateTransform.BeginAnimation(TranslateTransform.YProperty, slideToZero);
+        await doneTcs.Task;
+    }
+
+    public async Task HideStartupOverlayAsync(int durationMs = 680)
+    {
+        if (_startupOverlayHidden)
+        {
+            return;
+        }
+
+        _startupOverlayHidden = true;
+        if (StartupTransitionOverlay.Visibility != Visibility.Visible)
+        {
+            StartupTransitionOverlay.Visibility = Visibility.Collapsed;
+            StartupTransitionOverlay.Opacity = 0;
+            return;
+        }
+
+        var visibleElapsedMs = (DateTime.UtcNow - _startupOverlayVisibleSinceUtc).TotalMilliseconds;
+        var remainingVisibleMs = StartupOverlayMinVisibleMs - visibleElapsedMs;
+        if (remainingVisibleMs > 0)
+        {
+            await Task.Delay((int)Math.Ceiling(remainingVisibleMs));
+        }
+
+        var doneTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        var fadeOverlay = new DoubleAnimation
+        {
+            From = StartupTransitionOverlay.Opacity,
+            To = 0,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        var fadeCard = new DoubleAnimation
+        {
+            From = StartupTransitionCard.Opacity,
+            To = 0,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs - 30)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        var scaleDownX = new DoubleAnimation
+        {
+            From = StartupCardScaleTransform.ScaleX,
+            To = 0.985,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs - 40)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        var scaleDownY = new DoubleAnimation
+        {
+            From = StartupCardScaleTransform.ScaleY,
+            To = 0.985,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs - 40)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        var slideUp = new DoubleAnimation
+        {
+            From = StartupCardTranslateTransform.Y,
+            To = -8,
+            Duration = TimeSpan.FromMilliseconds(Math.Max(0, durationMs - 40)),
+            FillBehavior = FillBehavior.Stop,
+            EasingFunction = ease
+        };
+
+        fadeOverlay.Completed += (_, _) =>
+        {
+            StartupCardTranslateTransform.Y = -8;
+            StartupCardScaleTransform.ScaleX = 0.985;
+            StartupCardScaleTransform.ScaleY = 0.985;
+            StartupTransitionCard.Opacity = 0;
+            StartupTransitionOverlay.Opacity = 0;
+            StartupTransitionOverlay.Visibility = Visibility.Collapsed;
+
+            _ = Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ThemeModeRockerControl?.PrepareForDisplay();
+                FullscreenModeRockerControl?.PrepareForDisplay();
+                ClientesStatusRockerControl?.PrepareForDisplay();
+                BackupAutomaticoRockerControl?.PrepareForDisplay();
+                Alerta7DiasRockerControl?.PrepareForDisplay();
+                Alerta15DiasRockerControl?.PrepareForDisplay();
+                Alerta30DiasRockerControl?.PrepareForDisplay();
+                NotificationIncludeOverdueRockerControl?.PrepareForDisplay();
+            }), DispatcherPriority.Background);
+
+            doneTcs.TrySetResult(true);
+        };
+
+        StartupTransitionOverlay.BeginAnimation(OpacityProperty, fadeOverlay);
+        StartupTransitionCard.BeginAnimation(OpacityProperty, fadeCard);
+        StartupCardScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleDownX);
+        StartupCardScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleDownY);
+        StartupCardTranslateTransform.BeginAnimation(TranslateTransform.YProperty, slideUp);
+        await doneTcs.Task;
     }
 
     private void ClientesDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -532,7 +912,7 @@ public partial class MainWindow : Window
         _lastAutoScrolledStepIndex = -1;
     }
 
-    private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+    private void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (TourOverlay.Visibility != Visibility.Visible)
         {
@@ -622,6 +1002,49 @@ public partial class MainWindow : Window
         }
     }
 
+    private void AdvancedUnlockButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not ClientesViewModel viewModel)
+        {
+            return;
+        }
+
+        var typedPassword = AdvancedUnlockPasswordBox?.Password;
+        var unlocked = viewModel.TryUnlockAdvancedConfig(typedPassword);
+        if (AdvancedUnlockPasswordBox == null)
+        {
+            return;
+        }
+
+        AdvancedUnlockPasswordBox.Clear();
+        if (!unlocked)
+        {
+            AdvancedUnlockPasswordBox.Focus();
+        }
+    }
+
+    private void AdvancedUnlockPasswordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+        {
+            return;
+        }
+
+        AdvancedUnlockButton_Click(sender, new RoutedEventArgs(Button.ClickEvent));
+        e.Handled = true;
+    }
+
+    private void AdvancedRelockButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not ClientesViewModel viewModel)
+        {
+            return;
+        }
+
+        viewModel.LockAdvancedConfig();
+        AdvancedUnlockPasswordBox?.Clear();
+    }
+
     private enum TourPlacement
     {
         Right,
@@ -632,6 +1055,7 @@ public partial class MainWindow : Window
 
     private sealed record TourStep(FrameworkElement Target, string Title, string Description);
 }
+
 
 
 

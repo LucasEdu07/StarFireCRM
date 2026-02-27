@@ -18,7 +18,12 @@
     <SolidColorBrush x:Key="DangerFg" Color="#A73030" />
     <SolidColorBrush x:Key="DisabledBg" Color="#D6DEE9" />
     <SolidColorBrush x:Key="DisabledFg" Color="#8A99AE" />
-
+    <SolidColorBrush x:Key="DropDownBaseBg" Color="#F7F9FD" />
+    <SolidColorBrush x:Key="DropDownBaseBorder" Color="#BCC7D8" />
+    <SolidColorBrush x:Key="DropDownBaseText" Color="#6E819A" />
+    <SolidColorBrush x:Key="DropDownActiveText" Color="#285EA8" />
+    <SolidColorBrush x:Key="DropDownOptionText" Color="#182B44" />
+    <SolidColorBrush x:Key="DropDownOptionHoverBg" Color="#E7EEFA" />
     <SolidColorBrush x:Key="BorderColor" Color="#C9D8EA" />
     <SolidColorBrush x:Key="InputBackground" Color="#FDFEFF" />
     <SolidColorBrush x:Key="DataGridHeaderBackground" Color="#E4EEFA" />
@@ -26,6 +31,28 @@
     <SolidColorBrush x:Key="RowSelectedBackground" Color="#D7E6FD" />
     <SolidColorBrush x:Key="SurfaceMuted" Color="#E3ECF8" />
     <SolidColorBrush x:Key="TabHoverBackground" Color="#E7F1FE" />
+
+    <SolidColorBrush x:Key="ExcelPreviewSheetBg" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ExcelPreviewAltRowBg" Color="#F5FAF6" />
+    <SolidColorBrush x:Key="ExcelPreviewHeaderBg" Color="#217346" />
+    <SolidColorBrush x:Key="ExcelPreviewHeaderFg" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ExcelPreviewHeaderBorder" Color="#195739" />
+    <SolidColorBrush x:Key="ExcelPreviewGridLine" Color="#C9D8CC" />
+    <SolidColorBrush x:Key="ExcelPreviewCellFg" Color="#1B2F22" />
+    <SolidColorBrush x:Key="ExcelPreviewHoverBg" Color="#E9F5EE" />
+    <SolidColorBrush x:Key="PreviewExcelChipBg" Color="#DDF0E5" />
+    <SolidColorBrush x:Key="PreviewExcelChipFg" Color="#1A5D38" />
+
+    <SolidColorBrush x:Key="CsvPreviewSheetBg" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CsvPreviewAltRowBg" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="CsvPreviewHeaderBg" Color="#ECEFF3" />
+    <SolidColorBrush x:Key="CsvPreviewHeaderFg" Color="#2A3442" />
+    <SolidColorBrush x:Key="CsvPreviewHeaderBorder" Color="#C4CEDA" />
+    <SolidColorBrush x:Key="CsvPreviewGridLine" Color="#D5DCE5" />
+    <SolidColorBrush x:Key="CsvPreviewCellFg" Color="#1F2937" />
+    <SolidColorBrush x:Key="CsvPreviewHoverBg" Color="#EEF2F7" />
+    <SolidColorBrush x:Key="PreviewCsvChipBg" Color="#E9EDF3" />
+    <SolidColorBrush x:Key="PreviewCsvChipFg" Color="#425066" />
 
     <SolidColorBrush x:Key="BadgeSuccessBg" Color="#D9F6E5" />
     <SolidColorBrush x:Key="BadgeSuccessFg" Color="#1F6E48" />
@@ -43,14 +70,6 @@
         <GradientStop Color="#FFFFFD" Offset="0" />
         <GradientStop Color="#FDF4E3" Offset="1" />
     </LinearGradientBrush>
-    <RadialGradientBrush x:Key="KpiDangerOrbFill" Center="0.35,0.35" GradientOrigin="0.35,0.35" RadiusX="0.75" RadiusY="0.75">
-        <GradientStop Color="#B8F7CACA" Offset="0" />
-        <GradientStop Color="#00F7CACA" Offset="1" />
-    </RadialGradientBrush>
-    <RadialGradientBrush x:Key="KpiWarningOrbFill" Center="0.35,0.35" GradientOrigin="0.35,0.35" RadiusX="0.75" RadiusY="0.75">
-        <GradientStop Color="#B8F8DEAA" Offset="0" />
-        <GradientStop Color="#00F8DEAA" Offset="1" />
-    </RadialGradientBrush>
     <Color x:Key="ShadowColor">#0B1424</Color>
 
     <SolidColorBrush x:Key="SfRed" Color="#C63E3E" />
@@ -68,6 +87,15 @@
     <SolidColorBrush x:Key="ActionAccentBg" Color="#2D66C4" />
     <SolidColorBrush x:Key="ActionAccentHover" Color="#2756A8" />
     <SolidColorBrush x:Key="ActionAccentBorder" Color="#3A72CC" />
+
+    <SolidColorBrush x:Key="RockerBodyBackground" Color="#989898" />
+    <SolidColorBrush x:Key="RockerFrameBorder" Color="#EAEAEA" />
+    <SolidColorBrush x:Key="RockerInactiveFace" Color="#DDDDDD" />
+    <SolidColorBrush x:Key="RockerInactiveText" Color="#888888" />
+    <SolidColorBrush x:Key="RockerEdge" Color="#C7C7C7" />
+    <SolidColorBrush x:Key="RockerOnFace" Color="#2E63B2" />
+    <SolidColorBrush x:Key="RockerOnText" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="RockerOffFace" Color="#BD5757" />
 
     <LinearGradientBrush x:Key="TitleBarBackground" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#E7EFF9" Offset="0" />

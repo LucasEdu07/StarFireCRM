@@ -105,7 +105,25 @@ Leia tambem:
 Referencia de validacao manual:
 
 - `docs/TESTES_SMOKE.md`
+- `docs/QA_FLUXOS_CRITICOS.md`
 - projeto de apoio: `ExtintorCrm.App.SmokeTests`
+
+## Fluxo Pre-Commit (Recomendado)
+
+Antes de subir alteracoes:
+
+```powershell
+dotnet build .\ExtintorCrm.App\ExtintorCrm.App.csproj --no-restore
+dotnet build .\ExtintorCrm.App.SmokeTests\ExtintorCrm.App.SmokeTests.csproj --no-restore
+dotnet run --project .\ExtintorCrm.App.SmokeTests\ --no-build
+git status --short
+```
+
+Checklist rapido:
+
+- Confirmar que `bin/` e `obj/` nao entraram no commit
+- Separar commits por tema (ex.: UX, bugfix, higiene)
+- Garantir que build e smoke continuam verdes
 
 ## Suporte
 

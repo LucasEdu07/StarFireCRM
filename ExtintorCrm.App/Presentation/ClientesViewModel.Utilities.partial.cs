@@ -6,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows;
 using ExtintorCrm.App.Domain;
 using ExtintorCrm.App.Infrastructure.Logging;
+using ExtintorCrm.App.UseCases.Common;
 
 namespace ExtintorCrm.App.Presentation
 {
@@ -17,6 +19,44 @@ namespace ExtintorCrm.App.Presentation
         {
             AppLogger.Error(context, ex);
             await ShowToastAsync($"{userPrefix}: {ex.Message}", "Error");
+        }
+
+        private async Task ShowOperationResultAsync(OperationResult result, bool showDialogOnFailure = true)
+        {
+            var toastKind = ResolveToastKind(result);
+            var toastMessage = string.IsNullOrWhiteSpace(result.NextStep)
+                ? result.Message
+                : $"{result.Message} Proximo passo: {result.NextStep}";
+
+            await ShowToastAsync(toastMessage, toastKind);
+
+            if (!result.IsSuccess && showDialogOnFailure)
+            {
+                var body = result.Message;
+                if (result.Details.Count > 0)
+                {
+                    body = $"{body}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, result.Details)}";
+                }
+
+                if (!string.IsNullOrWhiteSpace(result.NextStep))
+                {
+                    body = $"{body}{Environment.NewLine}{Environment.NewLine}Proximo passo: {result.NextStep}";
+                }
+
+                DialogService.Error(result.Title, body, Application.Current?.MainWindow);
+            }
+        }
+
+        private static string ResolveToastKind(OperationResult result)
+        {
+            if (!result.IsSuccess)
+            {
+                return "Error";
+            }
+
+            return result.Code.Contains("WARN", StringComparison.OrdinalIgnoreCase)
+                ? "Info"
+                : "Success";
         }
 
         private static string FirstNotEmpty(params string?[] values)
@@ -329,6 +369,41 @@ namespace ExtintorCrm.App.Presentation
             }
 
             return DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+        }
+
+        private static IReadOnlyList<ReleaseNoteVersion> BuildReleaseNotesHistory()
+        {
+            return new List<ReleaseNoteVersion>
+            {
+                new(
+                    "1.0.6",
+                    "27/02/2026",
+                    new[]
+                    {
+                        "Painel de historico de releases implementado no selo de versao ao lado do sino.",
+                        "Secao Sobre agora consome automaticamente as notas da versao atual.",
+                        "Padronizacao das comunicacoes de release para facilitar suporte e operacao."
+                    }),
+                new(
+                    "1.0.5",
+                    "26/02/2026",
+                    new[]
+                    {
+                        "Editor de pagamento com layout premium alinhado ao Perfil do Cliente.",
+                        "Cobranca inteligente com estrategia por etapa e tom, com registro de interacoes.",
+                        "Historico recente de cobrancas refinado para leitura e acompanhamento.",
+                        "Melhorias gerais de UX, anexos e fluxo operacional de pagamentos."
+                    }),
+                new(
+                    "1.0.4",
+                    "25/02/2026",
+                    new[]
+                    {
+                        "Dropdowns modernizados globalmente, com consistencia entre light e dark mode.",
+                        "Rocker switches aplicados em todo o sistema com comportamento consolidado.",
+                        "Reducao de micro-piscada na primeira renderizacao dos controles."
+                    })
+            };
         }
     }
 }

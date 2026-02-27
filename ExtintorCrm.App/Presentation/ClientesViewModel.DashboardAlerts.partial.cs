@@ -21,6 +21,11 @@ namespace ExtintorCrm.App.Presentation
 
         private async Task SaveAlertSettingsAsync()
         {
+            if (!HasPendingConfigChanges)
+            {
+                return;
+            }
+
             var config = new ConfiguracaoAlerta
             {
                 Id = 1,
@@ -35,9 +40,11 @@ namespace ExtintorCrm.App.Presentation
                 var theme = IsDarkMode ? AppThemeManager.DarkTheme : AppThemeManager.LightTheme;
                 SaveAppSettings(theme);
                 AppThemeManager.ApplyTheme(theme);
+                AppThemeManager.ApplyChromeCustomization(UiBorderColorHex, UiTitleBarColorHex, UiVanillaColorHex, UiVanillaIntensityPercent);
                 ApplyAlertRulesFromSettings();
                 await ReloadListAsync();
                 StartBackupScheduler();
+                CaptureSavedConfigSnapshot();
                 await ShowToastAsync("Configurações salvas com sucesso.", "Success");
             }
             catch (Exception ex)
@@ -73,6 +80,7 @@ namespace ExtintorCrm.App.Presentation
             var pagamentos = _alertService.CountPagamentos(_allPagamentos);
             Dashboard.PagamentosVencidos = pagamentos.Vencidos;
             Dashboard.PagamentosVencendo = pagamentos.Vencendo;
+            SyncDashboardKpiCardValues();
         }
 
         private void RefreshDashboardExecutiveData()
@@ -144,6 +152,8 @@ namespace ExtintorCrm.App.Presentation
                 Dashboard.AlertasVencendoPercent = (double)Dashboard.AlertasVencendo / total * 100;
                 Dashboard.AlertasVencidosPercent = (double)Dashboard.AlertasVencidos / total * 100;
             }
+
+            SyncDashboardKpiCardValues();
         }
 
         private void RefreshBellNotifications(IReadOnlyCollection<DashboardAlertItem> alertItems)

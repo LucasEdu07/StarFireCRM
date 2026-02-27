@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 using ExtintorCrm.App.Infrastructure;
 using ExtintorCrm.App.Infrastructure.Backup;
@@ -27,8 +28,25 @@ namespace ExtintorCrm.App.Presentation
             else
             {
                 var workArea = SystemParameters.WorkArea;
-                MainWindowWidth = FitWindowDimension(DefaultWindowWidth, workArea.Width, minimumSize: 980, safePadding: 26);
-                MainWindowHeight = FitWindowDimension(DefaultWindowHeight, workArea.Height, minimumSize: 680, safePadding: 28);
+                var preferredWidth = DefaultWindowWidth;
+                var preferredHeight = DefaultWindowHeight;
+                var minimumWidth = 980d;
+                var minimumHeight = 680d;
+
+                if (WindowResolutionPresets.TryGetSize(SelectedWindowResolutionPreset, out var resolutionWidthPx, out var resolutionHeightPx))
+                {
+                    // Presets are stored in physical pixels; convert to WPF DIP so DPI scaling behaves as expected.
+                    var (dpiScaleX, dpiScaleY) = GetCurrentDpiScale();
+                    preferredWidth = resolutionWidthPx / dpiScaleX;
+                    preferredHeight = resolutionHeightPx / dpiScaleY;
+
+                    // Allow compact presets to actually resize the window on high-DPI screens.
+                    minimumWidth = 840d;
+                    minimumHeight = 560d;
+                }
+
+                MainWindowWidth = FitWindowDimension(preferredWidth, workArea.Width, minimumSize: minimumWidth, safePadding: 26);
+                MainWindowHeight = FitWindowDimension(preferredHeight, workArea.Height, minimumSize: minimumHeight, safePadding: 28);
                 MainWindowLeft = workArea.Left + Math.Max(0, (workArea.Width - MainWindowWidth) / 2);
                 MainWindowTop = workArea.Top + Math.Max(0, (workArea.Height - MainWindowHeight) / 2);
             }
@@ -37,6 +55,20 @@ namespace ExtintorCrm.App.Presentation
             OnPropertyChanged(nameof(MainWindowStyle));
             OnPropertyChanged(nameof(MainResizeMode));
             OnPropertyChanged(nameof(MainTopmost));
+        }
+
+        private static (double DpiScaleX, double DpiScaleY) GetCurrentDpiScale()
+        {
+            var window = Application.Current?.MainWindow;
+            if (window is null)
+            {
+                return (1d, 1d);
+            }
+
+            var dpi = VisualTreeHelper.GetDpi(window);
+            var dpiScaleX = dpi.DpiScaleX <= 0 ? 1d : dpi.DpiScaleX;
+            var dpiScaleY = dpi.DpiScaleY <= 0 ? 1d : dpi.DpiScaleY;
+            return (dpiScaleX, dpiScaleY);
         }
 
         private static double FitWindowDimension(double preferredSize, double availableSize, double minimumSize, double safePadding)
@@ -57,6 +89,7 @@ namespace ExtintorCrm.App.Presentation
             var current = _appSettingsService.Load();
             current.Theme = theme;
             current.Fullscreen = IsFullscreen;
+            current.WindowResolutionPreset = SelectedWindowResolutionPreset;
             current.BackupEnabled = BackupAutomatico;
             current.BackupFolder = BackupFolder;
             current.BackupIntervalHours = BackupIntervalHours;
@@ -68,6 +101,10 @@ namespace ExtintorCrm.App.Presentation
             current.NotificationIncludeOverdue = NotificationIncludeOverdue;
             current.NotificationDaysWindow = NotificationDaysWindow;
             current.NotificationMaxItems = NotificationMaxItems;
+            current.UiBorderColorHex = UiBorderColorHex;
+            current.UiTitleBarColorHex = UiTitleBarColorHex;
+            current.UiVanillaColorHex = UiVanillaColorHex;
+            current.UiVanillaIntensityPercent = UiVanillaIntensityPercent;
             current.ExportPreferredEntity = _exportPreferredEntity;
             current.ExportPreferExcel = _exportPreferExcel;
             current.ExportClienteSelectedFields = string.Join(';', _preferredClienteExportFields.OrderBy(x => x));
@@ -153,7 +190,7 @@ namespace ExtintorCrm.App.Presentation
 
             if (string.IsNullOrWhiteSpace(BackupFolder))
             {
-                await ShowToastAsync("Defina a pasta de backup nas Configurações.", "Error");
+                await ShowToastAsync("Defina a pasta de backup nas Configuracoes.", "Error");
                 return;
             }
 
@@ -161,7 +198,13 @@ namespace ExtintorCrm.App.Presentation
             {
                 IsBackupRunning = true;
                 var backupService = new BackupService();
-                var backupFile = await backupService.CreateBackupAsync(BackupFolder);
+                var operation = await backupService.TryCreateBackupAsync(BackupFolder);
+                if (!operation.IsSuccess)
+                {
+                    await ShowOperationResultAsync(operation, showDialogOnFailure: !automatic);
+                    return;
+                }
+
                 CleanupOldBackups();
                 _lastAutoBackupUtc = DateTime.UtcNow;
                 var theme = IsDarkMode ? AppThemeManager.DarkTheme : AppThemeManager.LightTheme;
@@ -169,11 +212,11 @@ namespace ExtintorCrm.App.Presentation
 
                 if (automatic)
                 {
-                    await ShowToastAsync("Backup automático executado com sucesso.", "Info");
+                    await ShowToastAsync("Backup automatico executado com sucesso.", "Info");
                 }
                 else
                 {
-                    await ShowToastAsync($"Backup salvo em: {backupFile}", "Success");
+                    await ShowOperationResultAsync(operation, showDialogOnFailure: false);
                 }
             }
             catch (Exception ex)
@@ -243,16 +286,15 @@ namespace ExtintorCrm.App.Presentation
             {
                 IsBackupRunning = true;
                 var backupService = new BackupService();
-                var result = await backupService.RestoreBackupAsync(dialog.FileName);
-
-                if (!result.DatabaseRestored && !result.SettingsRestored && !result.DocumentsRestored)
+                var operation = await backupService.TryRestoreBackupAsync(dialog.FileName);
+                if (!operation.IsSuccess)
                 {
-                    await ShowToastAsync("Arquivo de backup inválido ou vazio.", "Error");
+                    await ShowOperationResultAsync(operation);
                     return;
                 }
 
                 await LoadAsync();
-                await ShowToastAsync("Backup restaurado com sucesso.", "Success");
+                await ShowOperationResultAsync(operation, showDialogOnFailure: false);
             }
             catch (Exception ex)
             {
@@ -418,25 +460,8 @@ namespace ExtintorCrm.App.Presentation
                     reason.Contains("cliente", StringComparison.OrdinalIgnoreCase) &&
                     reason.Contains("cpf", StringComparison.OrdinalIgnoreCase));
 
-                var message = $"Importação de pagamentos concluída: {result.Inserted} inseridos, {result.Updated} atualizados, {result.Skipped} ignorados.";
-                if (result.SkippedReasons.Count > 0)
-                {
-                    var top = result.SkippedReasons
-                        .GroupBy(x => x)
-                        .OrderByDescending(g => g.Count())
-                        .Take(3)
-                        .Select(g => $"{g.Key}: {g.Count()}")
-                        .ToList();
-                    message = $"{message} Motivos: {string.Join(" | ", top)}";
-                }
-
-                if (result.Errors.Count > 0)
-                {
-                    var topErr = string.Join(" | ", result.Errors.Take(2));
-                    message = $"{message} Erros: {topErr}";
-                }
-
-                await ShowToastAsync(message, result.Errors.Count > 0 ? "Info" : "Success");
+                var operation = result.ToOperationResult("pagamentos");
+                await ShowOperationResultAsync(operation);
 
                 if (missingClientCount > 0)
                 {

@@ -16,18 +16,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExtintorCrm.App.Infrastructure.Import
 {
-    public class ImportResult
-    {
-        public int TotalRowsRead { get; set; }
-        public int Inserted { get; set; }
-        public int Updated { get; set; }
-        public int Skipped { get; set; }
-        public int BlankRowsIgnored { get; set; }
-        public List<string> SkippedReasons { get; } = new();
-        public List<string> Errors { get; } = new();
-        public List<string> FallbackLogs { get; } = new();
-    }
-
     public class ClienteExcelImporter
     {
         public static string ConvertLegacyExcelToXlsxTemp(string filePath)
@@ -38,6 +26,21 @@ namespace ExtintorCrm.App.Infrastructure.Import
         public async Task<ImportResult> ImportAsync(string filePath)
         {
             var result = new ImportResult();
+            var fileValidation = ImportValidation.ValidateSourceFile(
+                filePath,
+                ".xlsx",
+                ".xlsm",
+                ".xltx",
+                ".xltm",
+                ".xls",
+                ".xlsb",
+                ".csv");
+            result.Validation.Merge(fileValidation);
+            if (!fileValidation.IsValid)
+            {
+                result.Errors.AddRange(fileValidation.Issues.Select(x => x.Message));
+                return result;
+            }
 
             var extension = Path.GetExtension(filePath)?.ToLowerInvariant();
             await Task.Run(async () =>
@@ -45,8 +48,9 @@ namespace ExtintorCrm.App.Infrastructure.Import
                 using var workbook = LoadWorkbookForImport(filePath, extension);
                 if (workbook == null)
                 {
-                    AddSkip(result, "Formato nÃ£o suportado");
-                    result.Errors.Add("NÃ£o foi possÃ­vel abrir o arquivo para importaÃ§Ã£o.");
+                    AddSkip(result, "Formato nao suportado");
+                    result.Errors.Add("Nao foi possivel abrir o arquivo para importacao.");
+                    result.Validation.AddError("Arquivo", "open", "Nao foi possivel abrir o arquivo para importacao.");
                     return;
                 }
 
@@ -55,6 +59,7 @@ namespace ExtintorCrm.App.Infrastructure.Import
                 {
                     AddSkip(result, "Aba sem dados");
                     result.Errors.Add("Nenhuma aba com cabecalho 'Nome' foi encontrada.");
+                    result.Validation.AddError("Cabecalho", "nome_required", "Nenhuma aba com cabecalho 'Nome' foi encontrada.");
                     return;
                 }
 
@@ -62,6 +67,7 @@ namespace ExtintorCrm.App.Infrastructure.Import
                 if (usedRange == null)
                 {
                     AddSkip(result, "Aba sem dados");
+                    result.Validation.AddWarning("Planilha", "no_data", "Aba sem dados para importar.");
                     return;
                 }
 
@@ -134,7 +140,7 @@ namespace ExtintorCrm.App.Infrastructure.Import
 
                         if (!string.IsNullOrWhiteSpace(documento) && documento.Length is not (11 or 14))
                         {
-                            AddSkip(result, "CPF/CNPJ invÃ¡lido");
+                            AddSkip(result, "CPF/CNPJ invalido");
                             continue;
                         }
 
@@ -239,8 +245,8 @@ namespace ExtintorCrm.App.Infrastructure.Import
                 catch (Exception conversionEx)
                 {
                     throw new InvalidOperationException(
-                        "NÃ£o foi possÃ­vel ler este arquivo .xlsb com seguranÃ§a. " +
-                        "A leitura deste formato depende do Excel instalado para conversÃ£o. " +
+                        "Nao foi possivel ler este arquivo .xlsb com seguranca. " +
+                        "A leitura deste formato depende do Excel instalado para conversao. " +
                         "Abra o arquivo no Excel e salve como .xlsx, depois importe novamente.",
                         conversionEx);
                 }
@@ -261,8 +267,8 @@ namespace ExtintorCrm.App.Infrastructure.Import
                     catch (Exception oleDbEx)
                     {
                         throw new InvalidOperationException(
-                            "NÃ£o foi possÃ­vel ler este arquivo .xls. " +
-                            "Tentamos conversÃ£o via Excel e leitura OLE DB, mas ambas falharam. " +
+                            "Nao foi possivel ler este arquivo .xls. " +
+                            "Tentamos conversao via Excel e leitura OLE DB, mas ambas falharam. " +
                             "Converta para .xlsx e tente novamente.",
                             new AggregateException(conversionEx, oleDbEx));
                     }
@@ -345,13 +351,13 @@ namespace ExtintorCrm.App.Infrastructure.Import
             var oleDbConnectionType = Type.GetType("System.Data.OleDb.OleDbConnection, System.Data.OleDb", throwOnError: false);
             if (oleDbConnectionType == null)
             {
-                throw new InvalidOperationException("Assembly System.Data.OleDb indisponÃ­vel neste runtime.");
+                throw new InvalidOperationException("Assembly System.Data.OleDb indisponivel neste runtime.");
             }
 
             using var connection = (IDbConnection?)Activator.CreateInstance(oleDbConnectionType);
             if (connection == null)
             {
-                throw new InvalidOperationException("NÃ£o foi possÃ­vel criar conexÃ£o OLE DB.");
+                throw new InvalidOperationException("Nao foi possivel criar conexao OLE DB.");
             }
 
             connection.ConnectionString = connectionString;
@@ -383,21 +389,21 @@ namespace ExtintorCrm.App.Infrastructure.Import
             tableName ??= schema.Rows[0]["TABLE_NAME"]?.ToString();
             if (string.IsNullOrWhiteSpace(tableName))
             {
-                throw new InvalidOperationException("Nenhuma aba vÃ¡lida encontrada.");
+                throw new InvalidOperationException("Nenhuma aba valida encontrada.");
             }
 
             var table = new DataTable();
             using var command = connection.CreateCommand();
             if (command == null)
             {
-                throw new InvalidOperationException("NÃ£o foi possÃ­vel criar comando de leitura.");
+                throw new InvalidOperationException("Nao foi possivel criar comando de leitura.");
             }
 
             command.CommandText = $"SELECT * FROM [{tableName}]";
             using var reader = command.ExecuteReader();
             if (reader == null)
             {
-                throw new InvalidOperationException("NÃ£o foi possÃ­vel ler dados da planilha.");
+                throw new InvalidOperationException("Nao foi possivel ler dados da planilha.");
             }
 
             // Carrega manualmente para evitar constraints/chaves inferidas pelo provider OLE DB
@@ -454,7 +460,7 @@ namespace ExtintorCrm.App.Infrastructure.Import
                 }
                 catch
                 {
-                    // Ignora falha de limpeza de arquivo temporÃ¡rio.
+                    // Ignora falha de limpeza de arquivo temporario.
                 }
             }
         }
@@ -475,13 +481,13 @@ namespace ExtintorCrm.App.Infrastructure.Import
                     var excelType = Type.GetTypeFromProgID("Excel.Application");
                     if (excelType == null)
                     {
-                        throw new InvalidOperationException("Microsoft Excel nÃ£o estÃ¡ instalado neste computador.");
+                        throw new InvalidOperationException("Microsoft Excel nao esta instalado neste computador.");
                     }
 
                     excelApp = Activator.CreateInstance(excelType);
                     if (excelApp == null)
                     {
-                        throw new InvalidOperationException("NÃ£o foi possÃ­vel iniciar o Microsoft Excel.");
+                        throw new InvalidOperationException("Nao foi possivel iniciar o Microsoft Excel.");
                     }
 
                     excelType.InvokeMember("Visible", BindingFlags.SetProperty, null, excelApp, new object[] { false });
@@ -490,7 +496,7 @@ namespace ExtintorCrm.App.Infrastructure.Import
                     workbooks = excelType.InvokeMember("Workbooks", BindingFlags.GetProperty, null, excelApp, null);
                     if (workbooks == null)
                     {
-                        throw new InvalidOperationException("NÃ£o foi possÃ­vel acessar o motor de planilhas do Excel.");
+                        throw new InvalidOperationException("Nao foi possivel acessar o motor de planilhas do Excel.");
                     }
 
                     var workbooksType = workbooks.GetType();
@@ -503,7 +509,7 @@ namespace ExtintorCrm.App.Infrastructure.Import
 
                     if (workbook == null)
                     {
-                        throw new InvalidOperationException("NÃ£o foi possÃ­vel abrir o arquivo no Excel.");
+                        throw new InvalidOperationException("Nao foi possivel abrir o arquivo no Excel.");
                     }
 
                     outputPath = Path.Combine(Path.GetTempPath(), $"starfire-import-{Guid.NewGuid():N}.xlsx");

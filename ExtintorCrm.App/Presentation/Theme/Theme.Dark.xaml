@@ -43,4 +43,26 @@
     <SolidColorBrush x:Key="ToastInfoBg" Color="#1F4578" />
     <SolidColorBrush x:Key="ToastInfoBorder" Color="#3A71C0" />
     <SolidColorBrush x:Key="ToastInfoFg" Color="#D7E7FF" />
+
+    <LinearGradientBrush x:Key="SplashShellBackground" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#5B1F27" Offset="0" />
+        <GradientStop Color="#96383E" Offset="0.52" />
+        <GradientStop Color="#4D1A24" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="SplashShellBorder" Color="#52FFFFFF" />
+    <SolidColorBrush x:Key="SplashInnerBorder" Color="#1FFFFFFF" />
+    <LinearGradientBrush x:Key="SplashSheenOverlay" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#16FFFFFF" Offset="0" />
+        <GradientStop Color="#00FFFFFF" Offset="0.62" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="SplashOrbPrimary" Color="#18FFFFFF" />
+    <SolidColorBrush x:Key="SplashOrbSecondary" Color="#12698FBF" />
+    <SolidColorBrush x:Key="SplashLogoCardBackground" Color="#1CFFFFFF" />
+    <SolidColorBrush x:Key="SplashLogoCardBorder" Color="#42FFFFFF" />
+    <SolidColorBrush x:Key="SplashTitleForeground" Color="#FFF9FBFF" />
+    <SolidColorBrush x:Key="SplashPatternStroke" Color="#4DFFFFFF" />
+    <SolidColorBrush x:Key="SplashPatternStrokeSoft" Color="#34FFFFFF" />
+    <SolidColorBrush x:Key="SplashStatusForeground" Color="#F0E8EEF8" />
+    <SolidColorBrush x:Key="SplashProgressTrack" Color="#30FFFFFF" />
+    <SolidColorBrush x:Key="SplashProgressForeground" Color="#F2FFFFFF" />
 </ResourceDictionary>

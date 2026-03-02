@@ -54,6 +54,9 @@ namespace ExtintorCrm.App.Presentation
         private readonly AsyncRelayCommand _openDashboardItemCommand;
         private readonly AsyncRelayCommand _openDashboardAlertsCommand;
         private readonly RelayCommand _selectConfigSectionCommand;
+        private readonly AsyncRelayCommand _toastActionCommand;
+        private readonly RelayCommand _toggleClientesFiltersCollapsedCommand;
+        private readonly RelayCommand _togglePagamentosFiltersCollapsedCommand;
         private readonly RelayCommand _goToPageCommand;
         private readonly RelayCommand _resetClienteFiltersCommand;
         private readonly RelayCommand _removeClienteFilterCommand;
@@ -113,7 +116,15 @@ namespace ExtintorCrm.App.Presentation
         private bool _isToastVisible;
         private string _toastKind = "Success";
         private string _toastMessage = string.Empty;
+        private bool _hasToastAction;
+        private string _toastActionLabel = string.Empty;
+        private Func<Task>? _toastActionHandler;
         private int _toastVersion;
+        private bool _isOperationInProgress;
+        private string _operationStatusMessage = string.Empty;
+        private bool _isCompactLayout;
+        private bool _isClientesFiltersCollapsed;
+        private bool _isPagamentosFiltersCollapsed;
         private int _selectedMainTabIndex;
         private bool _isNotificationPanelOpen;
         private bool _isVersionHistoryOpen;
@@ -258,6 +269,9 @@ namespace ExtintorCrm.App.Presentation
             _openDashboardItemCommand = new AsyncRelayCommand(async item => await OpenDashboardItemAsync(item as DashboardAlertItem), item => item is DashboardAlertItem);
             _openDashboardAlertsCommand = new AsyncRelayCommand(async key => await OpenDashboardAlertsAsync(key as string));
             _selectConfigSectionCommand = new RelayCommand(section => SelectConfigSection(section as string));
+            _toastActionCommand = new AsyncRelayCommand(async _ => await ExecuteToastActionAsync(), _ => HasToastAction);
+            _toggleClientesFiltersCollapsedCommand = new RelayCommand(_ => IsClientesFiltersCollapsed = !IsClientesFiltersCollapsed);
+            _togglePagamentosFiltersCollapsedCommand = new RelayCommand(_ => IsPagamentosFiltersCollapsed = !IsPagamentosFiltersCollapsed);
             _contactSupportWhatsAppCommand = new AsyncRelayCommand(async _ => await ContactSupportWhatsAppAsync());
             _contactSupportEmailCommand = new AsyncRelayCommand(async _ => await ContactSupportEmailAsync());
             EditCommand = _editCommand;
@@ -302,6 +316,9 @@ namespace ExtintorCrm.App.Presentation
             OpenDashboardItemCommand = _openDashboardItemCommand;
             OpenDashboardAlertsCommand = _openDashboardAlertsCommand;
             SelectConfigSectionCommand = _selectConfigSectionCommand;
+            ToastActionCommand = _toastActionCommand;
+            ToggleClientesFiltersCollapsedCommand = _toggleClientesFiltersCollapsedCommand;
+            TogglePagamentosFiltersCollapsedCommand = _togglePagamentosFiltersCollapsedCommand;
             ContactSupportWhatsAppCommand = _contactSupportWhatsAppCommand;
             ContactSupportEmailCommand = _contactSupportEmailCommand;
             ViewAllCriticalAlertsCommand = new RelayCommand(_ => ShowAllCriticalAlerts = true, _ => HasCriticalAlerts);
@@ -545,6 +562,9 @@ namespace ExtintorCrm.App.Presentation
         public ICommand OpenDashboardItemCommand { get; }
         public ICommand OpenDashboardAlertsCommand { get; }
         public ICommand SelectConfigSectionCommand { get; }
+        public ICommand ToastActionCommand { get; }
+        public ICommand ToggleClientesFiltersCollapsedCommand { get; }
+        public ICommand TogglePagamentosFiltersCollapsedCommand { get; }
         public ICommand ContactSupportWhatsAppCommand { get; }
         public ICommand ContactSupportEmailCommand { get; }
         public ICommand ViewAllCriticalAlertsCommand { get; }
@@ -1240,6 +1260,117 @@ namespace ExtintorCrm.App.Presentation
             }
         }
 
+        public bool HasToastAction
+        {
+            get => _hasToastAction;
+            private set
+            {
+                if (_hasToastAction == value)
+                {
+                    return;
+                }
+
+                _hasToastAction = value;
+                OnPropertyChanged();
+                _toastActionCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public string ToastActionLabel
+        {
+            get => _toastActionLabel;
+            private set
+            {
+                if (string.Equals(_toastActionLabel, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _toastActionLabel = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsOperationInProgress
+        {
+            get => _isOperationInProgress;
+            private set
+            {
+                if (_isOperationInProgress == value)
+                {
+                    return;
+                }
+
+                _isOperationInProgress = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string OperationStatusMessage
+        {
+            get => _operationStatusMessage;
+            private set
+            {
+                if (string.Equals(_operationStatusMessage, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _operationStatusMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsCompactLayout
+        {
+            get => _isCompactLayout;
+            private set
+            {
+                if (_isCompactLayout == value)
+                {
+                    return;
+                }
+
+                _isCompactLayout = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsClientesFiltersCollapsed
+        {
+            get => _isClientesFiltersCollapsed;
+            set
+            {
+                if (_isClientesFiltersCollapsed == value)
+                {
+                    return;
+                }
+
+                _isClientesFiltersCollapsed = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ClientesFiltersToggleText));
+            }
+        }
+
+        public bool IsPagamentosFiltersCollapsed
+        {
+            get => _isPagamentosFiltersCollapsed;
+            set
+            {
+                if (_isPagamentosFiltersCollapsed == value)
+                {
+                    return;
+                }
+
+                _isPagamentosFiltersCollapsed = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(PagamentosFiltersToggleText));
+            }
+        }
+
+        public string ClientesFiltersToggleText => IsClientesFiltersCollapsed ? "Mostrar filtros" : "Ocultar filtros";
+        public string PagamentosFiltersToggleText => IsPagamentosFiltersCollapsed ? "Mostrar filtros" : "Ocultar filtros";
+
         public string UiBorderColorHex
         {
             get => _uiBorderColorHex;
@@ -1863,18 +1994,65 @@ namespace ExtintorCrm.App.Presentation
 
 
 
-        private async Task ShowToastAsync(string message, string kind = "Success")
+        public void UpdateAdaptiveLayout(double windowWidth)
+        {
+            var compact = windowWidth > 0 && windowWidth < 1220;
+            if (IsCompactLayout == compact)
+            {
+                return;
+            }
+
+            IsCompactLayout = compact;
+            if (compact)
+            {
+                IsClientesFiltersCollapsed = true;
+                IsPagamentosFiltersCollapsed = true;
+            }
+        }
+
+        private async Task ExecuteToastActionAsync()
+        {
+            if (_toastActionHandler == null)
+            {
+                return;
+            }
+
+            var action = _toastActionHandler;
+            _toastActionHandler = null;
+            HasToastAction = false;
+            ToastActionLabel = string.Empty;
+            IsToastVisible = false;
+            await action();
+        }
+
+        private void ResetToastAction()
+        {
+            _toastActionHandler = null;
+            HasToastAction = false;
+            ToastActionLabel = string.Empty;
+        }
+
+        private async Task ShowToastAsync(
+            string message,
+            string kind = "Success",
+            string? actionLabel = null,
+            Func<Task>? action = null,
+            int durationMs = 2400)
         {
             _toastVersion++;
             var currentVersion = _toastVersion;
             ToastMessage = message;
             ToastKind = kind;
+            _toastActionHandler = action;
+            ToastActionLabel = actionLabel?.Trim() ?? string.Empty;
+            HasToastAction = !string.IsNullOrWhiteSpace(ToastActionLabel) && action != null;
             IsToastVisible = true;
-            await Task.Delay(2400);
+            await Task.Delay(Math.Max(1200, durationMs));
 
             if (currentVersion == _toastVersion)
             {
                 IsToastVisible = false;
+                ResetToastAction();
             }
         }
 

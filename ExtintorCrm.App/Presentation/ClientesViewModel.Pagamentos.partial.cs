@@ -181,9 +181,15 @@ namespace ExtintorCrm.App.Presentation
                 return;
             }
 
-            await _pagamentoRepository.AddAsync(vm.ToPagamento());
+            var createdPagamento = vm.ToPagamento();
+            await _pagamentoRepository.AddAsync(createdPagamento);
             await LoadPagamentosAsync();
-            await ShowToastAsync("Pagamento criado com sucesso.", "Success");
+            SelectedPagamento = _allPagamentos.FirstOrDefault(p => p.Id == createdPagamento.Id) ?? SelectedPagamento;
+            await ShowToastAsync(
+                "Pagamento criado com sucesso.",
+                "Success",
+                "Abrir anexos",
+                async () => await OpenPagamentoAttachmentsAsync());
         }
 
         private async Task EditPagamentoAsync()

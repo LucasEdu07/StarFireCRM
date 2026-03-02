@@ -15,6 +15,26 @@ namespace ExtintorCrm.App.Presentation
 {
     public partial class ClientesViewModel
     {
+        private async Task RunTrackedOperationAsync(string statusMessage, Func<Task> operation)
+        {
+            if (operation == null)
+            {
+                return;
+            }
+
+            IsOperationInProgress = true;
+            OperationStatusMessage = statusMessage;
+            try
+            {
+                await operation();
+            }
+            finally
+            {
+                IsOperationInProgress = false;
+                OperationStatusMessage = string.Empty;
+            }
+        }
+
         private async Task LogAndToastErrorAsync(string context, string userPrefix, Exception ex)
         {
             AppLogger.Error(context, ex);
@@ -375,6 +395,15 @@ namespace ExtintorCrm.App.Presentation
         {
             return new List<ReleaseNoteVersion>
             {
+                new(
+                    "1.0.7",
+                    "02/03/2026",
+                    new[]
+                    {
+                        "Janelas com cantos verdadeiramente arredondados de forma consistente.",
+                        "Estados de carregamento, vazio e erro refinados nas grades principais.",
+                        "Validacao inline aprimorada e ajustes visuais para clientes inativos no light/dark mode."
+                    }),
                 new(
                     "1.0.6",
                     "27/02/2026",

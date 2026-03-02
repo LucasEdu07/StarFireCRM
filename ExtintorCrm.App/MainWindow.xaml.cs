@@ -58,9 +58,11 @@ public partial class MainWindow : Window
         }
 
         ApplyWindowGeometryFromViewModel();
+        _viewModel.UpdateAdaptiveLayout(ActualWidth);
 
         SizeChanged += (_, _) =>
         {
+            _viewModel.UpdateAdaptiveLayout(ActualWidth);
             if (TourOverlay.Visibility == Visibility.Visible)
             {
                 UpdateTourVisual();

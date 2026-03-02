@@ -1,0 +1,11 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <CornerRadius x:Key="Design.Corner.Sm">8</CornerRadius>
+    <CornerRadius x:Key="Design.Corner.Md">10</CornerRadius>
+    <CornerRadius x:Key="Design.Corner.Lg">12</CornerRadius>
+
+    <Thickness x:Key="Design.Space.ToastPadding">14,10</Thickness>
+    <Thickness x:Key="Design.Space.CardPadding">12,10</Thickness>
+    <Thickness x:Key="Design.Space.SectionGap">0,0,0,10</Thickness>
+
+</ResourceDictionary>

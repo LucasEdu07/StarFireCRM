@@ -196,28 +196,31 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
-                IsBackupRunning = true;
-                var backupService = new BackupService();
-                var operation = await backupService.TryCreateBackupAsync(BackupFolder);
-                if (!operation.IsSuccess)
+                await RunTrackedOperationAsync(automatic ? "Executando backup automático..." : "Executando backup manual...", async () =>
                 {
-                    await ShowOperationResultAsync(operation, showDialogOnFailure: !automatic);
-                    return;
-                }
+                    IsBackupRunning = true;
+                    var backupService = new BackupService();
+                    var operation = await backupService.TryCreateBackupAsync(BackupFolder);
+                    if (!operation.IsSuccess)
+                    {
+                        await ShowOperationResultAsync(operation, showDialogOnFailure: !automatic);
+                        return;
+                    }
 
-                CleanupOldBackups();
-                _lastAutoBackupUtc = DateTime.UtcNow;
-                var theme = IsDarkMode ? AppThemeManager.DarkTheme : AppThemeManager.LightTheme;
-                SaveAppSettings(theme);
+                    CleanupOldBackups();
+                    _lastAutoBackupUtc = DateTime.UtcNow;
+                    var theme = IsDarkMode ? AppThemeManager.DarkTheme : AppThemeManager.LightTheme;
+                    SaveAppSettings(theme);
 
-                if (automatic)
-                {
-                    await ShowToastAsync("Backup automatico executado com sucesso.", "Info");
-                }
-                else
-                {
-                    await ShowOperationResultAsync(operation, showDialogOnFailure: false);
-                }
+                    if (automatic)
+                    {
+                        await ShowToastAsync("Backup automatico executado com sucesso.", "Info");
+                    }
+                    else
+                    {
+                        await ShowOperationResultAsync(operation, showDialogOnFailure: false);
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -284,17 +287,20 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
-                IsBackupRunning = true;
-                var backupService = new BackupService();
-                var operation = await backupService.TryRestoreBackupAsync(dialog.FileName);
-                if (!operation.IsSuccess)
+                await RunTrackedOperationAsync("Restaurando backup...", async () =>
                 {
-                    await ShowOperationResultAsync(operation);
-                    return;
-                }
+                    IsBackupRunning = true;
+                    var backupService = new BackupService();
+                    var operation = await backupService.TryRestoreBackupAsync(dialog.FileName);
+                    if (!operation.IsSuccess)
+                    {
+                        await ShowOperationResultAsync(operation);
+                        return;
+                    }
 
-                await LoadAsync(reloadUiSettings: true);
-                await ShowOperationResultAsync(operation, showDialogOnFailure: false);
+                    await LoadAsync(reloadUiSettings: true);
+                    await ShowOperationResultAsync(operation, showDialogOnFailure: false);
+                });
             }
             catch (Exception ex)
             {
@@ -324,39 +330,42 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
-                try
+                await RunTrackedOperationAsync("Recriando base de clientes...", async () =>
                 {
-                    var backupFolder = string.IsNullOrWhiteSpace(BackupFolder)
-                        ? AppSettingsService.GetDefaultBackupFolder()
-                        : BackupFolder;
-                    var backupService = new BackupService();
-                    backupFile = await backupService.CreateBackupAsync(Path.Combine(backupFolder, "pre-recreate-clientes"));
-                }
-                catch (Exception ex)
-                {
-                    AppLogger.Error("Falha ao criar backup pré-recriação de clientes.", ex);
-                    // Continua com a recriação mesmo se backup prévio falhar.
-                }
+                    try
+                    {
+                        var backupFolder = string.IsNullOrWhiteSpace(BackupFolder)
+                            ? AppSettingsService.GetDefaultBackupFolder()
+                            : BackupFolder;
+                        var backupService = new BackupService();
+                        backupFile = await backupService.CreateBackupAsync(Path.Combine(backupFolder, "pre-recreate-clientes"));
+                    }
+                    catch (Exception ex)
+                    {
+                        AppLogger.Error("Falha ao criar backup pré-recriação de clientes.", ex);
+                        // Continua com a recriação mesmo se backup prévio falhar.
+                    }
 
-                await using (var db = new AppDbContext())
-                {
-                    await db.Pagamentos.ExecuteDeleteAsync();
-                    await db.Clientes.ExecuteDeleteAsync();
-                }
+                    await using (var db = new AppDbContext())
+                    {
+                        await db.Pagamentos.ExecuteDeleteAsync();
+                        await db.Clientes.ExecuteDeleteAsync();
+                    }
 
-                _allClientes.Clear();
-                _allPagamentos.Clear();
-                Clientes.Clear();
-                Pagamentos.Clear();
-                SelectedCliente = null;
-                SelectedPagamento = null;
+                    _allClientes.Clear();
+                    _allPagamentos.Clear();
+                    Clientes.Clear();
+                    Pagamentos.Clear();
+                    SelectedCliente = null;
+                    SelectedPagamento = null;
 
-                await LoadAsync();
+                    await LoadAsync();
 
-                var message = backupFile == null
-                    ? "Base de clientes recriada com sucesso."
-                    : $"Base de clientes recriada com sucesso. Backup salvo em: {backupFile}";
-                await ShowToastAsync(message, "Success");
+                    var message = backupFile == null
+                        ? "Base de clientes recriada com sucesso."
+                        : $"Base de clientes recriada com sucesso. Backup salvo em: {backupFile}";
+                    await ShowToastAsync(message, "Success");
+                });
             }
             catch (Exception ex)
             {
@@ -386,36 +395,39 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
-                try
+                await RunTrackedOperationAsync("Recriando base de pagamentos...", async () =>
                 {
-                    var backupFolder = string.IsNullOrWhiteSpace(BackupFolder)
-                        ? AppSettingsService.GetDefaultBackupFolder()
-                        : BackupFolder;
-                    var backupService = new BackupService();
-                    backupFile = await backupService.CreateBackupAsync(Path.Combine(backupFolder, "pre-recreate-pagamentos"));
-                }
-                catch (Exception ex)
-                {
-                    AppLogger.Error("Falha ao criar backup pré-recriação de pagamentos.", ex);
-                    // Continua com a recriação mesmo se backup prévio falhar.
-                }
+                    try
+                    {
+                        var backupFolder = string.IsNullOrWhiteSpace(BackupFolder)
+                            ? AppSettingsService.GetDefaultBackupFolder()
+                            : BackupFolder;
+                        var backupService = new BackupService();
+                        backupFile = await backupService.CreateBackupAsync(Path.Combine(backupFolder, "pre-recreate-pagamentos"));
+                    }
+                    catch (Exception ex)
+                    {
+                        AppLogger.Error("Falha ao criar backup pré-recriação de pagamentos.", ex);
+                        // Continua com a recriação mesmo se backup prévio falhar.
+                    }
 
-                await using (var db = new AppDbContext())
-                {
-                    await db.Pagamentos.ExecuteDeleteAsync();
-                }
+                    await using (var db = new AppDbContext())
+                    {
+                        await db.Pagamentos.ExecuteDeleteAsync();
+                    }
 
-                _allPagamentos.Clear();
-                Pagamentos.Clear();
-                SelectedPagamento = null;
+                    _allPagamentos.Clear();
+                    Pagamentos.Clear();
+                    SelectedPagamento = null;
 
-                await LoadPagamentosAsync();
-                RefreshDashboardExecutiveData();
+                    await LoadPagamentosAsync();
+                    RefreshDashboardExecutiveData();
 
-                var message = backupFile == null
-                    ? "Base de pagamentos recriada com sucesso."
-                    : $"Base de pagamentos recriada com sucesso. Backup salvo em: {backupFile}";
-                await ShowToastAsync(message, "Success");
+                    var message = backupFile == null
+                        ? "Base de pagamentos recriada com sucesso."
+                        : $"Base de pagamentos recriada com sucesso. Backup salvo em: {backupFile}";
+                    await ShowToastAsync(message, "Success");
+                });
             }
             catch (Exception ex)
             {
@@ -449,28 +461,31 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
-                IsImporting = true;
-                var importer = new PagamentoExcelImporter();
-                var result = await importer.ImportAsync(dialog.FileName);
-
-                await LoadPagamentosAsync();
-
-                var missingClientCount = result.SkippedReasons.Count(reason =>
-                    !string.IsNullOrWhiteSpace(reason) &&
-                    reason.Contains("cliente", StringComparison.OrdinalIgnoreCase) &&
-                    reason.Contains("cpf", StringComparison.OrdinalIgnoreCase));
-
-                var operation = result.ToOperationResult("pagamentos");
-                await ShowOperationResultAsync(operation);
-
-                if (missingClientCount > 0)
+                await RunTrackedOperationAsync("Importando pagamentos...", async () =>
                 {
-                    var owner = Application.Current?.MainWindow;
-                    DialogService.Info(
-                        "Cliente não encontrado",
-                        $"{missingClientCount} pagamento(s) não foram computados porque o cliente (CPF/CNPJ) não existe no sistema.\n\nCadastre ou importe os clientes primeiro e depois reimporte os pagamentos.",
-                        owner);
-                }
+                    IsImporting = true;
+                    var importer = new PagamentoExcelImporter();
+                    var result = await importer.ImportAsync(dialog.FileName);
+
+                    await LoadPagamentosAsync();
+
+                    var missingClientCount = result.SkippedReasons.Count(reason =>
+                        !string.IsNullOrWhiteSpace(reason) &&
+                        reason.Contains("cliente", StringComparison.OrdinalIgnoreCase) &&
+                        reason.Contains("cpf", StringComparison.OrdinalIgnoreCase));
+
+                    var operation = result.ToOperationResult("pagamentos");
+                    await ShowOperationResultAsync(operation);
+
+                    if (missingClientCount > 0)
+                    {
+                        var owner = Application.Current?.MainWindow;
+                        DialogService.Info(
+                            "Cliente não encontrado",
+                            $"{missingClientCount} pagamento(s) não foram computados porque o cliente (CPF/CNPJ) não existe no sistema.\n\nCadastre ou importe os clientes primeiro e depois reimporte os pagamentos.",
+                            owner);
+                    }
+                });
             }
             catch (Exception ex)
             {

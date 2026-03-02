@@ -82,7 +82,17 @@ namespace ExtintorCrm.App.Presentation
 
             await _clienteRepository.AddAsync(novoCliente);
             await ReloadListAsync();
-            await ShowToastAsync("Cliente criado com sucesso.", "Success");
+            var createdCliente = _allClientes.FirstOrDefault(c => c.Id == novoCliente.Id);
+            if (createdCliente != null)
+            {
+                UpdateSelectedClientes([createdCliente]);
+            }
+
+            await ShowToastAsync(
+                "Cliente criado com sucesso.",
+                "Success",
+                "Abrir cadastro",
+                async () => await OpenClienteDetalhesAsync(startInEditMode: false));
         }
 
         private async Task EditAsync()

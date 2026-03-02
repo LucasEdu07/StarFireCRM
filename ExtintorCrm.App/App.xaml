@@ -4,6 +4,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Presentation/Theme/Theme.DesignTokens.xaml" />
                 <ResourceDictionary Source="Presentation/Theme/Theme.Light.xaml" />
                 <ResourceDictionary Source="Presentation/Theme/Theme.Controls.xaml" />
             </ResourceDictionary.MergedDictionaries>

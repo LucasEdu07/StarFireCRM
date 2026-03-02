@@ -31,37 +31,40 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
-                IsImporting = true;
-                var importer = new ClienteExcelImporter();
-                var extension = Path.GetExtension(dialog.FileName)?.ToLowerInvariant();
-                string? tempConvertedFile = null;
-                try
+                await RunTrackedOperationAsync("Importando clientes...", async () =>
                 {
-                    var sourcePath = dialog.FileName;
-                    if (extension == ".xlsb")
+                    IsImporting = true;
+                    var importer = new ClienteExcelImporter();
+                    var extension = Path.GetExtension(dialog.FileName)?.ToLowerInvariant();
+                    string? tempConvertedFile = null;
+                    try
                     {
-                        tempConvertedFile = ClienteExcelImporter.ConvertLegacyExcelToXlsxTemp(dialog.FileName);
-                        sourcePath = tempConvertedFile;
-                    }
+                        var sourcePath = dialog.FileName;
+                        if (extension == ".xlsb")
+                        {
+                            tempConvertedFile = ClienteExcelImporter.ConvertLegacyExcelToXlsxTemp(dialog.FileName);
+                            sourcePath = tempConvertedFile;
+                        }
 
-                    var result = await importer.ImportAsync(sourcePath);
-                    var operation = result.ToOperationResult("clientes");
-                    await ShowOperationResultAsync(operation);
-                }
-                finally
-                {
-                    if (!string.IsNullOrWhiteSpace(tempConvertedFile))
+                        var result = await importer.ImportAsync(sourcePath);
+                        var operation = result.ToOperationResult("clientes");
+                        await ShowOperationResultAsync(operation);
+                    }
+                    finally
                     {
-                        try
+                        if (!string.IsNullOrWhiteSpace(tempConvertedFile))
                         {
-                            File.Delete(tempConvertedFile);
-                        }
-                        catch
-                        {
-                            // ignora falha de limpeza temporária
+                            try
+                            {
+                                File.Delete(tempConvertedFile);
+                            }
+                            catch
+                            {
+                                // ignora falha de limpeza temporária
+                            }
                         }
                     }
-                }
+                });
             }
             catch (Exception ex)
             {
@@ -138,46 +141,65 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
-                var exportService = new TabularExportService();
-                var selectedKeys = new HashSet<string>(options.SelectedFieldKeys);
-
-                if (options.SaveAsDefault)
+                await RunTrackedOperationAsync("Exportando dados...", async () =>
                 {
-                    _exportPreferredEntity = options.Entity;
-                    _exportPreferExcel = options.IsExcel;
+                    var exportService = new TabularExportService();
+                    var selectedKeys = new HashSet<string>(options.SelectedFieldKeys);
+
+                    if (options.SaveAsDefault)
+                    {
+                        _exportPreferredEntity = options.Entity;
+                        _exportPreferExcel = options.IsExcel;
+                        if (isClientes)
+                        {
+                            _preferredClienteExportFields.Clear();
+                            foreach (var key in selectedKeys)
+                            {
+                                _preferredClienteExportFields.Add(key);
+                            }
+                        }
+                        else
+                        {
+                            _preferredPagamentoExportFields.Clear();
+                            foreach (var key in selectedKeys)
+                            {
+                                _preferredPagamentoExportFields.Add(key);
+                            }
+                        }
+
+                        var themeForSave = IsDarkMode ? AppThemeManager.DarkTheme : AppThemeManager.LightTheme;
+                        SaveAppSettings(themeForSave);
+                    }
+
                     if (isClientes)
                     {
-                        _preferredClienteExportFields.Clear();
-                        foreach (var key in selectedKeys)
-                        {
-                            _preferredClienteExportFields.Add(key);
-                        }
+                        var columns = _clienteExportColumns.Where(c => selectedKeys.Contains(c.Key)).ToList();
+                        var path = await exportService.ExportAsync(_allClientes, columns, dialog.FileName);
+                        await ShowToastAsync(
+                            $"Clientes exportados com sucesso: {path}",
+                            "Success",
+                            "Abrir arquivo",
+                            async () =>
+                            {
+                                OpenUri(new Uri(path).AbsoluteUri);
+                                await ShowToastAsync("Arquivo exportado aberto.", "Info");
+                            });
                     }
                     else
                     {
-                        _preferredPagamentoExportFields.Clear();
-                        foreach (var key in selectedKeys)
-                        {
-                            _preferredPagamentoExportFields.Add(key);
-                        }
+                        var columns = _pagamentoExportColumns.Where(c => selectedKeys.Contains(c.Key)).ToList();
+                        var path = await exportService.ExportAsync(_allPagamentos, columns, dialog.FileName);
+                        await ShowToastAsync(
+                            $"Pagamentos exportados com sucesso: {path}",
+                            "Success",
+                            "Abrir arquivo",
+                            async () =>
+                            {
+                                OpenUri(new Uri(path).AbsoluteUri);
+                                await ShowToastAsync("Arquivo exportado aberto.", "Info");
+                            });
                     }
-
-                    var themeForSave = IsDarkMode ? AppThemeManager.DarkTheme : AppThemeManager.LightTheme;
-                    SaveAppSettings(themeForSave);
-                }
-
-                if (isClientes)
-                {
-                    var columns = _clienteExportColumns.Where(c => selectedKeys.Contains(c.Key)).ToList();
-                    var path = await exportService.ExportAsync(_allClientes, columns, dialog.FileName);
-                    await ShowToastAsync($"Clientes exportados com sucesso: {path}", "Success");
-                }
-                else
-                {
-                    var columns = _pagamentoExportColumns.Where(c => selectedKeys.Contains(c.Key)).ToList();
-                    var path = await exportService.ExportAsync(_allPagamentos, columns, dialog.FileName);
-                    await ShowToastAsync($"Pagamentos exportados com sucesso: {path}", "Success");
-                }
+                });
             }
             catch (Exception ex)
             {

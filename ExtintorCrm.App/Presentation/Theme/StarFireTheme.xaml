@@ -24,7 +24,7 @@
             <Setter Property="FontFamily" Value="Segoe UI Variable" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="AllowsTransparency" Value="True" />
-            <Setter Property="Background" Value="{DynamicResource AppBackground}" />
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
@@ -35,29 +35,19 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Window">
-                        <Border x:Name="WindowShell"
-                                Background="{DynamicResource SurfaceBackground}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="16"
-                                ClipToBounds="False"
-                                SnapsToDevicePixels="True">
-                            <Border.Effect>
-                                <DropShadowEffect Color="{DynamicResource ShadowColor}"
-                                                  BlurRadius="26"
-                                                  ShadowDepth="0"
-                                                  Opacity="0.30" />
-                            </Border.Effect>
-                            <Border x:Name="ContentHost"
-                                    Margin="1"
-                                    Background="{TemplateBinding Background}"
-                                    CornerRadius="15"
+                        <Grid Background="Transparent"
+                              SnapsToDevicePixels="True">
+                            <Border x:Name="WindowShell"
+                                    Background="{DynamicResource AppBackground}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="16"
                                     ClipToBounds="True">
                                 <AdornerDecorator>
                                     <ContentPresenter />
                                 </AdornerDecorator>
                             </Border>
-                        </Border>
+                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

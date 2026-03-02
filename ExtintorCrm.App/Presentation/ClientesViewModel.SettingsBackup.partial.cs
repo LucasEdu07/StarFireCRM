@@ -293,7 +293,7 @@ namespace ExtintorCrm.App.Presentation
                     return;
                 }
 
-                await LoadAsync();
+                await LoadAsync(reloadUiSettings: true);
                 await ShowOperationResultAsync(operation, showDialogOnFailure: false);
             }
             catch (Exception ex)

@@ -14,6 +14,7 @@
         ResizeMode="CanMinimize"
         WindowState="{Binding MainWindowState, Mode=OneWay}"
         WindowStyle="None"
+        AllowsTransparency="True"
         Topmost="{Binding MainTopmost, Mode=OneWay}"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackground}"
@@ -2528,6 +2529,57 @@
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
+                            <Border Background="#D9FFFFFF"
+                                    CornerRadius="10"
+                                    Margin="8"
+                                    Padding="18"
+                                    Visibility="{Binding ShowClientesLoadingState, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    IsHitTestVisible="False">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE895;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="22"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" />
+                                    <TextBlock Text="{Binding ClientesStateTitle}"
+                                               Margin="0,10,0,0"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}" />
+                                    <TextBlock Text="{Binding ClientesStateDescription}"
+                                               Margin="0,6,0,0"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Background="#CCFFFFFF"
+                                    CornerRadius="10"
+                                    Margin="8"
+                                    Padding="18"
+                                    Visibility="{Binding ShowClientesEmptyState, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    IsHitTestVisible="False">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE8A5;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="22"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" />
+                                    <TextBlock Text="{Binding ClientesStateTitle}"
+                                               Margin="0,10,0,0"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}" />
+                                    <TextBlock Text="{Binding ClientesStateDescription}"
+                                               Margin="0,6,0,0"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               TextAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               MaxWidth="420" />
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </Border>
 
@@ -2764,43 +2816,123 @@
                             Padding="8"
                             BorderBrush="{DynamicResource BorderStrong}"
                             BorderThickness="1">
-                        <DataGrid Style="{StaticResource CleanDataGrid}"
-                                  AutoGenerateColumns="False"
-                                  CanUserSortColumns="True"
-                                  IsReadOnly="True"
-                                  RowHeight="36"
-                                  ColumnHeaderHeight="38"
-                                  FontSize="12.8"
-                                  RowStyle="{StaticResource PagamentoRowStyle}"
-                                  ColumnHeaderStyle="{StaticResource UnifiedGridHeaderStyle}"
-                                  Language="pt-BR"
-                                  ItemsSource="{Binding Pagamentos}"
-                                  SelectedItem="{Binding SelectedPagamento, Mode=TwoWay}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Cliente" Binding="{Binding ClienteNome}" Width="2*" ElementStyle="{StaticResource LeftCellStyle}" />
-                                <DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" Width="2*" ElementStyle="{StaticResource LeftCellStyle}" />
-                                <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat={}{0:C2}}" Width="170" ElementStyle="{StaticResource MoneyCellStyle}" />
-                                <DataGridTextColumn Header="Vencimento" Binding="{Binding DataVencimento, StringFormat=dd/MM/yyyy}" Width="130" ElementStyle="{StaticResource CenterCellStyle}" />
-                                <DataGridTemplateColumn Header="Pagamento" Width="140">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border Style="{StaticResource PagoBadgeStyle}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock Style="{StaticResource PagoBadgeTextStyle}" />
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Situação" Width="160">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border Style="{StaticResource StatusBadgeBorderStyle}" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                <TextBlock Style="{StaticResource StatusBadgeTextStyle}" Text="{Binding SituacaoTexto}" />
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <Grid>
+                            <DataGrid Style="{StaticResource CleanDataGrid}"
+                                      AutoGenerateColumns="False"
+                                      CanUserSortColumns="True"
+                                      IsReadOnly="True"
+                                      RowHeight="36"
+                                      ColumnHeaderHeight="38"
+                                      FontSize="12.8"
+                                      RowStyle="{StaticResource PagamentoRowStyle}"
+                                      ColumnHeaderStyle="{StaticResource UnifiedGridHeaderStyle}"
+                                      Language="pt-BR"
+                                      ItemsSource="{Binding Pagamentos}"
+                                      SelectedItem="{Binding SelectedPagamento, Mode=TwoWay}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Cliente" Binding="{Binding ClienteNome}" Width="2*" ElementStyle="{StaticResource LeftCellStyle}" />
+                                    <DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" Width="2*" ElementStyle="{StaticResource LeftCellStyle}" />
+                                    <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat={}{0:C2}}" Width="170" ElementStyle="{StaticResource MoneyCellStyle}" />
+                                    <DataGridTextColumn Header="Vencimento" Binding="{Binding DataVencimento, StringFormat=dd/MM/yyyy}" Width="130" ElementStyle="{StaticResource CenterCellStyle}" />
+                                    <DataGridTemplateColumn Header="Pagamento" Width="140">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{StaticResource PagoBadgeStyle}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Style="{StaticResource PagoBadgeTextStyle}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Situação" Width="160">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{StaticResource StatusBadgeBorderStyle}" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                    <TextBlock Style="{StaticResource StatusBadgeTextStyle}" Text="{Binding SituacaoTexto}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <Border Background="#D9FFFFFF"
+                                    CornerRadius="10"
+                                    Margin="8"
+                                    Padding="18"
+                                    Visibility="{Binding ShowPagamentosLoadingState, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    IsHitTestVisible="False">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE895;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="22"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" />
+                                    <TextBlock Text="{Binding PagamentosStateTitle}"
+                                               Margin="0,10,0,0"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}" />
+                                    <TextBlock Text="{Binding PagamentosStateDescription}"
+                                               Margin="0,6,0,0"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Background="#CCFFFFFF"
+                                    CornerRadius="10"
+                                    Margin="8"
+                                    Padding="18"
+                                    Visibility="{Binding ShowPagamentosErrorState, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    IsHitTestVisible="False">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xEA39;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="22"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource DangerFg}" />
+                                    <TextBlock Text="{Binding PagamentosStateTitle}"
+                                               Margin="0,10,0,0"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}" />
+                                    <TextBlock Text="{Binding PagamentosStateDescription}"
+                                               Margin="0,6,0,0"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               TextAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               MaxWidth="420" />
+                                </StackPanel>
+                            </Border>
+                            <Border Background="#CCFFFFFF"
+                                    CornerRadius="10"
+                                    Margin="8"
+                                    Padding="18"
+                                    Visibility="{Binding ShowPagamentosEmptyState, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    IsHitTestVisible="False">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE8A5;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="22"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" />
+                                    <TextBlock Text="{Binding PagamentosStateTitle}"
+                                               Margin="0,10,0,0"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}" />
+                                    <TextBlock Text="{Binding PagamentosStateDescription}"
+                                               Margin="0,6,0,0"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               TextAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               MaxWidth="420" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Border>
                 </Grid>
             </TabItem>
@@ -2816,6 +2948,10 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Configurações"
@@ -2845,10 +2981,16 @@
                                     Command="{Binding SaveAlertSettingsCommand}">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
                                     <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE74E;" Foreground="{DynamicResource ButtonPrimaryFg}" />
-                                    <TextBlock Text="Salvar configurações" Foreground="{DynamicResource ButtonPrimaryFg}" />
+                                    <TextBlock Text="{Binding ConfigSaveButtonText}" Foreground="{DynamicResource ButtonPrimaryFg}" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
+                        <TextBlock Grid.Row="1"
+                                   Grid.ColumnSpan="2"
+                                   Margin="0,8,0,0"
+                                   Text="{Binding ConfigValidationMessage}"
+                                   Foreground="{DynamicResource DangerFg}"
+                                   Visibility="{Binding HasConfigValidationError, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </Grid>
 
                     <Grid Grid.Row="1">
@@ -3461,6 +3603,10 @@
                                                 </StackPanel>
                                             </Button>
                                         </Grid>
+                                        <TextBlock Text="{Binding ConfigValidationMessage}"
+                                                   Margin="0,-2,0,10"
+                                                   Foreground="{DynamicResource DangerFg}"
+                                                   Visibility="{Binding HasConfigValidationError, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                                         <Grid>
                                             <Grid.ColumnDefinitions>

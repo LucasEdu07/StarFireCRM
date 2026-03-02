@@ -8,6 +8,7 @@
         MinWidth="980"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
+        AllowsTransparency="True"
         ResizeMode="NoResize"
         Background="{DynamicResource AppBackground}"
         FontFamily="Segoe UI Variable"
@@ -198,7 +199,8 @@
                             <StackPanel Visibility="{Binding IsClienteSelectable, Converter={StaticResource BoolToVisibilityConverter}}"
                                         Margin="0,0,0,12">
                                 <TextBlock Text="Cliente *" Style="{StaticResource SectionLabel}" />
-                                <ComboBox Style="{StaticResource ModernComboBox}"
+                                <ComboBox x:Name="ClienteComboBox"
+                                          Style="{StaticResource ModernComboBox}"
                                           Height="40"
                                           MaxDropDownHeight="280"
                                           IsTextSearchEnabled="True"
@@ -208,7 +210,12 @@
                                           ItemsSource="{Binding Clientes}"
                                           SelectedValuePath="Id"
                                           DisplayMemberPath="Nome"
+                                          SelectionChanged="ClienteComboBox_SelectionChanged"
                                           SelectedValue="{Binding ClienteId}" />
+                                <TextBlock x:Name="ClienteValidationText"
+                                           Margin="0,6,0,0"
+                                           Foreground="{DynamicResource DangerFg}"
+                                           Visibility="Collapsed" />
                             </StackPanel>
 
                             <StackPanel Visibility="{Binding IsClienteReadOnly, Converter={StaticResource BoolToVisibilityConverter}}"

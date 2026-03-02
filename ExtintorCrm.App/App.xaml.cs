@@ -1,8 +1,11 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 using ExtintorCrm.App.Infrastructure;
 using ExtintorCrm.App.Infrastructure.Backup;
@@ -20,10 +23,12 @@ namespace ExtintorCrm.App;
 public partial class App : System.Windows.Application
 {
     private const int MainWindowRenderTimeoutMs = 6000;
+    private const int WindowCornerRadiusPx = 16;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        RegisterRoundedWindowHandlers();
         RegisterGlobalExceptionHandlers();
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
@@ -186,6 +191,112 @@ public partial class App : System.Windows.Application
             args.SetObserved();
         };
     }
+
+    private static void RegisterRoundedWindowHandlers()
+    {
+        EventManager.RegisterClassHandler(
+            typeof(Window),
+            FrameworkElement.LoadedEvent,
+            new RoutedEventHandler(OnWindowLoaded));
+    }
+
+    private static void OnWindowLoaded(object sender, RoutedEventArgs _)
+    {
+        if (sender is not Window window)
+        {
+            return;
+        }
+
+        if (window.WindowStyle != WindowStyle.None)
+        {
+            return;
+        }
+
+        window.SourceInitialized -= OnWindowSourceInitialized;
+        window.SourceInitialized += OnWindowSourceInitialized;
+        window.SizeChanged -= OnWindowSizeChanged;
+        window.SizeChanged += OnWindowSizeChanged;
+        window.StateChanged -= OnWindowStateChanged;
+        window.StateChanged += OnWindowStateChanged;
+
+        ApplyRoundedWindowRegion(window);
+    }
+
+    private static void OnWindowSourceInitialized(object? sender, EventArgs _)
+    {
+        if (sender is Window window)
+        {
+            ApplyRoundedWindowRegion(window);
+        }
+    }
+
+    private static void OnWindowSizeChanged(object sender, SizeChangedEventArgs _)
+    {
+        if (sender is Window window)
+        {
+            ApplyRoundedWindowRegion(window);
+        }
+    }
+
+    private static void OnWindowStateChanged(object? sender, EventArgs _)
+    {
+        if (sender is Window window)
+        {
+            ApplyRoundedWindowRegion(window);
+        }
+    }
+
+    private static void ApplyRoundedWindowRegion(Window window)
+    {
+        var hwnd = new WindowInteropHelper(window).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (window.WindowState == WindowState.Maximized)
+        {
+            SetWindowRgn(hwnd, IntPtr.Zero, true);
+            return;
+        }
+
+        if (window.ActualWidth <= 0 || window.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var dpi = VisualTreeHelper.GetDpi(window);
+        var widthPx = (int)Math.Ceiling(window.ActualWidth * dpi.DpiScaleX);
+        var heightPx = (int)Math.Ceiling(window.ActualHeight * dpi.DpiScaleY);
+        var radiusPx = (int)Math.Ceiling(WindowCornerRadiusPx * Math.Max(dpi.DpiScaleX, dpi.DpiScaleY));
+
+        var region = CreateRoundRectRgn(0, 0, widthPx + 1, heightPx + 1, radiusPx * 2, radiusPx * 2);
+        if (region == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (SetWindowRgn(hwnd, region, true) == 0)
+        {
+            DeleteObject(region);
+        }
+    }
+
+    [DllImport("gdi32.dll", SetLastError = true)]
+    private static extern IntPtr CreateRoundRectRgn(
+        int nLeftRect,
+        int nTopRect,
+        int nRightRect,
+        int nBottomRect,
+        int nWidthEllipse,
+        int nHeightEllipse);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, bool bRedraw);
+
+    [DllImport("gdi32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DeleteObject(IntPtr hObject);
 
     private static void TryCreatePreMigrationBackup()
     {

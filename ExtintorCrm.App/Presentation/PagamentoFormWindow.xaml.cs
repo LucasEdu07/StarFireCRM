@@ -212,28 +212,29 @@ namespace ExtintorCrm.App.Presentation
             return "Outro";
         }
 
-        private void Salvar_Click(object sender, RoutedEventArgs e)
+                private void Salvar_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not PagamentoFormViewModel vm)
             {
                 return;
             }
 
-            if (vm.ClienteId == Guid.Empty || vm.Valor <= 0)
+            var isClienteInvalid = vm.ClienteId == Guid.Empty;
+            var isValorInvalid = vm.Valor <= 0;
+            SetClienteValidationState(isClienteInvalid, "Selecione um cliente.");
+            SetValorValidationState(isValorInvalid, "Informe um valor maior que zero.");
+
+            if (isClienteInvalid || isValorInvalid)
             {
-                var isValorInvalid = vm.Valor <= 0;
-                SetValorValidationState(isValorInvalid, "Informe um valor maior que zero.");
-                if (!isValorInvalid)
+                if (isClienteInvalid)
                 {
-                    DialogService.Info(
-                        "Validação",
-                        "Preencha os campos obrigatórios (Cliente e Valor).",
-                        this);
+                    ClienteComboBox?.Focus();
                 }
                 else
                 {
                     ValorTextBox.Focus();
                 }
+
                 return;
             }
 
@@ -241,6 +242,15 @@ namespace ExtintorCrm.App.Presentation
             Close();
         }
 
+        private void ClienteComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is not PagamentoFormViewModel vm)
+            {
+                return;
+            }
+
+            SetClienteValidationState(vm.ClienteId == Guid.Empty, "Selecione um cliente.");
+        }
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
@@ -364,6 +374,17 @@ namespace ExtintorCrm.App.Presentation
             ValorValidationText.Visibility = isInvalid ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        private void SetClienteValidationState(bool isInvalid, string message)
+        {
+            if (ClienteValidationText == null)
+            {
+                return;
+            }
+
+            ClienteValidationText.Text = message;
+            ClienteValidationText.Visibility = isInvalid ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         private bool TryParseMoneyFlexible(string input, out decimal value)
         {
             value = 0m;
@@ -451,3 +472,4 @@ namespace ExtintorCrm.App.Presentation
         }
     }
 }
+

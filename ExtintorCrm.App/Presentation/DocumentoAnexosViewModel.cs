@@ -17,10 +17,10 @@ namespace ExtintorCrm.App.Presentation
         private readonly IDocumentoAnexoRepository _documentoAnexoRepository;
         private readonly DocumentoStorageService _documentoStorageService;
         private readonly DocumentoAnexosContext _context;
-        private readonly RelayCommand _addCommand;
+        private readonly AsyncRelayCommand _addCommand;
         private readonly RelayCommand _openCommand;
-        private readonly RelayCommand _removeCommand;
-        private readonly RelayCommand _refreshCommand;
+        private readonly AsyncRelayCommand _removeCommand;
+        private readonly AsyncRelayCommand _refreshCommand;
         private DocumentoAnexoItem? _selectedAnexo;
         private string _selectedTipoDocumento = "Outro";
         private bool _isBusy;
@@ -53,10 +53,10 @@ namespace ExtintorCrm.App.Presentation
                 _selectedTipoDocumento = "Nota fiscal";
             }
 
-            _addCommand = new RelayCommand(async _ => await AddFilesAsync(), _ => !IsBusy);
+            _addCommand = new AsyncRelayCommand(async _ => await AddFilesAsync(), _ => !IsBusy);
             _openCommand = new RelayCommand(_ => OpenSelected(), _ => !IsBusy && SelectedAnexo != null);
-            _removeCommand = new RelayCommand(async _ => await RemoveSelectedAsync(), _ => !IsBusy && SelectedAnexo != null);
-            _refreshCommand = new RelayCommand(async _ => await LoadAsync(), _ => !IsBusy);
+            _removeCommand = new AsyncRelayCommand(async _ => await RemoveSelectedAsync(), _ => !IsBusy && SelectedAnexo != null);
+            _refreshCommand = new AsyncRelayCommand(async _ => await LoadAsync(), _ => !IsBusy);
             AddCommand = _addCommand;
             OpenCommand = _openCommand;
             RemoveCommand = _removeCommand;
@@ -113,10 +113,10 @@ namespace ExtintorCrm.App.Presentation
 
         public int TotalAnexos => Anexos.Count;
 
-        public RelayCommand AddCommand { get; }
+        public AsyncRelayCommand AddCommand { get; }
         public RelayCommand OpenCommand { get; }
-        public RelayCommand RemoveCommand { get; }
-        public RelayCommand RefreshCommand { get; }
+        public AsyncRelayCommand RemoveCommand { get; }
+        public AsyncRelayCommand RefreshCommand { get; }
 
         public async Task LoadAsync()
         {

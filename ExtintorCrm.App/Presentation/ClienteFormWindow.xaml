@@ -6,6 +6,7 @@
         Width="920"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
+        AllowsTransparency="True"
         ResizeMode="NoResize"
         Background="{DynamicResource AppBackground}"
         FontFamily="Segoe UI Variable"
@@ -95,12 +96,27 @@
 
                             <StackPanel Grid.Row="1">
                                 <TextBlock Text="Nome *" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
-                                <TextBox x:Name="NomeTextBox" Style="{StaticResource InputStyle}" Text="{Binding NomeFantasia, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox x:Name="NomeTextBox"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding NomeFantasia, UpdateSourceTrigger=PropertyChanged}"
+                                         TextChanged="NomeTextBox_TextChanged" />
+                                <TextBlock x:Name="NomeValidationText"
+                                           Margin="0,6,0,0"
+                                           Foreground="{DynamicResource DangerFg}"
+                                           Visibility="Collapsed" />
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Grid.Column="2">
                                 <TextBlock Text="CPF/CNPJ *" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
-                                <TextBox x:Name="CpfTextBox" Style="{StaticResource InputStyle}" Text="{Binding CpfCnpj}" LostFocus="CpfTextBox_LostFocus" />
+                                <TextBox x:Name="CpfTextBox"
+                                         Style="{StaticResource InputStyle}"
+                                         Text="{Binding CpfCnpj}"
+                                         TextChanged="CpfTextBox_TextChanged"
+                                         LostFocus="CpfTextBox_LostFocus" />
+                                <TextBlock x:Name="CpfValidationText"
+                                           Margin="0,6,0,0"
+                                           Foreground="{DynamicResource DangerFg}"
+                                           Visibility="Collapsed" />
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Margin="0,12,0,0">

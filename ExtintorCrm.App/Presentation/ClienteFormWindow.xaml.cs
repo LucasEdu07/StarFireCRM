@@ -1,16 +1,21 @@
-﻿using System.Linq;
-using System.Text.RegularExpressions;
+using System;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ExtintorCrm.App.Presentation
 {
     public partial class ClienteFormWindow : Window
     {
+        private readonly Brush _defaultTextBoxBorderBrush;
+
         public ClienteFormWindow(ClienteFormViewModel viewModel)
         {
             InitializeComponent();
             DataContext = viewModel;
+            _defaultTextBoxBorderBrush = NomeTextBox.BorderBrush;
         }
 
         private void Salvar_Click(object sender, RoutedEventArgs e)
@@ -22,28 +27,32 @@ namespace ExtintorCrm.App.Presentation
 
             if (string.IsNullOrWhiteSpace(viewModel.NomeFantasia))
             {
-                NomeTextBox.BorderBrush = System.Windows.Media.Brushes.IndianRed;
+                SetNomeValidationState(true, "Nome é obrigatório.");
                 NomeTextBox.Focus();
-                DialogService.Info(
-                    "Validação",
-                    "Nome é obrigatório.",
-                    this);
                 return;
             }
+            SetNomeValidationState(false, string.Empty);
 
             if (string.IsNullOrWhiteSpace(viewModel.CpfCnpj))
             {
-                CpfTextBox.BorderBrush = System.Windows.Media.Brushes.IndianRed;
+                SetCpfValidationState(true, "CPF/CNPJ é obrigatório.");
                 CpfTextBox.Focus();
-                DialogService.Info(
-                    "Validação",
-                    "CPF/CNPJ é obrigatório.",
-                    this);
                 return;
             }
+            SetCpfValidationState(false, string.Empty);
 
             DialogResult = true;
             Close();
+        }
+
+        private void NomeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            SetNomeValidationState(string.IsNullOrWhiteSpace(NomeTextBox.Text), "Nome é obrigatório.");
+        }
+
+        private void CpfTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            SetCpfValidationState(string.IsNullOrWhiteSpace(CpfTextBox.Text), "CPF/CNPJ é obrigatório.");
         }
 
         private void CpfTextBox_LostFocus(object sender, RoutedEventArgs e)
@@ -98,6 +107,19 @@ namespace ExtintorCrm.App.Presentation
         {
             Close();
         }
+
+        private void SetNomeValidationState(bool isInvalid, string message)
+        {
+            NomeTextBox.BorderBrush = isInvalid ? Brushes.IndianRed : _defaultTextBoxBorderBrush;
+            NomeValidationText.Text = message;
+            NomeValidationText.Visibility = isInvalid ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void SetCpfValidationState(bool isInvalid, string message)
+        {
+            CpfTextBox.BorderBrush = isInvalid ? Brushes.IndianRed : _defaultTextBoxBorderBrush;
+            CpfValidationText.Text = message;
+            CpfValidationText.Visibility = isInvalid ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 }
-

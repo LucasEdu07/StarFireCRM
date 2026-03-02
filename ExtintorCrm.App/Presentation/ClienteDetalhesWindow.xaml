@@ -7,6 +7,7 @@
         Width="1120"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
+        AllowsTransparency="True"
         ResizeMode="NoResize"
         Background="{DynamicResource AppBackground}"
         FontFamily="Segoe UI Variable"

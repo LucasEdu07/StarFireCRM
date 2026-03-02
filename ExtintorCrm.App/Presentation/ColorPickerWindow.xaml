@@ -6,6 +6,7 @@
         Height="520"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
+        AllowsTransparency="True"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         Background="{DynamicResource AppBackground}"

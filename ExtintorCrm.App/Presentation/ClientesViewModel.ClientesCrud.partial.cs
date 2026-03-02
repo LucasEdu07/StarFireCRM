@@ -46,9 +46,17 @@ namespace ExtintorCrm.App.Presentation
                 return;
             }
 
-            var clientes = await _clienteRepository.SearchAsync(SearchTerm);
-            ReplaceClientes(clientes);
-            UpdateDashboardPaymentCounters();
+            IsLoadingClientes = true;
+            try
+            {
+                var clientes = await _clienteRepository.SearchAsync(SearchTerm);
+                ReplaceClientes(clientes);
+                UpdateDashboardPaymentCounters();
+            }
+            finally
+            {
+                IsLoadingClientes = false;
+            }
         }
 
         private async Task NewAsync()

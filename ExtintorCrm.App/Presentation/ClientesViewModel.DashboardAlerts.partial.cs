@@ -21,8 +21,14 @@ namespace ExtintorCrm.App.Presentation
 
         private async Task SaveAlertSettingsAsync()
         {
-            if (!HasPendingConfigChanges)
+            if (!HasPendingConfigChanges || IsSavingSettings)
             {
+                return;
+            }
+
+            if (!IsConfigValid)
+            {
+                await ShowToastAsync("Revise as configurações antes de salvar.", "Info");
                 return;
             }
 
@@ -36,6 +42,7 @@ namespace ExtintorCrm.App.Presentation
 
             try
             {
+                IsSavingSettings = true;
                 await _configuracaoAlertaRepository.SaveAsync(config);
                 var theme = IsDarkMode ? AppThemeManager.DarkTheme : AppThemeManager.LightTheme;
                 SaveAppSettings(theme);
@@ -50,6 +57,10 @@ namespace ExtintorCrm.App.Presentation
             catch (Exception ex)
             {
                 await LogAndToastErrorAsync("Falha ao salvar configurações de alerta.", "Não foi possível salvar as configurações", ex);
+            }
+            finally
+            {
+                IsSavingSettings = false;
             }
         }
 

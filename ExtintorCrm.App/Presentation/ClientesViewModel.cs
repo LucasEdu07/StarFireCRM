@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,31 +28,31 @@ namespace ExtintorCrm.App.Presentation
         private readonly IConfiguracaoAlertaRepository _configuracaoAlertaRepository;
         private readonly IDocumentoAnexoRepository _documentoAnexoRepository;
         private readonly DocumentoStorageService _documentoStorageService;
-        private readonly RelayCommand _editCommand;
-        private readonly RelayCommand _deleteCommand;
-        private readonly RelayCommand _detailsCommand;
-        private readonly RelayCommand _importCommand;
-        private readonly RelayCommand _exportCommand;
-        private readonly RelayCommand _backupCommand;
+        private readonly AsyncRelayCommand _editCommand;
+        private readonly AsyncRelayCommand _deleteCommand;
+        private readonly AsyncRelayCommand _detailsCommand;
+        private readonly AsyncRelayCommand _importCommand;
+        private readonly AsyncRelayCommand _exportCommand;
+        private readonly AsyncRelayCommand _backupCommand;
         private readonly RelayCommand _previousPageCommand;
         private readonly RelayCommand _nextPageCommand;
-        private readonly RelayCommand _newPagamentoCommand;
-        private readonly RelayCommand _editPagamentoCommand;
-        private readonly RelayCommand _deletePagamentoCommand;
-        private readonly RelayCommand _cobrancaCommand;
-        private readonly RelayCommand _openPagamentoAttachmentsCommand;
-        private readonly RelayCommand _saveAlertSettingsCommand;
+        private readonly AsyncRelayCommand _newPagamentoCommand;
+        private readonly AsyncRelayCommand _editPagamentoCommand;
+        private readonly AsyncRelayCommand _deletePagamentoCommand;
+        private readonly AsyncRelayCommand _cobrancaCommand;
+        private readonly AsyncRelayCommand _openPagamentoAttachmentsCommand;
+        private readonly AsyncRelayCommand _saveAlertSettingsCommand;
         private readonly RelayCommand _selectBackupFolderCommand;
-        private readonly RelayCommand _restoreBackupCommand;
-        private readonly RelayCommand _recreateClientesCommand;
-        private readonly RelayCommand _recreatePagamentosCommand;
-        private readonly RelayCommand _importPagamentosCommand;
+        private readonly AsyncRelayCommand _restoreBackupCommand;
+        private readonly AsyncRelayCommand _recreateClientesCommand;
+        private readonly AsyncRelayCommand _recreatePagamentosCommand;
+        private readonly AsyncRelayCommand _importPagamentosCommand;
         private readonly RelayCommand _goToClientesCommand;
         private readonly RelayCommand _goToPagamentosCommand;
         private readonly RelayCommand _goToDashboardCommand;
         private readonly RelayCommand _toggleNotificationsCommand;
-        private readonly RelayCommand _openDashboardItemCommand;
-        private readonly RelayCommand _openDashboardAlertsCommand;
+        private readonly AsyncRelayCommand _openDashboardItemCommand;
+        private readonly AsyncRelayCommand _openDashboardAlertsCommand;
         private readonly RelayCommand _selectConfigSectionCommand;
         private readonly RelayCommand _goToPageCommand;
         private readonly RelayCommand _resetClienteFiltersCommand;
@@ -69,8 +70,8 @@ namespace ExtintorCrm.App.Presentation
         private readonly RelayCommand _resetUiVanillaColorCommand;
         private readonly RelayCommand _resetUiVanillaIntensityCommand;
         private readonly RelayCommand _resetUiChromeColorsCommand;
-        private readonly RelayCommand _contactSupportWhatsAppCommand;
-        private readonly RelayCommand _contactSupportEmailCommand;
+        private readonly AsyncRelayCommand _contactSupportWhatsAppCommand;
+        private readonly AsyncRelayCommand _contactSupportEmailCommand;
         private readonly AlertService _alertService;
         private readonly AlertRules _alertRules;
         private readonly AppSettingsService _appSettingsService;
@@ -133,6 +134,11 @@ namespace ExtintorCrm.App.Presentation
         private int _backupRetentionCount = 10;
         private DateTime? _lastAutoBackupUtc;
         private bool _isBackupRunning;
+        private bool _isSavingSettings;
+        private bool _isLoadingClientes;
+        private bool _isLoadingPagamentos;
+        private string _configValidationMessage = string.Empty;
+        private string _pagamentosLoadErrorMessage = string.Empty;
         private string _selectedConfigSection = "Aparencia";
         private string _advancedSectionPassword = string.Empty;
         private bool _isAdvancedConfigUnlocked;
@@ -150,6 +156,7 @@ namespace ExtintorCrm.App.Presentation
         private bool _hasPendingConfigChanges;
         private bool _suppressConfigDirtyTracking;
         private ConfigSnapshot _savedConfigSnapshot = ConfigSnapshot.Empty;
+        private bool _hasLoadedUiSettings;
         private readonly List<DashboardKpiCardItem> _dashboardKpiCardsIndex = [];
         private string _uiBorderColorHex = string.Empty;
         private string _uiTitleBarColorHex = string.Empty;
@@ -192,15 +199,15 @@ namespace ExtintorCrm.App.Presentation
             _buildDateTimeDisplay = ResolveBuildDateTimeDisplay();
             _releaseNotesHistory = BuildReleaseNotesHistory();
 
-            LoadCommand = new RelayCommand(async _ => await LoadAsync());
-            SearchCommand = new RelayCommand(async _ => await SearchAsync());
-            NewCommand = new RelayCommand(async _ => await NewAsync());
-            _editCommand = new RelayCommand(async _ => await EditAsync(), _ => CanEditSelectedCliente);
-            _deleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => CanDeleteSelectedClientes);
-            _detailsCommand = new RelayCommand(async _ => await ShowDetailsAsync(), _ => CanEditSelectedCliente);
-            _importCommand = new RelayCommand(async _ => await ImportAsync(), _ => !IsImporting);
-            _exportCommand = new RelayCommand(async _ => await ExportAsync(), _ => _allClientes.Any() || _allPagamentos.Any());
-            _backupCommand = new RelayCommand(async _ => await RunBackupAsync(false), _ => !IsImporting && !IsBackupRunning);
+            LoadCommand = new AsyncRelayCommand(async _ => await LoadAsync(reloadUiSettings: true));
+            SearchCommand = new AsyncRelayCommand(async _ => await SearchAsync());
+            NewCommand = new AsyncRelayCommand(async _ => await NewAsync());
+            _editCommand = new AsyncRelayCommand(async _ => await EditAsync(), _ => CanEditSelectedCliente);
+            _deleteCommand = new AsyncRelayCommand(async _ => await DeleteAsync(), _ => CanDeleteSelectedClientes);
+            _detailsCommand = new AsyncRelayCommand(async _ => await ShowDetailsAsync(), _ => CanEditSelectedCliente);
+            _importCommand = new AsyncRelayCommand(async _ => await ImportAsync(), _ => !IsImporting);
+            _exportCommand = new AsyncRelayCommand(async _ => await ExportAsync(), _ => _allClientes.Any() || _allPagamentos.Any());
+            _backupCommand = new AsyncRelayCommand(async _ => await RunBackupAsync(false), _ => !IsImporting && !IsBackupRunning);
             _previousPageCommand = new RelayCommand(_ => ChangeClientesPage(-1), _ => CanGoPrev);
             _nextPageCommand = new RelayCommand(_ => ChangeClientesPage(1), _ => CanGoNext);
             _goToPageCommand = new RelayCommand(page => GoToPage(page), page => CanGoToPage(page));
@@ -227,19 +234,19 @@ namespace ExtintorCrm.App.Presentation
                     UiVanillaIntensityPercent = 100;
                 },
                 _ => !string.IsNullOrWhiteSpace(UiBorderColorHex) || !string.IsNullOrWhiteSpace(UiTitleBarColorHex) || !string.IsNullOrWhiteSpace(UiVanillaColorHex) || UiVanillaIntensityPercent != 100);
-            _newPagamentoCommand = new RelayCommand(async _ => await NewPagamentoAsync());
-            _editPagamentoCommand = new RelayCommand(async _ => await EditPagamentoAsync(), _ => SelectedPagamento != null);
-            _deletePagamentoCommand = new RelayCommand(async _ => await DeletePagamentoAsync(), _ => SelectedPagamento != null);
-            _cobrancaCommand = new RelayCommand(async _ => await SendCobrancaAsync(), _ => SelectedPagamento != null);
-            _openPagamentoAttachmentsCommand = new RelayCommand(async _ => await OpenPagamentoAttachmentsAsync(), _ => SelectedPagamento != null);
-            _saveAlertSettingsCommand = new RelayCommand(
+            _newPagamentoCommand = new AsyncRelayCommand(async _ => await NewPagamentoAsync());
+            _editPagamentoCommand = new AsyncRelayCommand(async _ => await EditPagamentoAsync(), _ => SelectedPagamento != null);
+            _deletePagamentoCommand = new AsyncRelayCommand(async _ => await DeletePagamentoAsync(), _ => SelectedPagamento != null);
+            _cobrancaCommand = new AsyncRelayCommand(async _ => await SendCobrancaAsync(), _ => SelectedPagamento != null);
+            _openPagamentoAttachmentsCommand = new AsyncRelayCommand(async _ => await OpenPagamentoAttachmentsAsync(), _ => SelectedPagamento != null);
+            _saveAlertSettingsCommand = new AsyncRelayCommand(
                 async _ => await SaveAlertSettingsAsync(),
-                _ => HasPendingConfigChanges && !IsImporting && !IsBackupRunning);
+                _ => HasPendingConfigChanges && !IsImporting && !IsBackupRunning && !IsSavingSettings && IsConfigValid);
             _selectBackupFolderCommand = new RelayCommand(_ => SelectBackupFolder());
-            _restoreBackupCommand = new RelayCommand(async _ => await RestoreBackupAsync(), _ => !IsImporting && !IsBackupRunning);
-            _recreateClientesCommand = new RelayCommand(async _ => await RecreateClientesAsync(), _ => IsAdvancedConfigUnlocked && !IsImporting && !IsBackupRunning);
-            _recreatePagamentosCommand = new RelayCommand(async _ => await RecreatePagamentosAsync(), _ => IsAdvancedConfigUnlocked && !IsImporting && !IsBackupRunning);
-            _importPagamentosCommand = new RelayCommand(async _ => await ImportPagamentosAsync(), _ => !IsImporting && !IsBackupRunning);
+            _restoreBackupCommand = new AsyncRelayCommand(async _ => await RestoreBackupAsync(), _ => !IsImporting && !IsBackupRunning);
+            _recreateClientesCommand = new AsyncRelayCommand(async _ => await RecreateClientesAsync(), _ => IsAdvancedConfigUnlocked && !IsImporting && !IsBackupRunning);
+            _recreatePagamentosCommand = new AsyncRelayCommand(async _ => await RecreatePagamentosAsync(), _ => IsAdvancedConfigUnlocked && !IsImporting && !IsBackupRunning);
+            _importPagamentosCommand = new AsyncRelayCommand(async _ => await ImportPagamentosAsync(), _ => !IsImporting && !IsBackupRunning);
             _goToDashboardCommand = new RelayCommand(_ =>
             {
                 SelectedMainTabIndex = 0;
@@ -248,11 +255,11 @@ namespace ExtintorCrm.App.Presentation
             _goToClientesCommand = new RelayCommand(_ => SelectedMainTabIndex = 1);
             _goToPagamentosCommand = new RelayCommand(_ => SelectedMainTabIndex = 2);
             _toggleNotificationsCommand = new RelayCommand(_ => IsNotificationPanelOpen = !IsNotificationPanelOpen);
-            _openDashboardItemCommand = new RelayCommand(async item => await OpenDashboardItemAsync(item as DashboardAlertItem), item => item is DashboardAlertItem);
-            _openDashboardAlertsCommand = new RelayCommand(async key => await OpenDashboardAlertsAsync(key as string));
+            _openDashboardItemCommand = new AsyncRelayCommand(async item => await OpenDashboardItemAsync(item as DashboardAlertItem), item => item is DashboardAlertItem);
+            _openDashboardAlertsCommand = new AsyncRelayCommand(async key => await OpenDashboardAlertsAsync(key as string));
             _selectConfigSectionCommand = new RelayCommand(section => SelectConfigSection(section as string));
-            _contactSupportWhatsAppCommand = new RelayCommand(async _ => await ContactSupportWhatsAppAsync());
-            _contactSupportEmailCommand = new RelayCommand(async _ => await ContactSupportEmailAsync());
+            _contactSupportWhatsAppCommand = new AsyncRelayCommand(async _ => await ContactSupportWhatsAppAsync());
+            _contactSupportEmailCommand = new AsyncRelayCommand(async _ => await ContactSupportEmailAsync());
             EditCommand = _editCommand;
             DeleteCommand = _deleteCommand;
             DetailsCommand = _detailsCommand;
@@ -301,6 +308,7 @@ namespace ExtintorCrm.App.Presentation
             Dashboard = new DashboardViewModel();
             InitializeDashboardKpiCards();
             ApplyWindowMode();
+            RecomputeConfigValidation();
         }
 
         public ObservableCollection<Cliente> Clientes { get; } = new();
@@ -443,6 +451,7 @@ namespace ExtintorCrm.App.Presentation
             {
                 _searchTerm = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(ClientesStateDescription));
                 QueueSearch();
             }
         }
@@ -461,6 +470,7 @@ namespace ExtintorCrm.App.Presentation
                 _pagamentoSearchTerm = normalized;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CanResetPagamentoFilters));
+                OnPropertyChanged(nameof(PagamentosStateDescription));
                 _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
                 QueuePagamentoSearch();
             }
@@ -480,6 +490,7 @@ namespace ExtintorCrm.App.Presentation
                 _pagamentoFilter = normalized;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CanResetPagamentoFilters));
+                OnPropertyChanged(nameof(PagamentosStateDescription));
                 _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
                 ApplyPagamentoFilter();
             }
@@ -789,6 +800,7 @@ namespace ExtintorCrm.App.Presentation
                 OnPropertyChanged(nameof(DisplayTo));
                 OnPropertyChanged(nameof(FooterSummary));
                 OnPropertyChanged(nameof(ShowPagination));
+                OnPropertyChanged(nameof(ShowClientesEmptyState));
             }
         }
 
@@ -988,6 +1000,100 @@ namespace ExtintorCrm.App.Presentation
                 _recreateClientesCommand.RaiseCanExecuteChanged();
                 _recreatePagamentosCommand.RaiseCanExecuteChanged();
                 _saveAlertSettingsCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public bool IsLoadingClientes
+        {
+            get => _isLoadingClientes;
+            private set
+            {
+                if (_isLoadingClientes == value)
+                {
+                    return;
+                }
+
+                _isLoadingClientes = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ShowClientesLoadingState));
+                OnPropertyChanged(nameof(ShowClientesEmptyState));
+                OnPropertyChanged(nameof(ClientesStateTitle));
+                OnPropertyChanged(nameof(ClientesStateDescription));
+            }
+        }
+
+        public bool IsLoadingPagamentos
+        {
+            get => _isLoadingPagamentos;
+            private set
+            {
+                if (_isLoadingPagamentos == value)
+                {
+                    return;
+                }
+
+                _isLoadingPagamentos = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ShowPagamentosLoadingState));
+                OnPropertyChanged(nameof(ShowPagamentosErrorState));
+                OnPropertyChanged(nameof(ShowPagamentosEmptyState));
+                OnPropertyChanged(nameof(PagamentosStateTitle));
+                OnPropertyChanged(nameof(PagamentosStateDescription));
+            }
+        }
+
+        public bool IsSavingSettings
+        {
+            get => _isSavingSettings;
+            private set
+            {
+                if (_isSavingSettings == value)
+                {
+                    return;
+                }
+
+                _isSavingSettings = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ConfigSaveButtonText));
+                _saveAlertSettingsCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public string ConfigValidationMessage
+        {
+            get => _configValidationMessage;
+            private set
+            {
+                if (string.Equals(_configValidationMessage, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _configValidationMessage = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasConfigValidationError));
+                OnPropertyChanged(nameof(IsConfigValid));
+                _saveAlertSettingsCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public string PagamentosLoadErrorMessage
+        {
+            get => _pagamentosLoadErrorMessage;
+            private set
+            {
+                if (string.Equals(_pagamentosLoadErrorMessage, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _pagamentosLoadErrorMessage = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasPagamentosLoadError));
+                OnPropertyChanged(nameof(ShowPagamentosErrorState));
+                OnPropertyChanged(nameof(ShowPagamentosEmptyState));
+                OnPropertyChanged(nameof(PagamentosStateTitle));
+                OnPropertyChanged(nameof(PagamentosStateDescription));
             }
         }
 
@@ -1354,6 +1460,7 @@ namespace ExtintorCrm.App.Presentation
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(BackupModeLabel));
                 RecomputePendingConfigChanges();
+                RecomputeConfigValidation();
             }
         }
 
@@ -1371,6 +1478,7 @@ namespace ExtintorCrm.App.Presentation
                 _backupFolder = normalized;
                 OnPropertyChanged();
                 RecomputePendingConfigChanges();
+                RecomputeConfigValidation();
             }
         }
 
@@ -1429,6 +1537,33 @@ namespace ExtintorCrm.App.Presentation
         public string BackupModeLabel => BackupAutomatico ? "Ativado" : "Desativado";
         public string BackupIntervalLabel => $"A cada {BackupIntervalHours}h";
         public string BackupRetentionLabel => $"Manter últimos {BackupRetentionCount} arquivos";
+        public string ConfigSaveButtonText => IsSavingSettings ? "Salvando configurações..." : "Salvar configurações";
+        public bool HasConfigValidationError => !string.IsNullOrWhiteSpace(ConfigValidationMessage);
+        public bool IsConfigValid => !HasConfigValidationError;
+        public bool ShowClientesLoadingState => IsLoadingClientes;
+        public bool ShowClientesEmptyState => !IsLoadingClientes && TotalClientes == 0;
+        public string ClientesStateTitle => IsLoadingClientes ? "Carregando clientes..." : "Nenhum cliente encontrado";
+        public string ClientesStateDescription => IsLoadingClientes
+            ? "Aguarde enquanto carregamos os dados."
+            : string.IsNullOrWhiteSpace(SearchTerm)
+                ? "Cadastre um cliente novo ou importe uma planilha para começar."
+                : $"Sem resultados para \"{SearchTerm.Trim()}\". Ajuste os filtros e tente novamente.";
+        public bool HasPagamentosLoadError => !string.IsNullOrWhiteSpace(PagamentosLoadErrorMessage);
+        public bool ShowPagamentosLoadingState => IsLoadingPagamentos;
+        public bool ShowPagamentosErrorState => !IsLoadingPagamentos && HasPagamentosLoadError;
+        public bool ShowPagamentosEmptyState => !IsLoadingPagamentos && !HasPagamentosLoadError && Pagamentos.Count == 0;
+        public string PagamentosStateTitle => IsLoadingPagamentos
+            ? "Carregando pagamentos..."
+            : HasPagamentosLoadError
+                ? "Falha ao carregar pagamentos"
+                : "Nenhum pagamento encontrado";
+        public string PagamentosStateDescription => IsLoadingPagamentos
+            ? "Aguarde enquanto carregamos os dados."
+            : HasPagamentosLoadError
+                ? PagamentosLoadErrorMessage
+                : string.IsNullOrWhiteSpace(PagamentoSearchTerm)
+                    ? "Cadastre um pagamento novo ou importe uma planilha para começar."
+                    : $"Sem resultados para \"{PagamentoSearchTerm.Trim()}\" com os filtros atuais.";
         public string LastBackupLabel => _lastAutoBackupUtc.HasValue
             ? _lastAutoBackupUtc.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
             : "Nunca executado";
@@ -1477,23 +1612,36 @@ namespace ExtintorCrm.App.Presentation
             }
         }
 
-        private async Task LoadAsync()
+        private async Task LoadAsync(bool reloadUiSettings = false)
         {
-            _suppressConfigDirtyTracking = true;
+            if (reloadUiSettings || !_hasLoadedUiSettings)
+            {
+                _suppressConfigDirtyTracking = true;
+                try
+                {
+                    LoadThemeSettings();
+                    await LoadAlertSettingsAsync();
+                }
+                finally
+                {
+                    _suppressConfigDirtyTracking = false;
+                }
+
+                CaptureSavedConfigSnapshot();
+                _hasLoadedUiSettings = true;
+            }
+
+            IsLoadingClientes = true;
             try
             {
-                LoadThemeSettings();
-                await LoadAlertSettingsAsync();
+                var clientes = await _clienteRepository.GetAllAsync();
+                ReplaceClientes(clientes);
+                await LoadPagamentosAsync();
             }
             finally
             {
-                _suppressConfigDirtyTracking = false;
+                IsLoadingClientes = false;
             }
-
-            CaptureSavedConfigSnapshot();
-            var clientes = await _clienteRepository.GetAllAsync();
-            ReplaceClientes(clientes);
-            await LoadPagamentosAsync();
         }
 
         private void LoadThemeSettings()
@@ -1526,6 +1674,7 @@ namespace ExtintorCrm.App.Presentation
             AppThemeManager.ApplyTheme(settings.Theme);
             ApplyUiChromeCustomization();
             ApplyWindowMode();
+            RecomputeConfigValidation();
             OnPropertyChanged(nameof(LastBackupLabel));
             StartBackupScheduler();
         }
@@ -1611,6 +1760,29 @@ namespace ExtintorCrm.App.Presentation
             }
 
             HasPendingConfigChanges = BuildCurrentConfigSnapshot() != _savedConfigSnapshot;
+        }
+
+        private void RecomputeConfigValidation()
+        {
+            if (!BackupAutomatico)
+            {
+                ConfigValidationMessage = string.Empty;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(BackupFolder))
+            {
+                ConfigValidationMessage = "Defina a pasta de destino para o backup automático.";
+                return;
+            }
+
+            if (!Directory.Exists(BackupFolder))
+            {
+                ConfigValidationMessage = "A pasta de backup informada não existe. Selecione uma pasta válida.";
+                return;
+            }
+
+            ConfigValidationMessage = string.Empty;
         }
 
         private void CaptureSavedConfigSnapshot()

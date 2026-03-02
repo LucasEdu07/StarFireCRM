@@ -13,49 +13,63 @@ namespace ExtintorCrm.App.Presentation
     {
         private async Task LoadPagamentosAsync()
         {
-            var pagamentos = await _pagamentoRepository.GetAllAsync();
-            var clientes = await _clienteRepository.GetAllAsync();
-            var clientesById = clientes.ToDictionary(c => c.Id, c => c);
-            var clientesByCpf = clientes
-                .Where(c => !string.IsNullOrWhiteSpace(c.CPF))
-                .Select(c => new { Key = NormalizeDigits(c.CPF), Cliente = c })
-                .Where(x => !string.IsNullOrWhiteSpace(x.Key))
-                .GroupBy(x => x.Key!)
-                .ToDictionary(g => g.Key, g => g.First().Cliente);
-
-            foreach (var pagamento in pagamentos)
+            IsLoadingPagamentos = true;
+            try
             {
-                Cliente? cliente = null;
-                var pagamentoCpf = NormalizeDigits(pagamento.CpfCnpjCliente);
-                if (!string.IsNullOrWhiteSpace(pagamentoCpf) && clientesByCpf.TryGetValue(pagamentoCpf!, out var byCpf))
+                var pagamentos = await _pagamentoRepository.GetAllAsync();
+                var clientes = await _clienteRepository.GetAllAsync();
+                var clientesById = clientes.ToDictionary(c => c.Id, c => c);
+                var clientesByCpf = clientes
+                    .Where(c => !string.IsNullOrWhiteSpace(c.CPF))
+                    .Select(c => new { Key = NormalizeDigits(c.CPF), Cliente = c })
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Key))
+                    .GroupBy(x => x.Key!)
+                    .ToDictionary(g => g.Key, g => g.First().Cliente);
+
+                foreach (var pagamento in pagamentos)
                 {
-                    cliente = byCpf;
-                }
-                else if (clientesById.TryGetValue(pagamento.ClienteId, out var byId))
-                {
-                    cliente = byId;
+                    Cliente? cliente = null;
+                    var pagamentoCpf = NormalizeDigits(pagamento.CpfCnpjCliente);
+                    if (!string.IsNullOrWhiteSpace(pagamentoCpf) && clientesByCpf.TryGetValue(pagamentoCpf!, out var byCpf))
+                    {
+                        cliente = byCpf;
+                    }
+                    else if (clientesById.TryGetValue(pagamento.ClienteId, out var byId))
+                    {
+                        cliente = byId;
+                    }
+
+                    if (cliente != null)
+                    {
+                        pagamento.ClienteId = cliente.Id;
+                        pagamento.CpfCnpjCliente = cliente.CPF ?? cliente.Documento;
+                        pagamento.ClienteNome = cliente.NomeFantasia;
+                    }
+                    else
+                    {
+                        pagamento.ClienteNome = "Cliente nao identificado";
+                    }
                 }
 
-                if (cliente != null)
-                {
-                    pagamento.ClienteId = cliente.Id;
-                    pagamento.CpfCnpjCliente = cliente.CPF ?? cliente.Documento;
-                    pagamento.ClienteNome = cliente.NomeFantasia;
-                }
-                else
-                {
-                    pagamento.ClienteNome = "Cliente nao identificado";
-                }
+                _allPagamentos.Clear();
+                _allPagamentos.AddRange(pagamentos);
+                PagamentosLoadErrorMessage = string.Empty;
+                _alertService.ApplyAlerts(_allPagamentos);
+                ApplyPagamentoFilter();
+                _exportCommand.RaiseCanExecuteChanged();
+                UpdateDashboardPaymentCounters();
+                RefreshCriticalAlerts();
+                RefreshDashboardExecutiveData();
             }
-
-            _allPagamentos.Clear();
-            _allPagamentos.AddRange(pagamentos);
-            _alertService.ApplyAlerts(_allPagamentos);
-            ApplyPagamentoFilter();
-            _exportCommand.RaiseCanExecuteChanged();
-            UpdateDashboardPaymentCounters();
-            RefreshCriticalAlerts();
-            RefreshDashboardExecutiveData();
+            catch (Exception ex)
+            {
+                PagamentosLoadErrorMessage = "Não foi possível carregar os pagamentos. Tente novamente.";
+                await LogAndToastErrorAsync("Falha ao carregar pagamentos.", "Falha ao carregar pagamentos", ex);
+            }
+            finally
+            {
+                IsLoadingPagamentos = false;
+            }
         }
 
         private void ApplyPagamentoFilter()
@@ -86,6 +100,9 @@ namespace ExtintorCrm.App.Presentation
             }
             SelectedPagamento = null;
             OnPropertyChanged(nameof(CanResetPagamentoFilters));
+            OnPropertyChanged(nameof(ShowPagamentosEmptyState));
+            OnPropertyChanged(nameof(PagamentosStateTitle));
+            OnPropertyChanged(nameof(PagamentosStateDescription));
             _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
         }
 

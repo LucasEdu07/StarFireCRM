@@ -34,12 +34,19 @@
   <ItemGroup>
     <Content Include="Dependencies\WebView2\WebView2Loader.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
 
   <Target Name="CopyWebView2Loader" AfterTargets="Build">
     <Copy SourceFiles="Dependencies\WebView2\WebView2Loader.dll"
           DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyWebView2LoaderToPublishRoot" AfterTargets="Publish">
+    <Copy SourceFiles="Dependencies\WebView2\WebView2Loader.dll"
+          DestinationFolder="$(PublishDir)"
           SkipUnchangedFiles="true" />
   </Target>
 

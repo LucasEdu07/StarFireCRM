@@ -38,7 +38,6 @@
             <Setter Property="Height" Value="40" />
         </Style>
 
-        <Style x:Key="SwitchStyle" TargetType="ToggleButton" BasedOn="{StaticResource ModernLightSwitch3D}" />
     </Window.Resources>
 
     <Grid>
@@ -105,11 +104,6 @@
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Margin="0,12,0,0">
-                                <TextBlock Text="Status" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
-                                <ToggleButton Style="{StaticResource SwitchStyle}" IsChecked="{Binding IsAtivo}" />
-                            </StackPanel>
-
-                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
                                 <TextBlock Text="Contato" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
                                 <TextBox Style="{StaticResource InputStyle}" Text="{Binding Contato}" />
                             </StackPanel>

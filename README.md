@@ -125,6 +125,28 @@ Checklist rapido:
 - Separar commits por tema (ex.: UX, bugfix, higiene)
 - Garantir que build e smoke continuam verdes
 
+## Ralph Loop Local (Codex)
+
+Para rodar um loop iterativo de validacao (estilo "ralph loop") com build + smoke:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Ralph-Loop.ps1 -MaxCycles 5
+```
+
+Modo manual entre ciclos (pausa para voce ajustar no Codex e continuar):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Ralph-Loop.ps1 -MaxCycles 5 -PromptBetweenCycles
+```
+
+Com comandos customizados de correcao entre ciclos:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Ralph-Loop.ps1 `
+  -MaxCycles 3 `
+  -FixCommands "dotnet format .\ExtintorCrm.sln --verify-no-changes"
+```
+
 ## Suporte
 
 No app, acesse **Configuracoes > Sobre** para acionar suporte por WhatsApp ou e-mail com mensagem pre-preenchida.

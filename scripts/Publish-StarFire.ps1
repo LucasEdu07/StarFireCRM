@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.0.5",
+    [string]$Version = "1.0.6",
     [string]$Configuration = "Release",
     [switch]$BuildInstaller
 )
@@ -16,13 +16,12 @@ if (Test-Path $outputDir) {
     Remove-Item -Recurse -Force $outputDir
 }
 
-Write-Host ">> Publicando Star Fire (self-contained, win-x64)..."
+Write-Host ">> Publicando Star Fire (self-contained, win-x64, multi-file)..."
 dotnet publish $project `
   -c $Configuration `
   -r win-x64 `
   --self-contained true `
-  /p:PublishSingleFile=true `
-  /p:IncludeNativeLibrariesForSelfExtract=true `
+  /p:PublishSingleFile=false `
   /p:PublishTrimmed=false `
   /p:DebugType=None `
   /p:DebugSymbols=false `

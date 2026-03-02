@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <Version>1.0.6</Version>
+    <Version>1.0.7</Version>
     <ApplicationIcon Condition="Exists('Assets\\AppIcon\\startfire.ico')">Assets\AppIcon\startfire.ico</ApplicationIcon>
   </PropertyGroup>
 

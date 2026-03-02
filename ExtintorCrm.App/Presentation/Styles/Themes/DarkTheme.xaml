@@ -62,6 +62,10 @@
     <SolidColorBrush x:Key="BadgeDangerFg" Color="#F4D2D2" />
     <SolidColorBrush x:Key="BadgeMutedBg" Color="#2B3F57" />
     <SolidColorBrush x:Key="BadgeMutedFg" Color="#D2DCEC" />
+    <SolidColorBrush x:Key="ClienteInactiveRowBackground" Color="#22364D" />
+    <SolidColorBrush x:Key="ClienteInactiveRowHoverBackground" Color="#2A425D" />
+    <SolidColorBrush x:Key="ClienteInactiveBadgeBg" Color="#324B68" />
+    <SolidColorBrush x:Key="ClienteInactiveBadgeFg" Color="#D9E5F5" />
     <LinearGradientBrush x:Key="KpiDangerCardBackground" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#2D2023" Offset="0" />
         <GradientStop Color="#332327" Offset="1" />

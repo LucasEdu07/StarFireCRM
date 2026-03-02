@@ -43,6 +43,10 @@
                         <Setter Property="Background" Value="{DynamicResource BadgeDangerBg}" />
                         <Setter Property="BorderBrush" Value="{DynamicResource BadgeDangerBg}" />
                     </DataTrigger>
+                    <DataTrigger Binding="{Binding IsAtivo}" Value="False">
+                        <Setter Property="Background" Value="{DynamicResource ClienteInactiveBadgeBg}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource ClienteInactiveBadgeBg}" />
+                    </DataTrigger>
                 </Style.Triggers>
             </Style>
 
@@ -61,6 +65,9 @@
                     </DataTrigger>
                     <DataTrigger Binding="{Binding SituacaoNivel}" Value="Vencido">
                         <Setter Property="Foreground" Value="{DynamicResource BadgeDangerFg}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsAtivo}" Value="False">
+                        <Setter Property="Foreground" Value="{DynamicResource ClienteInactiveBadgeFg}" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -315,6 +322,20 @@
                         <Setter Property="BorderBrush" Value="{DynamicResource RowSelectedBorder}" />
                         <Setter Property="BorderThickness" Value="3,1,1,1" />
                     </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="ClienteRowStyle" TargetType="DataGridRow" BasedOn="{StaticResource UnifiedGridRowStyle}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsAtivo}" Value="False">
+                        <Setter Property="Background" Value="{DynamicResource ClienteInactiveRowBackground}" />
+                    </DataTrigger>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsAtivo}" Value="False" />
+                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True" />
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="{DynamicResource ClienteInactiveRowHoverBackground}" />
+                    </MultiDataTrigger>
                 </Style.Triggers>
             </Style>
 
@@ -2481,7 +2502,7 @@
                                       FontSize="12.8"
                                       SelectionMode="Extended"
                                       SelectionUnit="FullRow"
-                                      RowStyle="{StaticResource UnifiedGridRowStyle}"
+                                      RowStyle="{StaticResource ClienteRowStyle}"
                                       ColumnHeaderStyle="{StaticResource UnifiedGridHeaderStyle}"
                                       ItemsSource="{Binding Clientes}"
                                       SelectedItem="{Binding SelectedCliente, Mode=TwoWay}"
@@ -2529,7 +2550,7 @@
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
-                            <Border Background="#D9FFFFFF"
+                            <Border Background="{DynamicResource SurfaceBackground}"
                                     CornerRadius="10"
                                     Margin="8"
                                     Padding="18"
@@ -2553,7 +2574,7 @@
                                                Foreground="{DynamicResource TextSecondary}" />
                                 </StackPanel>
                             </Border>
-                            <Border Background="#CCFFFFFF"
+                            <Border Background="{DynamicResource CardBackground}"
                                     CornerRadius="10"
                                     Margin="8"
                                     Padding="18"
@@ -2854,7 +2875,7 @@
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
-                            <Border Background="#D9FFFFFF"
+                            <Border Background="{DynamicResource SurfaceBackground}"
                                     CornerRadius="10"
                                     Margin="8"
                                     Padding="18"
@@ -2878,7 +2899,7 @@
                                                Foreground="{DynamicResource TextSecondary}" />
                                 </StackPanel>
                             </Border>
-                            <Border Background="#CCFFFFFF"
+                            <Border Background="{DynamicResource CardBackground}"
                                     CornerRadius="10"
                                     Margin="8"
                                     Padding="18"
@@ -2905,7 +2926,7 @@
                                                MaxWidth="420" />
                                 </StackPanel>
                             </Border>
-                            <Border Background="#CCFFFFFF"
+                            <Border Background="{DynamicResource CardBackground}"
                                     CornerRadius="10"
                                     Margin="8"
                                     Padding="18"

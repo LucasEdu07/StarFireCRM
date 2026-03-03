@@ -126,6 +126,10 @@ namespace ExtintorCrm.App.Presentation
                 return;
             }
 
+            var deletedSnapshots = selected
+                .Select(CloneClienteForUndo)
+                .ToArray();
+
             foreach (var cliente in selected)
             {
                 await _clienteRepository.DeleteAsync(cliente.Id);
@@ -133,7 +137,12 @@ namespace ExtintorCrm.App.Presentation
 
             UpdateSelectedClientes([]);
             await ReloadListAsync();
-            await ShowToastAsync(selected.Count == 1 ? "Cliente excluído com sucesso." : "Clientes excluídos com sucesso.", "Success");
+            await ShowToastAsync(
+                selected.Count == 1 ? "Cliente excluído com sucesso." : "Clientes excluídos com sucesso.",
+                "Success",
+                "Desfazer",
+                async () => await RestoreDeletedClientesAsync(deletedSnapshots),
+                6000);
         }
 
         private async Task ShowDetailsAsync()
@@ -210,6 +219,50 @@ namespace ExtintorCrm.App.Presentation
             }
 
             await SearchAsync();
+        }
+
+        private async Task RestoreDeletedClientesAsync(Cliente[] snapshots)
+        {
+            if (snapshots.Length == 0)
+            {
+                return;
+            }
+
+            var restoredIds = new List<Guid>();
+            var skippedCount = 0;
+
+            foreach (var snapshot in snapshots)
+            {
+                if (await _clienteRepository.GetByIdAsync(snapshot.Id) != null)
+                {
+                    skippedCount++;
+                    continue;
+                }
+
+                var normalizedCpf = NormalizeDigits(snapshot.CPF ?? snapshot.Documento);
+                if (!string.IsNullOrWhiteSpace(normalizedCpf) && await _clienteRepository.ExistsByCpfAsync(normalizedCpf!))
+                {
+                    skippedCount++;
+                    continue;
+                }
+
+                await _clienteRepository.AddAsync(CloneClienteForUndo(snapshot));
+                restoredIds.Add(snapshot.Id);
+            }
+
+            await ReloadListAsync();
+
+            var reselected = _allClientes.Where(c => restoredIds.Contains(c.Id)).ToList();
+            if (reselected.Count > 0)
+            {
+                UpdateSelectedClientes(reselected);
+            }
+
+            var restoredCount = restoredIds.Count;
+            var summary = skippedCount > 0
+                ? $"Desfazer concluído: {restoredCount} restaurado(s), {skippedCount} ignorado(s)."
+                : $"Desfazer concluído: {restoredCount} restaurado(s).";
+            await ShowToastAsync(summary, restoredCount > 0 ? "Success" : "Info");
         }
 
         private void ReplaceClientes(IEnumerable<Cliente> clientes)

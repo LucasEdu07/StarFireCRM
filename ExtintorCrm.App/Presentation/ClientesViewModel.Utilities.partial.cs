@@ -285,6 +285,85 @@ namespace ExtintorCrm.App.Presentation
             return $"[COBRANCA {timestamp}] Canal={canal} | Etapa={etapa} | Tom={tom} | Msg=\"{resumo}\"";
         }
 
+        private static Cliente CloneClienteForUndo(Cliente source)
+        {
+            return new Cliente
+            {
+                Id = source.Id,
+                NomeFantasia = source.NomeFantasia,
+                RazaoSocial = source.RazaoSocial,
+                Documento = source.Documento,
+                RG = source.RG,
+                CPF = source.CPF,
+                Nascimento = source.Nascimento,
+                Sexo = source.Sexo,
+                Categoria = source.Categoria,
+                Contato = source.Contato,
+                TipoContato = source.TipoContato,
+                Telefone = source.Telefone,
+                Telefone1 = source.Telefone1,
+                Telefone2 = source.Telefone2,
+                Telefone3 = source.Telefone3,
+                Email = source.Email,
+                Endereco = source.Endereco,
+                Numero = source.Numero,
+                Complemento = source.Complemento,
+                Bairro = source.Bairro,
+                Cidade = source.Cidade,
+                UF = source.UF,
+                CEP = source.CEP,
+                Observacoes = source.Observacoes,
+                TipoServico = source.TipoServico,
+                StatusRecarga = source.StatusRecarga,
+                VencimentoServico = source.VencimentoServico,
+                VencimentoExtintores = source.VencimentoExtintores,
+                NumeroAlvara = source.NumeroAlvara,
+                VencimentoAlvara = source.VencimentoAlvara,
+                Representante = source.Representante,
+                IsAtivo = source.IsAtivo,
+                Status = source.Status,
+                AvisoAtivo = source.AvisoAtivo,
+                CriadoEm = source.CriadoEm,
+                AtualizadoEm = source.AtualizadoEm
+            };
+        }
+
+        private static Pagamento ClonePagamentoForUndo(Pagamento source)
+        {
+            return new Pagamento
+            {
+                Id = source.Id,
+                ClienteId = source.ClienteId,
+                CpfCnpjCliente = source.CpfCnpjCliente,
+                Tipo = source.Tipo,
+                Status = source.Status,
+                DataPrevista = source.DataPrevista,
+                DataEfetiva = source.DataEfetiva,
+                VencimentoFatura = source.VencimentoFatura,
+                ValorPrevisto = source.ValorPrevisto,
+                ValorEfetivo = source.ValorEfetivo,
+                Categoria = source.Categoria,
+                Subcategoria = source.Subcategoria,
+                Conta = source.Conta,
+                ContaTransferencia = source.ContaTransferencia,
+                Centro = source.Centro,
+                Contato = source.Contato,
+                RazaoSocial = source.RazaoSocial,
+                Forma = source.Forma,
+                Projeto = source.Projeto,
+                NumeroDocumento = source.NumeroDocumento,
+                Observacoes = source.Observacoes,
+                Descricao = source.Descricao,
+                Valor = source.Valor,
+                DataVencimento = source.DataVencimento,
+                Pago = source.Pago,
+                DataPagamento = source.DataPagamento,
+                CriadoEm = source.CriadoEm,
+                AtualizadoEm = source.AtualizadoEm,
+                ClienteNome = source.ClienteNome
+            };
+        }
+
         private static (string Subject, string Message) BuildCobrancaMessage(
             string clienteNome,
             Pagamento pagamento,
@@ -395,6 +474,15 @@ namespace ExtintorCrm.App.Presentation
         {
             return new List<ReleaseNoteVersion>
             {
+                new(
+                    "1.0.8",
+                    "02/03/2026",
+                    new[]
+                    {
+                        "Toasts com ações rápidas para abrir cadastro, anexos e exportações concluídas.",
+                        "Indicador global de progresso para operações longas (importação, exportação e backups).",
+                        "Modo compacto inicial com filtros colapsáveis e base de design tokens para evolução visual."
+                    }),
                 new(
                     "1.0.7",
                     "02/03/2026",

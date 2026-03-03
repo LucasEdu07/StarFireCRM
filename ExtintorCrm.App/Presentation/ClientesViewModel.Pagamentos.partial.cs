@@ -229,9 +229,15 @@ namespace ExtintorCrm.App.Presentation
                 return;
             }
 
+            var deletedSnapshot = ClonePagamentoForUndo(SelectedPagamento);
             await _pagamentoRepository.DeleteAsync(SelectedPagamento.Id);
             await LoadPagamentosAsync();
-            await ShowToastAsync("Pagamento excluido com sucesso.", "Success");
+            await ShowToastAsync(
+                "Pagamento excluido com sucesso.",
+                "Success",
+                "Desfazer",
+                async () => await RestoreDeletedPagamentoAsync(deletedSnapshot),
+                6000);
         }
 
         private async Task SendCobrancaAsync()
@@ -360,6 +366,20 @@ namespace ExtintorCrm.App.Presentation
             {
                 await LogAndToastErrorAsync("Falha ao abrir canal de cobranca.", "Falha ao abrir canal de cobranca", ex);
             }
+        }
+
+        private async Task RestoreDeletedPagamentoAsync(Pagamento snapshot)
+        {
+            if (await _pagamentoRepository.GetByIdAsync(snapshot.Id) != null)
+            {
+                await ShowToastAsync("Este pagamento já foi restaurado anteriormente.", "Info");
+                return;
+            }
+
+            await _pagamentoRepository.AddAsync(ClonePagamentoForUndo(snapshot));
+            await LoadPagamentosAsync();
+            SelectedPagamento = _allPagamentos.FirstOrDefault(p => p.Id == snapshot.Id);
+            await ShowToastAsync("Pagamento restaurado com sucesso.", "Success");
         }
 
         private async Task RegisterCobrancaInteractionAsync(

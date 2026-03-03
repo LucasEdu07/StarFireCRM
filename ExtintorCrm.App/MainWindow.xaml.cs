@@ -916,25 +916,90 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
-        if (TourOverlay.Visibility != Visibility.Visible)
+        if (TourOverlay.Visibility == Visibility.Visible)
+        {
+            switch (e.Key)
+            {
+                case Key.Escape:
+                    CloseTour();
+                    e.Handled = true;
+                    break;
+                case Key.Left:
+                    TourPrevButton_Click(sender, e);
+                    e.Handled = true;
+                    break;
+                case Key.Right:
+                    TourNextButton_Click(sender, e);
+                    e.Handled = true;
+                    break;
+            }
+
+            return;
+        }
+
+        if (Keyboard.Modifiers != ModifierKeys.Control)
         {
             return;
         }
 
         switch (e.Key)
         {
-            case Key.Escape:
-                CloseTour();
+            case Key.D1:
+            case Key.NumPad1:
+                _viewModel.SelectedMainTabIndex = 0;
                 e.Handled = true;
                 break;
-            case Key.Left:
-                TourPrevButton_Click(sender, e);
+            case Key.D2:
+            case Key.NumPad2:
+                _viewModel.SelectedMainTabIndex = 1;
                 e.Handled = true;
                 break;
-            case Key.Right:
-                TourNextButton_Click(sender, e);
+            case Key.D3:
+            case Key.NumPad3:
+                _viewModel.SelectedMainTabIndex = 2;
                 e.Handled = true;
                 break;
+            case Key.D4:
+            case Key.NumPad4:
+                _viewModel.SelectedMainTabIndex = 3;
+                e.Handled = true;
+                break;
+            case Key.N:
+                if (_viewModel.SelectedMainTabIndex == 1)
+                {
+                    ExecuteCommand(_viewModel.NewCommand);
+                    e.Handled = true;
+                }
+                else if (_viewModel.SelectedMainTabIndex == 2)
+                {
+                    ExecuteCommand(_viewModel.NewPagamentoCommand);
+                    e.Handled = true;
+                }
+
+                break;
+            case Key.F:
+                if (_viewModel.SelectedMainTabIndex == 1 && ClientesSearchTextBox != null)
+                {
+                    ClientesSearchTextBox.Focus();
+                    ClientesSearchTextBox.SelectAll();
+                    e.Handled = true;
+                }
+                else if (_viewModel.SelectedMainTabIndex == 2 && PagamentosSearchTextBox != null)
+                {
+                    PagamentosSearchTextBox.Focus();
+                    PagamentosSearchTextBox.SelectAll();
+                    e.Handled = true;
+                }
+
+                break;
+        }
+    }
+
+    private static void ExecuteCommand(ICommand command)
+    {
+        if (command.CanExecute(null))
+        {
+            command.Execute(null);
         }
     }
 

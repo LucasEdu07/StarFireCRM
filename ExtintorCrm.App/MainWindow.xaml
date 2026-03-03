@@ -676,6 +676,13 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource AccentBlueBorder}" />
                 <Setter Property="Foreground" Value="{DynamicResource ButtonSecondaryFg}" />
             </Style>
+            <Style x:Key="ShortcutHintTextStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="FontStyle" Value="Italic" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="0,0,12,0" />
+            </Style>
 
             <Style x:Key="SupportWhatsAppButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonBaseStyle}">
                 <Setter Property="Height" Value="42" />
@@ -2150,7 +2157,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                <Button Style="{StaticResource ActionBarPrimaryButtonStyle}" Margin="0,0,12,0" Command="{Binding NewCommand}">
+                                <Button x:Name="NewClienteButton" Style="{StaticResource ActionBarPrimaryButtonStyle}" Margin="0,0,12,0" Command="{Binding NewCommand}" ToolTip="Novo cliente (Ctrl+N)">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
                                         <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE710;" Foreground="{DynamicResource ButtonPrimaryFg}" />
                                         <TextBlock Text="Novo Cliente" Foreground="{DynamicResource ButtonPrimaryFg}" />
@@ -2220,6 +2227,7 @@
                             <Border Grid.Column="2" Style="{StaticResource ActionBarDivider}" />
 
                             <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <TextBlock Style="{StaticResource ShortcutHintTextStyle}" Text="Atalhos: Ctrl+N / Ctrl+F" />
                                 <Button Style="{StaticResource ActionBarImportButtonStyle}" Margin="0,0,12,0" Command="{Binding ImportCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
                                         <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8B5;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
@@ -2264,7 +2272,8 @@
                                        Text="Buscar clientes"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
-                            <TextBox Grid.Column="2"
+                            <TextBox x:Name="ClientesSearchTextBox"
+                                     Grid.Column="2"
                                      Style="{StaticResource SearchTextBox}"
                                      Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
                                      Height="36"
@@ -2766,7 +2775,8 @@
                             <WrapPanel Grid.Column="0"
                                        Orientation="Horizontal"
                                        VerticalAlignment="Center">
-                                <Button Style="{StaticResource ActionBarPrimaryButtonStyle}" Margin="0,0,12,0" MinWidth="170" Command="{Binding NewPagamentoCommand}">
+                                <TextBlock Style="{StaticResource ShortcutHintTextStyle}" Text="Atalhos: Ctrl+N / Ctrl+F" />
+                                <Button x:Name="NewPagamentoButton" Style="{StaticResource ActionBarPrimaryButtonStyle}" Margin="0,0,12,0" MinWidth="170" Command="{Binding NewPagamentoCommand}" ToolTip="Novo pagamento (Ctrl+N)">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
                                         <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE710;" Foreground="{DynamicResource ButtonPrimaryFg}" />
                                         <TextBlock Text="Novo Pagamento" Foreground="{DynamicResource ButtonPrimaryFg}" />
@@ -2831,7 +2841,8 @@
                                        Text="Buscar pagamentos"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
-                            <TextBox Grid.Column="2"
+                            <TextBox x:Name="PagamentosSearchTextBox"
+                                     Grid.Column="2"
                                      Style="{StaticResource SearchTextBox}"
                                      Text="{Binding PagamentoSearchTerm, UpdateSourceTrigger=PropertyChanged}"
                                      Height="36"

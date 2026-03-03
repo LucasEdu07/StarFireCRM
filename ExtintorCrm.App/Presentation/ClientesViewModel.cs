@@ -34,6 +34,9 @@ namespace ExtintorCrm.App.Presentation
         private readonly AsyncRelayCommand _importCommand;
         private readonly AsyncRelayCommand _exportCommand;
         private readonly AsyncRelayCommand _backupCommand;
+        private readonly AsyncRelayCommand _activateSelectedClientesCommand;
+        private readonly AsyncRelayCommand _deactivateSelectedClientesCommand;
+        private readonly AsyncRelayCommand _exportSelectedClientesCommand;
         private readonly RelayCommand _previousPageCommand;
         private readonly RelayCommand _nextPageCommand;
         private readonly AsyncRelayCommand _newPagamentoCommand;
@@ -220,6 +223,9 @@ namespace ExtintorCrm.App.Presentation
             _importCommand = new AsyncRelayCommand(async _ => await ImportAsync(), _ => !IsImporting);
             _exportCommand = new AsyncRelayCommand(async _ => await ExportAsync(), _ => _allClientes.Any() || _allPagamentos.Any());
             _backupCommand = new AsyncRelayCommand(async _ => await RunBackupAsync(false), _ => !IsImporting && !IsBackupRunning);
+            _activateSelectedClientesCommand = new AsyncRelayCommand(async _ => await SetSelectedClientesActiveStateAsync(true), _ => CanActivateSelectedClientes);
+            _deactivateSelectedClientesCommand = new AsyncRelayCommand(async _ => await SetSelectedClientesActiveStateAsync(false), _ => CanDeactivateSelectedClientes);
+            _exportSelectedClientesCommand = new AsyncRelayCommand(async _ => await ExportSelectedClientesAsync(), _ => CanExportSelectedClientes);
             _previousPageCommand = new RelayCommand(_ => ChangeClientesPage(-1), _ => CanGoPrev);
             _nextPageCommand = new RelayCommand(_ => ChangeClientesPage(1), _ => CanGoNext);
             _goToPageCommand = new RelayCommand(page => GoToPage(page), page => CanGoToPage(page));
@@ -281,6 +287,9 @@ namespace ExtintorCrm.App.Presentation
             ImportCommand = _importCommand;
             ExportCommand = _exportCommand;
             BackupCommand = _backupCommand;
+            ActivateSelectedClientesCommand = _activateSelectedClientesCommand;
+            DeactivateSelectedClientesCommand = _deactivateSelectedClientesCommand;
+            ExportSelectedClientesCommand = _exportSelectedClientesCommand;
             PreviousPageCommand = _previousPageCommand;
             NextPageCommand = _nextPageCommand;
             GoToPageCommand = _goToPageCommand;
@@ -359,10 +368,16 @@ namespace ExtintorCrm.App.Presentation
                 OnPropertyChanged(nameof(HasMultiSelection));
                 OnPropertyChanged(nameof(CanEditSelectedCliente));
                 OnPropertyChanged(nameof(CanDeleteSelectedClientes));
+                OnPropertyChanged(nameof(CanActivateSelectedClientes));
+                OnPropertyChanged(nameof(CanDeactivateSelectedClientes));
+                OnPropertyChanged(nameof(CanExportSelectedClientes));
                 OnPropertyChanged(nameof(SelectedClientesSummary));
                 _editCommand.RaiseCanExecuteChanged();
                 _deleteCommand.RaiseCanExecuteChanged();
                 _detailsCommand.RaiseCanExecuteChanged();
+                _activateSelectedClientesCommand.RaiseCanExecuteChanged();
+                _deactivateSelectedClientesCommand.RaiseCanExecuteChanged();
+                _exportSelectedClientesCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -370,6 +385,9 @@ namespace ExtintorCrm.App.Presentation
         public bool HasMultiSelection => SelectedClientesCount > 1;
         public bool CanEditSelectedCliente => SelectedClientesCount == 1 && SelectedCliente != null;
         public bool CanDeleteSelectedClientes => SelectedClientesCount >= 1;
+        public bool CanActivateSelectedClientes => _selectedClientes.Any(c => !c.IsAtivo);
+        public bool CanDeactivateSelectedClientes => _selectedClientes.Any(c => c.IsAtivo);
+        public bool CanExportSelectedClientes => _selectedClientes.Count > 0;
         public string ClientesSortMember => _clientesSortMember;
         public ListSortDirection ClientesSortDirection => _clientesSortDirection;
         public string ClienteSortField
@@ -540,6 +558,9 @@ namespace ExtintorCrm.App.Presentation
         public ICommand ImportCommand { get; }
         public ICommand ExportCommand { get; }
         public ICommand BackupCommand { get; }
+        public ICommand ActivateSelectedClientesCommand { get; }
+        public ICommand DeactivateSelectedClientesCommand { get; }
+        public ICommand ExportSelectedClientesCommand { get; }
         public ICommand PreviousPageCommand { get; }
         public ICommand NextPageCommand { get; }
         public ICommand GoToPageCommand { get; }
@@ -796,10 +817,16 @@ namespace ExtintorCrm.App.Presentation
             OnPropertyChanged(nameof(HasMultiSelection));
             OnPropertyChanged(nameof(CanEditSelectedCliente));
             OnPropertyChanged(nameof(CanDeleteSelectedClientes));
+            OnPropertyChanged(nameof(CanActivateSelectedClientes));
+            OnPropertyChanged(nameof(CanDeactivateSelectedClientes));
+            OnPropertyChanged(nameof(CanExportSelectedClientes));
             OnPropertyChanged(nameof(SelectedClientesSummary));
             _editCommand.RaiseCanExecuteChanged();
             _deleteCommand.RaiseCanExecuteChanged();
             _detailsCommand.RaiseCanExecuteChanged();
+            _activateSelectedClientesCommand.RaiseCanExecuteChanged();
+            _deactivateSelectedClientesCommand.RaiseCanExecuteChanged();
+            _exportSelectedClientesCommand.RaiseCanExecuteChanged();
         }
 
         public void UpdateSelectedPagamentos(IReadOnlyCollection<Pagamento> selectedPagamentos)

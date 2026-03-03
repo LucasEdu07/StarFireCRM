@@ -207,6 +207,67 @@ namespace ExtintorCrm.App.Presentation
             }
         }
 
+        private async Task ExportSelectedClientesAsync()
+        {
+            var selected = _selectedClientes
+                .Where(c => c != null)
+                .DistinctBy(c => c.Id)
+                .ToList();
+
+            if (selected.Count == 0)
+            {
+                await ShowToastAsync("Selecione ao menos um cliente para exportar.", "Info");
+                return;
+            }
+
+            var defaultExt = _exportPreferExcel ? ".xlsx" : ".csv";
+            var dialog = new SaveFileDialog
+            {
+                Filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv",
+                AddExtension = true,
+                DefaultExt = defaultExt,
+                FileName = $"clientes-selecionados-{DateTime.Now:yyyyMMdd-HHmm}{defaultExt}"
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            var selectedKeys = _preferredClienteExportFields.Count == 0
+                ? new HashSet<string>(_clienteExportColumns.Select(c => c.Key))
+                : new HashSet<string>(_preferredClienteExportFields);
+            var columns = _clienteExportColumns
+                .Where(c => selectedKeys.Contains(c.Key))
+                .ToList();
+            if (columns.Count == 0)
+            {
+                columns = _clienteExportColumns.ToList();
+            }
+
+            try
+            {
+                await RunTrackedOperationAsync("Exportando clientes selecionados...", async () =>
+                {
+                    var exportService = new TabularExportService();
+                    var path = await exportService.ExportAsync(selected, columns, dialog.FileName);
+                    await ShowToastAsync(
+                        $"Clientes selecionados exportados: {path}",
+                        "Success",
+                        "Abrir arquivo",
+                        async () =>
+                        {
+                            OpenUri(new Uri(path).AbsoluteUri);
+                            await ShowToastAsync("Arquivo exportado aberto.", "Info");
+                        });
+                });
+            }
+            catch (Exception ex)
+            {
+                await LogAndToastErrorAsync("Falha ao exportar clientes selecionados.", "Falha ao exportar selecionados", ex);
+            }
+        }
+
         private static IReadOnlyList<ExportColumnDefinition<Cliente>> BuildClienteExportColumns()
         {
             return new List<ExportColumnDefinition<Cliente>>

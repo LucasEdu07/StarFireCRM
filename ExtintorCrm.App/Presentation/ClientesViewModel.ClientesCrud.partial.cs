@@ -145,6 +145,79 @@ namespace ExtintorCrm.App.Presentation
                 6000);
         }
 
+        private async Task SetSelectedClientesActiveStateAsync(bool isAtivo)
+        {
+            var selected = _selectedClientes.Any()
+                ? _selectedClientes.ToList()
+                : (SelectedCliente != null ? new List<Cliente> { SelectedCliente } : []);
+
+            if (selected.Count == 0)
+            {
+                await ShowToastAsync("Selecione ao menos um cliente.", "Info");
+                return;
+            }
+
+            var changes = selected
+                .Where(c => c.IsAtivo != isAtivo)
+                .Select(c => (Snapshot: CloneClienteForUndo(c), PreviousIsAtivo: c.IsAtivo))
+                .ToList();
+
+            if (changes.Count == 0)
+            {
+                await ShowToastAsync(
+                    isAtivo ? "Os clientes selecionados já estão ativos." : "Os clientes selecionados já estão inativos.",
+                    "Info");
+                return;
+            }
+
+            foreach (var change in changes)
+            {
+                var updated = CloneClienteForUndo(change.Snapshot);
+                updated.IsAtivo = isAtivo;
+                await _clienteRepository.UpdateAsync(updated);
+            }
+
+            await ReloadListAsync();
+            await ShowToastAsync(
+                isAtivo
+                    ? $"{changes.Count} cliente(s) ativado(s) com sucesso."
+                    : $"{changes.Count} cliente(s) inativado(s) com sucesso.",
+                "Success",
+                "Desfazer",
+                async () => await RestoreClientesActiveStateAsync(changes),
+                6000);
+        }
+
+        private async Task RestoreClientesActiveStateAsync(IReadOnlyList<(Cliente Snapshot, bool PreviousIsAtivo)> changes)
+        {
+            if (changes.Count == 0)
+            {
+                return;
+            }
+
+            var restored = 0;
+            foreach (var change in changes)
+            {
+                var current = await _clienteRepository.GetByIdAsync(change.Snapshot.Id);
+                if (current == null)
+                {
+                    continue;
+                }
+
+                var updated = CloneClienteForUndo(current);
+                updated.IsAtivo = change.PreviousIsAtivo;
+                await _clienteRepository.UpdateAsync(updated);
+                restored++;
+            }
+
+            await ReloadListAsync();
+            await ShowToastAsync(
+                restored > 0
+                    ? $"Desfazer concluído: {restored} cliente(s) restaurado(s)."
+                    : "Nenhum cliente pôde ser restaurado.",
+                restored > 0 ? "Success" : "Info");
+        }
+
         private async Task ShowDetailsAsync()
         {
             await OpenClienteDetalhesAsync(startInEditMode: false);

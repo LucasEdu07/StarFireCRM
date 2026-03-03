@@ -63,8 +63,10 @@ namespace ExtintorCrm.App.Presentation
         private readonly RelayCommand _goToPageCommand;
         private readonly RelayCommand _resetClienteFiltersCommand;
         private readonly RelayCommand _removeClienteFilterCommand;
+        private readonly RelayCommand _clearClientesSearchAndFiltersCommand;
         private readonly RelayCommand _searchPagamentosCommand;
         private readonly RelayCommand _resetPagamentoFiltersCommand;
+        private readonly RelayCommand _clearPagamentosSearchAndFiltersCommand;
         private readonly RelayCommand _setUiBorderColorPresetCommand;
         private readonly RelayCommand _setUiTitleBarColorPresetCommand;
         private readonly RelayCommand _setUiVanillaColorPresetCommand;
@@ -231,8 +233,10 @@ namespace ExtintorCrm.App.Presentation
             _goToPageCommand = new RelayCommand(page => GoToPage(page), page => CanGoToPage(page));
             _resetClienteFiltersCommand = new RelayCommand(_ => ResetClienteFilters(), _ => CanResetClienteFilters);
             _removeClienteFilterCommand = new RelayCommand(filter => RemoveClienteFilter(filter as string), _ => CanResetClienteFilters);
+            _clearClientesSearchAndFiltersCommand = new RelayCommand(_ => ClearClientesSearchAndFilters(), _ => CanClearClientesSearchAndFilters);
             _searchPagamentosCommand = new RelayCommand(_ => ApplyPagamentoFilter());
             _resetPagamentoFiltersCommand = new RelayCommand(_ => ResetPagamentoFilters(), _ => CanResetPagamentoFilters);
+            _clearPagamentosSearchAndFiltersCommand = new RelayCommand(_ => ClearPagamentosSearchAndFilters(), _ => CanClearPagamentosSearchAndFilters);
             _setUiBorderColorPresetCommand = new RelayCommand(hex => UiBorderColorHex = hex as string ?? string.Empty);
             _setUiTitleBarColorPresetCommand = new RelayCommand(hex => UiTitleBarColorHex = hex as string ?? string.Empty);
             _setUiVanillaColorPresetCommand = new RelayCommand(hex => UiVanillaColorHex = hex as string ?? string.Empty);
@@ -295,8 +299,10 @@ namespace ExtintorCrm.App.Presentation
             GoToPageCommand = _goToPageCommand;
             ResetClienteFiltersCommand = _resetClienteFiltersCommand;
             RemoveClienteFilterCommand = _removeClienteFilterCommand;
+            ClearClientesSearchAndFiltersCommand = _clearClientesSearchAndFiltersCommand;
             SearchPagamentosCommand = _searchPagamentosCommand;
             ResetPagamentoFiltersCommand = _resetPagamentoFiltersCommand;
+            ClearPagamentosSearchAndFiltersCommand = _clearPagamentosSearchAndFiltersCommand;
             SetUiBorderColorPresetCommand = _setUiBorderColorPresetCommand;
             SetUiTitleBarColorPresetCommand = _setUiTitleBarColorPresetCommand;
             SetUiVanillaColorPresetCommand = _setUiVanillaColorPresetCommand;
@@ -409,8 +415,10 @@ namespace ExtintorCrm.App.Presentation
                 OnPropertyChanged(nameof(ClientesSortDirection));
                 OnPropertyChanged(nameof(ClienteSortDirection));
                 OnPropertyChanged(nameof(CanResetClienteFilters));
+                OnPropertyChanged(nameof(CanClearClientesSearchAndFilters));
                 _resetClienteFiltersCommand.RaiseCanExecuteChanged();
                 _removeClienteFilterCommand.RaiseCanExecuteChanged();
+                _clearClientesSearchAndFiltersCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -430,8 +438,10 @@ namespace ExtintorCrm.App.Presentation
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ClientesSortDirection));
                 OnPropertyChanged(nameof(CanResetClienteFilters));
+                OnPropertyChanged(nameof(CanClearClientesSearchAndFilters));
                 _resetClienteFiltersCommand.RaiseCanExecuteChanged();
                 _removeClienteFilterCommand.RaiseCanExecuteChanged();
+                _clearClientesSearchAndFiltersCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -449,8 +459,10 @@ namespace ExtintorCrm.App.Presentation
                 _clienteSituacaoFilter = normalized;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CanResetClienteFilters));
+                OnPropertyChanged(nameof(CanClearClientesSearchAndFilters));
                 _resetClienteFiltersCommand.RaiseCanExecuteChanged();
                 _removeClienteFilterCommand.RaiseCanExecuteChanged();
+                _clearClientesSearchAndFiltersCommand.RaiseCanExecuteChanged();
                 ApplyClienteStatusFilter();
             }
         }
@@ -460,6 +472,8 @@ namespace ExtintorCrm.App.Presentation
             !string.Equals(ClienteSituacaoFilter, "Todos", StringComparison.Ordinal) ||
             !string.Equals(_clientesSortMember, nameof(Cliente.NomeFantasia), StringComparison.Ordinal) ||
             _clientesSortDirection != ListSortDirection.Ascending;
+        public bool CanClearClientesSearchAndFilters => !string.IsNullOrWhiteSpace(SearchTerm) || CanResetClienteFilters;
+        public bool CanClearPagamentosSearchAndFilters => !string.IsNullOrWhiteSpace(PagamentoSearchTerm) || CanResetPagamentoFilters;
         public string SelectedClientesSummary => SelectedClientesCount == 0
             ? "Nenhum cliente selecionado"
             : SelectedClientesCount == 1
@@ -500,6 +514,8 @@ namespace ExtintorCrm.App.Presentation
                 _searchTerm = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ClientesStateDescription));
+                OnPropertyChanged(nameof(CanClearClientesSearchAndFilters));
+                _clearClientesSearchAndFiltersCommand.RaiseCanExecuteChanged();
                 QueueSearch();
             }
         }
@@ -518,8 +534,10 @@ namespace ExtintorCrm.App.Presentation
                 _pagamentoSearchTerm = normalized;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CanResetPagamentoFilters));
+                OnPropertyChanged(nameof(CanClearPagamentosSearchAndFilters));
                 OnPropertyChanged(nameof(PagamentosStateDescription));
                 _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
+                _clearPagamentosSearchAndFiltersCommand.RaiseCanExecuteChanged();
                 QueuePagamentoSearch();
             }
         }
@@ -538,8 +556,10 @@ namespace ExtintorCrm.App.Presentation
                 _pagamentoFilter = normalized;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CanResetPagamentoFilters));
+                OnPropertyChanged(nameof(CanClearPagamentosSearchAndFilters));
                 OnPropertyChanged(nameof(PagamentosStateDescription));
                 _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
+                _clearPagamentosSearchAndFiltersCommand.RaiseCanExecuteChanged();
                 ApplyPagamentoFilter();
             }
         }
@@ -567,6 +587,8 @@ namespace ExtintorCrm.App.Presentation
         public ICommand ResetClienteFiltersCommand { get; }
         public ICommand ResetPagamentoFiltersCommand { get; }
         public ICommand RemoveClienteFilterCommand { get; }
+        public ICommand ClearClientesSearchAndFiltersCommand { get; }
+        public ICommand ClearPagamentosSearchAndFiltersCommand { get; }
         public ICommand SetUiBorderColorPresetCommand { get; }
         public ICommand SetUiTitleBarColorPresetCommand { get; }
         public ICommand SetUiVanillaColorPresetCommand { get; }
@@ -1189,8 +1211,10 @@ namespace ExtintorCrm.App.Presentation
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsClienteAtivosMode));
                 OnPropertyChanged(nameof(CanResetClienteFilters));
+                OnPropertyChanged(nameof(CanClearClientesSearchAndFilters));
                 _resetClienteFiltersCommand.RaiseCanExecuteChanged();
                 _removeClienteFilterCommand.RaiseCanExecuteChanged();
+                _clearClientesSearchAndFiltersCommand.RaiseCanExecuteChanged();
                 ApplyClienteStatusFilter();
             }
         }

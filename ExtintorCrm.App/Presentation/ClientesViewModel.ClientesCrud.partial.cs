@@ -409,8 +409,10 @@ namespace ExtintorCrm.App.Presentation
             _nextPageCommand.RaiseCanExecuteChanged();
             _goToPageCommand.RaiseCanExecuteChanged();
             OnPropertyChanged(nameof(CanResetClienteFilters));
+            OnPropertyChanged(nameof(CanClearClientesSearchAndFilters));
             _resetClienteFiltersCommand.RaiseCanExecuteChanged();
             _removeClienteFilterCommand.RaiseCanExecuteChanged();
+            _clearClientesSearchAndFiltersCommand.RaiseCanExecuteChanged();
         }
 
         public void SortClientesBy(string? sortMemberPath)
@@ -438,8 +440,10 @@ namespace ExtintorCrm.App.Presentation
             OnPropertyChanged(nameof(ClienteSortField));
             OnPropertyChanged(nameof(ClienteSortDirection));
             OnPropertyChanged(nameof(CanResetClienteFilters));
+            OnPropertyChanged(nameof(CanClearClientesSearchAndFilters));
             _resetClienteFiltersCommand.RaiseCanExecuteChanged();
             _removeClienteFilterCommand.RaiseCanExecuteChanged();
+            _clearClientesSearchAndFiltersCommand.RaiseCanExecuteChanged();
         }
 
         private void ResetClienteFilters()
@@ -459,8 +463,30 @@ namespace ExtintorCrm.App.Presentation
             OnPropertyChanged(nameof(ClientesSortMember));
             OnPropertyChanged(nameof(ClientesSortDirection));
             OnPropertyChanged(nameof(CanResetClienteFilters));
+            OnPropertyChanged(nameof(CanClearClientesSearchAndFilters));
             _resetClienteFiltersCommand.RaiseCanExecuteChanged();
             _removeClienteFilterCommand.RaiseCanExecuteChanged();
+            _clearClientesSearchAndFiltersCommand.RaiseCanExecuteChanged();
+        }
+
+        private void ClearClientesSearchAndFilters()
+        {
+            var hasSearch = !string.IsNullOrWhiteSpace(SearchTerm);
+            var hasAdvancedFilters = CanResetClienteFilters;
+            if (!hasSearch && !hasAdvancedFilters)
+            {
+                return;
+            }
+
+            if (hasSearch)
+            {
+                SearchTerm = string.Empty;
+            }
+
+            if (hasAdvancedFilters)
+            {
+                ResetClienteFilters();
+            }
         }
 
         private void RemoveClienteFilter(string? filterKey)

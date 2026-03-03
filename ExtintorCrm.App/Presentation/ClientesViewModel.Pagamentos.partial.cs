@@ -101,10 +101,12 @@ namespace ExtintorCrm.App.Presentation
             }
             UpdateSelectedPagamentos([]);
             OnPropertyChanged(nameof(CanResetPagamentoFilters));
+            OnPropertyChanged(nameof(CanClearPagamentosSearchAndFilters));
             OnPropertyChanged(nameof(ShowPagamentosEmptyState));
             OnPropertyChanged(nameof(PagamentosStateTitle));
             OnPropertyChanged(nameof(PagamentosStateDescription));
             _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
+            _clearPagamentosSearchAndFiltersCommand.RaiseCanExecuteChanged();
         }
 
         private void ResetPagamentoFilters()
@@ -119,7 +121,21 @@ namespace ExtintorCrm.App.Presentation
             OnPropertyChanged(nameof(PagamentoSearchTerm));
             OnPropertyChanged(nameof(PagamentoFilter));
             OnPropertyChanged(nameof(CanResetPagamentoFilters));
+            OnPropertyChanged(nameof(CanClearPagamentosSearchAndFilters));
             _resetPagamentoFiltersCommand.RaiseCanExecuteChanged();
+            _clearPagamentosSearchAndFiltersCommand.RaiseCanExecuteChanged();
+        }
+
+        private void ClearPagamentosSearchAndFilters()
+        {
+            var hasSearch = !string.IsNullOrWhiteSpace(PagamentoSearchTerm);
+            var hasAdvancedFilters = CanResetPagamentoFilters;
+            if (!hasSearch && !hasAdvancedFilters)
+            {
+                return;
+            }
+
+            ResetPagamentoFilters();
         }
 
         private void QueuePagamentoSearch()

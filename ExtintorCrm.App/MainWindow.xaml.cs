@@ -487,6 +487,20 @@ public partial class MainWindow : Window
         e.Column.SortDirection = _viewModel.ClientesSortDirection;
     }
 
+    private void PagamentosDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not DataGrid grid)
+        {
+            return;
+        }
+
+        var selected = grid.SelectedItems
+            .OfType<Domain.Pagamento>()
+            .ToList();
+
+        _viewModel.UpdateSelectedPagamentos(selected);
+    }
+
     private void ClientesSelectionCheckBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not CheckBox checkBox || checkBox.DataContext is not Domain.Cliente cliente)

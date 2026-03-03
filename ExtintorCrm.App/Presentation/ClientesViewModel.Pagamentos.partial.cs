@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -98,7 +99,7 @@ namespace ExtintorCrm.App.Presentation
             {
                 Pagamentos.Add(pagamento);
             }
-            SelectedPagamento = null;
+            UpdateSelectedPagamentos([]);
             OnPropertyChanged(nameof(CanResetPagamentoFilters));
             OnPropertyChanged(nameof(ShowPagamentosEmptyState));
             OnPropertyChanged(nameof(PagamentosStateTitle));
@@ -184,7 +185,11 @@ namespace ExtintorCrm.App.Presentation
             var createdPagamento = vm.ToPagamento();
             await _pagamentoRepository.AddAsync(createdPagamento);
             await LoadPagamentosAsync();
-            SelectedPagamento = _allPagamentos.FirstOrDefault(p => p.Id == createdPagamento.Id) ?? SelectedPagamento;
+            var selected = _allPagamentos.FirstOrDefault(p => p.Id == createdPagamento.Id);
+            if (selected != null)
+            {
+                UpdateSelectedPagamentos([selected]);
+            }
             await ShowToastAsync(
                 "Pagamento criado com sucesso.",
                 "Success",
@@ -214,14 +219,20 @@ namespace ExtintorCrm.App.Presentation
 
         private async Task DeletePagamentoAsync()
         {
-            if (SelectedPagamento == null)
+            var selected = _selectedPagamentos.Any()
+                ? _selectedPagamentos.ToList()
+                : (SelectedPagamento != null ? new[] { SelectedPagamento }.ToList() : []);
+
+            if (selected.Count == 0)
             {
                 return;
             }
 
             var confirmed = DialogService.Confirm(
                 "Excluir pagamento",
-                $"Deseja realmente excluir o pagamento '{SelectedPagamento.Descricao}'?",
+                selected.Count == 1
+                    ? $"Deseja realmente excluir o pagamento '{selected[0].Descricao}'?"
+                    : $"Deseja realmente excluir {selected.Count} pagamentos selecionados?",
                 Application.Current?.MainWindow);
 
             if (!confirmed)
@@ -229,14 +240,21 @@ namespace ExtintorCrm.App.Presentation
                 return;
             }
 
-            var deletedSnapshot = ClonePagamentoForUndo(SelectedPagamento);
-            await _pagamentoRepository.DeleteAsync(SelectedPagamento.Id);
+            var deletedSnapshots = selected
+                .Select(ClonePagamentoForUndo)
+                .ToArray();
+
+            foreach (var pagamento in selected)
+            {
+                await _pagamentoRepository.DeleteAsync(pagamento.Id);
+            }
+
             await LoadPagamentosAsync();
             await ShowToastAsync(
-                "Pagamento excluido com sucesso.",
+                selected.Count == 1 ? "Pagamento excluido com sucesso." : "Pagamentos excluidos com sucesso.",
                 "Success",
                 "Desfazer",
-                async () => await RestoreDeletedPagamentoAsync(deletedSnapshot),
+                async () => await RestoreDeletedPagamentosAsync(deletedSnapshots),
                 6000);
         }
 
@@ -368,18 +386,37 @@ namespace ExtintorCrm.App.Presentation
             }
         }
 
-        private async Task RestoreDeletedPagamentoAsync(Pagamento snapshot)
+        private async Task RestoreDeletedPagamentosAsync(Pagamento[] snapshots)
         {
-            if (await _pagamentoRepository.GetByIdAsync(snapshot.Id) != null)
+            if (snapshots.Length == 0)
             {
-                await ShowToastAsync("Este pagamento já foi restaurado anteriormente.", "Info");
                 return;
             }
 
-            await _pagamentoRepository.AddAsync(ClonePagamentoForUndo(snapshot));
+            var restoredIds = new List<Guid>();
+            foreach (var snapshot in snapshots)
+            {
+                if (await _pagamentoRepository.GetByIdAsync(snapshot.Id) != null)
+                {
+                    continue;
+                }
+
+                await _pagamentoRepository.AddAsync(ClonePagamentoForUndo(snapshot));
+                restoredIds.Add(snapshot.Id);
+            }
+
             await LoadPagamentosAsync();
-            SelectedPagamento = _allPagamentos.FirstOrDefault(p => p.Id == snapshot.Id);
-            await ShowToastAsync("Pagamento restaurado com sucesso.", "Success");
+            var reselected = _allPagamentos.Where(p => restoredIds.Contains(p.Id)).ToList();
+            if (reselected.Count > 0)
+            {
+                UpdateSelectedPagamentos(reselected);
+            }
+
+            await ShowToastAsync(
+                restoredIds.Count > 0
+                    ? $"Desfazer concluído: {restoredIds.Count} pagamento(s) restaurado(s)."
+                    : "Nenhum pagamento foi restaurado.",
+                restoredIds.Count > 0 ? "Success" : "Info");
         }
 
         private async Task RegisterCobrancaInteractionAsync(

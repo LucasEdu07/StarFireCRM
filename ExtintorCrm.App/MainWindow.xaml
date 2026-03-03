@@ -2770,6 +2770,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
                             <WrapPanel Grid.Column="0"
@@ -2803,11 +2804,20 @@
                             </WrapPanel>
 
                             <Border Grid.Column="1"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Margin="8,0,12,0"
+                                    Style="{StaticResource SelectedClientsBadgeStyle}">
+                                <TextBlock Text="{Binding SelectedPagamentosSummary}"
+                                           Style="{StaticResource SelectedClientsBadgeTextStyle}" />
+                            </Border>
+
+                            <Border Grid.Column="2"
                                     Style="{StaticResource ActionBarDivider}"
                                     VerticalAlignment="Center"
                                     Margin="2,0,12,0" />
 
-                            <Button Grid.Column="2"
+                            <Button Grid.Column="3"
                                     Style="{StaticResource ActionBarImportButtonStyle}"
                                     Margin="0"
                                     MinWidth="146"
@@ -2935,18 +2945,22 @@
                             BorderBrush="{DynamicResource BorderStrong}"
                             BorderThickness="1">
                         <Grid>
-                            <DataGrid Style="{StaticResource CleanDataGrid}"
+                            <DataGrid x:Name="PagamentosDataGrid"
+                                      Style="{StaticResource CleanDataGrid}"
                                       AutoGenerateColumns="False"
                                       CanUserSortColumns="True"
                                       IsReadOnly="True"
                                       RowHeight="36"
                                       ColumnHeaderHeight="38"
                                       FontSize="12.8"
+                                      SelectionMode="Extended"
+                                      SelectionUnit="FullRow"
                                       RowStyle="{StaticResource PagamentoRowStyle}"
                                       ColumnHeaderStyle="{StaticResource UnifiedGridHeaderStyle}"
                                       Language="pt-BR"
                                       ItemsSource="{Binding Pagamentos}"
-                                      SelectedItem="{Binding SelectedPagamento, Mode=TwoWay}">
+                                      SelectedItem="{Binding SelectedPagamento, Mode=TwoWay}"
+                                      SelectionChanged="PagamentosDataGrid_SelectionChanged">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Cliente" Binding="{Binding ClienteNome}" Width="2*" ElementStyle="{StaticResource LeftCellStyle}" />
                                     <DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" Width="2*" ElementStyle="{StaticResource LeftCellStyle}" />

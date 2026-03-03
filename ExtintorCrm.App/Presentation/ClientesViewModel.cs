@@ -99,6 +99,7 @@ namespace ExtintorCrm.App.Presentation
         private readonly List<Cliente> _allClientes = new();
         private readonly List<Cliente> _filteredClientes = new();
         private readonly List<Cliente> _selectedClientes = new();
+        private readonly List<Pagamento> _selectedPagamentos = new();
         private Cliente? _selectedCliente;
         private Pagamento? _selectedPagamento;
         private string _searchTerm = string.Empty;
@@ -246,10 +247,10 @@ namespace ExtintorCrm.App.Presentation
                 },
                 _ => !string.IsNullOrWhiteSpace(UiBorderColorHex) || !string.IsNullOrWhiteSpace(UiTitleBarColorHex) || !string.IsNullOrWhiteSpace(UiVanillaColorHex) || UiVanillaIntensityPercent != 100);
             _newPagamentoCommand = new AsyncRelayCommand(async _ => await NewPagamentoAsync());
-            _editPagamentoCommand = new AsyncRelayCommand(async _ => await EditPagamentoAsync(), _ => SelectedPagamento != null);
-            _deletePagamentoCommand = new AsyncRelayCommand(async _ => await DeletePagamentoAsync(), _ => SelectedPagamento != null);
-            _cobrancaCommand = new AsyncRelayCommand(async _ => await SendCobrancaAsync(), _ => SelectedPagamento != null);
-            _openPagamentoAttachmentsCommand = new AsyncRelayCommand(async _ => await OpenPagamentoAttachmentsAsync(), _ => SelectedPagamento != null);
+            _editPagamentoCommand = new AsyncRelayCommand(async _ => await EditPagamentoAsync(), _ => CanEditSelectedPagamento);
+            _deletePagamentoCommand = new AsyncRelayCommand(async _ => await DeletePagamentoAsync(), _ => CanDeleteSelectedPagamentos);
+            _cobrancaCommand = new AsyncRelayCommand(async _ => await SendCobrancaAsync(), _ => CanEditSelectedPagamento);
+            _openPagamentoAttachmentsCommand = new AsyncRelayCommand(async _ => await OpenPagamentoAttachmentsAsync(), _ => CanEditSelectedPagamento);
             _saveAlertSettingsCommand = new AsyncRelayCommand(
                 async _ => await SaveAlertSettingsAsync(),
                 _ => HasPendingConfigChanges && !IsImporting && !IsBackupRunning && !IsSavingSettings && IsConfigValid);
@@ -446,6 +447,11 @@ namespace ExtintorCrm.App.Presentation
             : SelectedClientesCount == 1
                 ? "1 cliente selecionado"
                 : $"{SelectedClientesCount} clientes selecionados";
+        public string SelectedPagamentosSummary => SelectedPagamentosCount == 0
+            ? "Nenhum pagamento selecionado"
+            : SelectedPagamentosCount == 1
+                ? "1 pagamento selecionado"
+                : $"{SelectedPagamentosCount} pagamentos selecionados";
 
         public Pagamento? SelectedPagamento
         {
@@ -454,12 +460,19 @@ namespace ExtintorCrm.App.Presentation
             {
                 _selectedPagamento = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedPagamentosCount));
+                OnPropertyChanged(nameof(CanEditSelectedPagamento));
+                OnPropertyChanged(nameof(CanDeleteSelectedPagamentos));
+                OnPropertyChanged(nameof(SelectedPagamentosSummary));
                 _editPagamentoCommand.RaiseCanExecuteChanged();
                 _deletePagamentoCommand.RaiseCanExecuteChanged();
                 _cobrancaCommand.RaiseCanExecuteChanged();
                 _openPagamentoAttachmentsCommand.RaiseCanExecuteChanged();
             }
         }
+        public int SelectedPagamentosCount => _selectedPagamentos.Count;
+        public bool CanEditSelectedPagamento => SelectedPagamentosCount == 1 && SelectedPagamento != null;
+        public bool CanDeleteSelectedPagamentos => SelectedPagamentosCount >= 1;
 
         public string SearchTerm
         {
@@ -787,6 +800,22 @@ namespace ExtintorCrm.App.Presentation
             _editCommand.RaiseCanExecuteChanged();
             _deleteCommand.RaiseCanExecuteChanged();
             _detailsCommand.RaiseCanExecuteChanged();
+        }
+
+        public void UpdateSelectedPagamentos(IReadOnlyCollection<Pagamento> selectedPagamentos)
+        {
+            _selectedPagamentos.Clear();
+            _selectedPagamentos.AddRange(selectedPagamentos.Where(p => p != null));
+            _selectedPagamento = _selectedPagamentos.FirstOrDefault();
+            OnPropertyChanged(nameof(SelectedPagamento));
+            OnPropertyChanged(nameof(SelectedPagamentosCount));
+            OnPropertyChanged(nameof(CanEditSelectedPagamento));
+            OnPropertyChanged(nameof(CanDeleteSelectedPagamentos));
+            OnPropertyChanged(nameof(SelectedPagamentosSummary));
+            _editPagamentoCommand.RaiseCanExecuteChanged();
+            _deletePagamentoCommand.RaiseCanExecuteChanged();
+            _cobrancaCommand.RaiseCanExecuteChanged();
+            _openPagamentoAttachmentsCommand.RaiseCanExecuteChanged();
         }
 
         public int PageNumber

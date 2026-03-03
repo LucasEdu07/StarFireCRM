@@ -1,9 +1,9 @@
 ; Star Fire Installer (upgrade-safe)
 ; Build:
-;   iscc /DMyAppVersion=1.0.7 /DPublishDir="D:\path\to\publish" installer\StarFire.iss
+;   iscc /DMyAppVersion=1.0.8 /DPublishDir="D:\path\to\publish" installer\StarFire.iss
 
 #ifndef MyAppVersion
-  #define MyAppVersion "1.0.7"
+  #define MyAppVersion "1.0.8"
 #endif
 
 #ifndef PublishDir

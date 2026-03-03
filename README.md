@@ -1,45 +1,31 @@
-﻿# Star Fire CRM
+# Star Fire CRM
 
-Aplicacao desktop WPF para gestao operacional de clientes, vencimentos, alertas e pagamentos.
+Aplicacao desktop WPF para gestao operacional offline de clientes, vencimentos e pagamentos.
 
-## Visao Geral
+## Visao geral
 
-O **Star Fire CRM** foi projetado para operacao offline com foco em:
+O **Star Fire CRM** foi projetado para operacao local com foco em:
 
-- Cadastro e gestao de clientes
-- Controle de vencimento de extintores e alvaras
-- Gestao de pagamentos
-- Alertas e pendencias criticas
-- Backup e restauracao
-- Importacao/Exportacao de dados
-
-## Principais Funcionalidades
-
-- Dashboard executivo com KPIs e alertas
-- CRUD completo de clientes
-- Perfil detalhado do cliente (extintores, alvara, pagamentos, observacoes)
-- CRUD de pagamentos
-- Importacao de clientes por planilha
-- Importacao de pagamentos por planilha
-- Exportacao para Excel/CSV com selecao de campos
-- Tema Light/Dark com persistencia
-- Backup manual/automatico e restauracao
-- Atualizacao de versao via instalador
+- cadastro e gestao de clientes
+- controle de vencimentos de extintores e alvaras
+- gestao de pagamentos
+- alertas e pendencias criticas
+- backup/restauracao e importacao/exportacao
 
 ## Tecnologias
 
-- .NET 8 (WPF)
+- .NET 8 (WPF / C#)
 - EF Core 8 + SQLite
-- ClosedXML (Excel)
+- ClosedXML (arquivos Excel)
 - Inno Setup (instalador)
 
-## Requisitos
+## Requisitos de desenvolvimento
 
 - Windows 10/11
-- .NET SDK 8.0 (para desenvolvimento)
-- Microsoft Excel instalado (recomendado para alguns fluxos de importacao de arquivos legados)
+- .NET SDK 8.0
+- Inno Setup 6 (para gerar instalador)
 
-## Estrutura do Projeto
+## Estrutura principal
 
 ```text
 ExtintorCrm.App/
@@ -48,12 +34,13 @@ ExtintorCrm.App/
   Migrations/
   Presentation/
   UseCases/
+ExtintorCrm.App.SmokeTests/
 scripts/
 installer/
 docs/
 ```
 
-## Como Executar
+## Como executar localmente
 
 ```powershell
 dotnet restore
@@ -61,56 +48,7 @@ dotnet build
 dotnet run --project .\ExtintorCrm.App\
 ```
 
-## Build e Publicacao
-
-Gerar publish + instalador:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-StarFire.ps1 -Version 1.0.4 -BuildInstaller
-```
-
-Saidas:
-
-- Publish: `artifacts/publish/StarFire-<versao>/`
-- Instalador: `artifacts/installer/StarFire-Setup-<versao>.exe`
-
-## Dados, Backup e Atualizacao
-
-- O app utiliza pasta de dados local do usuario (nao sobrescrever dados em atualizacao de executavel).
-- Use a aba **Configuracoes > Backup** para:
-  - definir pasta de backup
-  - configurar backup automatico
-  - restaurar backup
-
-Leia tambem:
-
-- `docs/ATUALIZACAO-CLIENTE.md`
-- `README_RELEASE.md`
-
-## Importacao
-
-### Clientes
-
-- Suporta planilhas e CSV
-- Regras de validacao aplicadas no importador
-- Linhas invalidas sao ignoradas com motivo no resumo
-
-### Pagamentos
-
-- Importacao por aba de Pagamentos
-- Validacao por vinculo com cliente existente
-
-## Testes e Smoke
-
-Referencia de validacao manual:
-
-- `docs/TESTES_SMOKE.md`
-- `docs/QA_FLUXOS_CRITICOS.md`
-- projeto de apoio: `ExtintorCrm.App.SmokeTests`
-
-## Fluxo Pre-Commit (Recomendado)
-
-Antes de subir alteracoes:
+## Qualidade local (recomendado antes de commit)
 
 ```powershell
 dotnet build .\ExtintorCrm.App\ExtintorCrm.App.csproj --no-restore
@@ -121,32 +59,51 @@ git status --short
 
 Checklist rapido:
 
-- Confirmar que `bin/` e `obj/` nao entraram no commit
-- Separar commits por tema (ex.: UX, bugfix, higiene)
-- Garantir que build e smoke continuam verdes
+- confirmar que `bin/` e `obj/` nao entraram no commit
+- separar commits por tema
+- garantir build e smoke verdes
 
-## Ralph Loop Local (Codex)
+## Publicacao e instalador
 
-Para rodar um loop iterativo de validacao (estilo "ralph loop") com build + smoke:
+Publish:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-StarFire.ps1 -Version <versao>
+```
+
+Publish + instalador:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-StarFire.ps1 -Version <versao> -BuildInstaller
+```
+
+Saidas:
+
+- publish: `artifacts/publish/StarFire-<versao>/`
+- instalador: `artifacts/installer/StarFire-Setup-<versao>.exe`
+
+## Ralph Loop local (Codex)
+
+Loop iterativo de validacao com build + smoke:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\Ralph-Loop.ps1 -MaxCycles 5
 ```
 
-Modo manual entre ciclos (pausa para voce ajustar no Codex e continuar):
+Modo manual entre ciclos:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\Ralph-Loop.ps1 -MaxCycles 5 -PromptBetweenCycles
 ```
 
-Com comandos customizados de correcao entre ciclos:
+## Documentacao
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Ralph-Loop.ps1 `
-  -MaxCycles 3 `
-  -FixCommands "dotnet format .\ExtintorCrm.sln --verify-no-changes"
-```
+Indice oficial: `docs/INDEX.md`
 
-## Suporte
+Principais guias:
 
-No app, acesse **Configuracoes > Sobre** para acionar suporte por WhatsApp ou e-mail com mensagem pre-preenchida.
+- operacao: `docs/OPERACAO_CLIENTE.md`
+- arquitetura: `docs/ARQUITETURA.md`
+- release: `docs/RELEASE_PLAYBOOK.md`
+- smoke tests: `docs/TESTES_SMOKE.md`
+- QA fluxos criticos: `docs/QA_FLUXOS_CRITICOS.md`

@@ -2142,7 +2142,18 @@
                                 Tag="Clientes">
                             <StackPanel Style="{StaticResource IconButtonContent}">
                                 <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE897;" />
-                                <TextBlock Text="Ajuda" />
+                                <TextBlock Text="Ajuda">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -2234,16 +2245,47 @@
                             <Border Grid.Column="1"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
-                                    Margin="14,0,0,0"
-                                    Style="{StaticResource SelectedClientsBadgeStyle}">
+                                    Margin="14,0,0,0">
+                                <Border.Style>
+                                    <Style TargetType="Border" BasedOn="{StaticResource SelectedClientsBadgeStyle}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <TextBlock Text="{Binding SelectedClientesSummary}"
                                            Style="{StaticResource SelectedClientsBadgeTextStyle}" />
                             </Border>
 
-                            <Border Grid.Column="2" Style="{StaticResource ActionBarDivider}" />
+                            <Border Grid.Column="2">
+                                <Border.Style>
+                                    <Style TargetType="Border" BasedOn="{StaticResource ActionBarDivider}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
 
                             <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                                <TextBlock Style="{StaticResource ShortcutHintTextStyle}" Text="Atalhos: Ctrl+N / Ctrl+F" />
+                                <TextBlock Text="Atalhos: Ctrl+N / Ctrl+F">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource ShortcutHintTextStyle}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                                 <Button Style="{StaticResource ActionBarImportButtonStyle}" Margin="0,0,12,0" Command="{Binding ImportCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
                                         <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8B5;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
@@ -2294,7 +2336,18 @@
                             <TextBlock Grid.Column="0"
                                        Text="Buscar clientes"
                                        FontWeight="SemiBold"
-                                       VerticalAlignment="Center" />
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                             <TextBox x:Name="ClientesSearchTextBox"
                                      Grid.Column="2"
                                      Style="{StaticResource SearchTextBox}"
@@ -2791,7 +2844,18 @@
                                 Tag="Pagamentos">
                             <StackPanel Style="{StaticResource IconButtonContent}">
                                 <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE897;" />
-                                <TextBlock Text="Ajuda" />
+                                <TextBlock Text="Ajuda">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -2808,7 +2872,18 @@
                             <WrapPanel Grid.Column="0"
                                        Orientation="Horizontal"
                                        VerticalAlignment="Center">
-                                <TextBlock Style="{StaticResource ShortcutHintTextStyle}" Text="Atalhos: Ctrl+N / Ctrl+F" />
+                                <TextBlock Text="Atalhos: Ctrl+N / Ctrl+F">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource ShortcutHintTextStyle}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                                 <Button x:Name="NewPagamentoButton" Style="{StaticResource ActionBarPrimaryButtonStyle}" Margin="0,0,12,0" MinWidth="170" Command="{Binding NewPagamentoCommand}" ToolTip="Novo pagamento (Ctrl+N)">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
                                         <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE710;" Foreground="{DynamicResource ButtonPrimaryFg}" />
@@ -2838,16 +2913,35 @@
                             <Border Grid.Column="1"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
-                                    Margin="8,0,12,0"
-                                    Style="{StaticResource SelectedClientsBadgeStyle}">
+                                    Margin="8,0,12,0">
+                                <Border.Style>
+                                    <Style TargetType="Border" BasedOn="{StaticResource SelectedClientsBadgeStyle}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <TextBlock Text="{Binding SelectedPagamentosSummary}"
                                            Style="{StaticResource SelectedClientsBadgeTextStyle}" />
                             </Border>
 
                             <Border Grid.Column="2"
-                                    Style="{StaticResource ActionBarDivider}"
                                     VerticalAlignment="Center"
-                                    Margin="2,0,12,0" />
+                                    Margin="2,0,12,0">
+                                <Border.Style>
+                                    <Style TargetType="Border" BasedOn="{StaticResource ActionBarDivider}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
 
                             <Button Grid.Column="3"
                                     Style="{StaticResource ActionBarImportButtonStyle}"
@@ -2882,7 +2976,18 @@
                             <TextBlock Grid.Column="0"
                                        Text="Buscar pagamentos"
                                        FontWeight="SemiBold"
-                                       VerticalAlignment="Center" />
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCompactLayout}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                             <TextBox x:Name="PagamentosSearchTextBox"
                                      Grid.Column="2"
                                      Style="{StaticResource SearchTextBox}"

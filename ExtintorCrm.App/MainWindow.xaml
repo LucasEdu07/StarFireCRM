@@ -2787,7 +2787,8 @@
                                                     Tag="{Binding}"
                                                     Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=TabControl}}"
                                                     CommandParameter="{Binding}">
-                                                <TextBlock Text="{Binding}" />
+                                                <TextBlock Text="{Binding}"
+                                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                             </Button>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>

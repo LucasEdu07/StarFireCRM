@@ -475,6 +475,15 @@ namespace ExtintorCrm.App.Presentation
             return new List<ReleaseNoteVersion>
             {
                 new(
+                    "1.0.9",
+                    "03/03/2026",
+                    new[]
+                    {
+                        "Estados vazios de Clientes e Pagamentos agora possuem ação direta para limpar busca e filtros.",
+                        "Barras de ação ficaram mais adaptativas em resoluções menores, com menos ruído visual no modo compacto.",
+                        "Ajustes de UX para manter navegação fluida e consistente no fluxo MVP."
+                    }),
+                new(
                     "1.0.8",
                     "02/03/2026",
                     new[]

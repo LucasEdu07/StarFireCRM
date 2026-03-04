@@ -22,7 +22,11 @@
         <EventTrigger RoutedEvent="Window.Loaded">
             <BeginStoryboard>
                 <Storyboard>
-                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.18" />
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0"
+                                     To="1"
+                                     Duration="0:0:0.24"
+                                     EasingFunction="{StaticResource DialogEaseOut}" />
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -35,7 +39,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Style="{StaticResource AppTitleBarStyle}"
+                Style="{StaticResource DialogTitleBarStyle}"
                 MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -43,16 +47,16 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Exportar dados"
-                           Style="{StaticResource AppTitleBarTextStyle}" />
+                           Style="{StaticResource DialogTitleTextStyle}" />
                 <Button Grid.Column="1"
-                        Style="{StaticResource AppTitleBarCloseButtonStyle}"
+                        Style="{StaticResource DialogCloseButtonStyle}"
                         Click="CloseButton_Click"
                         Content="&#xE8BB;" />
             </Grid>
         </Border>
 
         <Grid Grid.Row="1" Margin="18">
-            <Border Style="{StaticResource CardStyle}" Padding="18">
+            <Border Style="{StaticResource DialogAnimatedCardStyle}" Padding="18">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -119,7 +123,7 @@
                                 Margin="0,0,10,0"
                                 Click="PresetPadrao_Click">
                             <StackPanel Style="{StaticResource IconButtonContent}">
-                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8D2;" />
+                                <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconDocumentGeometry}" />
                                 <TextBlock Text="Preset padrão" />
                             </StackPanel>
                         </Button>
@@ -129,7 +133,7 @@
                                 Click="PresetFinanceiro_Click"
                                 Visibility="{Binding IsFinanceiroVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                             <StackPanel Style="{StaticResource IconButtonContent}">
-                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xEAFD;" />
+                                <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconMoneyGeometry}" />
                                 <TextBlock Text="Preset financeiro" />
                             </StackPanel>
                         </Button>
@@ -166,7 +170,7 @@
                                         MinWidth="126"
                                         Click="SelecionarTodos_Click">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8FB;" />
+                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCheckGeometry}" />
                                         <TextBlock Text="Selecionar todos" />
                                     </StackPanel>
                                 </Button>
@@ -177,7 +181,7 @@
                                         MinWidth="120"
                                         Click="LimparSelecao_Click">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE894;" />
+                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconBroomGeometry}" />
                                         <TextBlock Text="Limpar seleção" />
                                     </StackPanel>
                                 </Button>
@@ -301,13 +305,13 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Style="{StaticResource SecondaryButton}" Width="122" IsCancel="True" Margin="0,0,10,0">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                                    <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCloseGeometry}" />
                                     <TextBlock Text="Cancelar" />
                                 </StackPanel>
                             </Button>
                             <Button Style="{StaticResource PrimaryButton}" Width="130" IsDefault="True" Click="Confirmar_Click">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8A5;" Foreground="{DynamicResource ButtonPrimaryFg}" />
+                                    <Path Style="{StaticResource ToolbarVectorIconPrimaryStyle}" Data="{StaticResource IconArrowRightGeometry}" />
                                     <TextBlock Text="Continuar" Foreground="{DynamicResource ButtonPrimaryFg}" />
                                 </StackPanel>
                             </Button>
@@ -318,5 +322,8 @@
         </Grid>
     </Grid>
 </Window>
+
+
+
 
 

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using ExtintorCrm.App.Domain;
 using ExtintorCrm.App.Infrastructure.Documents;
 using ExtintorCrm.App.UseCases;
@@ -285,6 +286,10 @@ namespace ExtintorCrm.App.Presentation
         public DateTime CriadoEm { get; }
         public string CriadoEmTexto => CriadoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
         public string TamanhoTexto => FormatFileSize(TamanhoBytes);
+        public string ExtensaoRotulo => ResolveExtensaoRotulo(NomeOriginal);
+        public string ExtensaoCurta => ResolveExtensaoCurta(ExtensaoRotulo);
+        public string CategoriaArquivo => ResolveCategoriaArquivo(NomeOriginal);
+        public ImageSource? IconSource => FileIconHelper.GetSmallIcon(NomeOriginal);
 
         private static string FormatFileSize(long sizeInBytes)
         {
@@ -303,6 +308,42 @@ namespace ExtintorCrm.App.Presentation
             }
 
             return string.Format(CultureInfo.InvariantCulture, "{0:0.##} {1}", value, units[unit]);
+        }
+
+        private static string ResolveExtensaoRotulo(string nomeOriginal)
+        {
+            var extension = Path.GetExtension(nomeOriginal);
+            return string.IsNullOrWhiteSpace(extension)
+                ? "ARQ"
+                : extension.Trim('.').ToUpperInvariant();
+        }
+
+        private static string ResolveExtensaoCurta(string extensao)
+        {
+            if (string.IsNullOrWhiteSpace(extensao))
+            {
+                return "ARQ";
+            }
+
+            return extensao.Length <= 3 ? extensao : extensao[..3];
+        }
+
+        private static string ResolveCategoriaArquivo(string nomeOriginal)
+        {
+            var extension = Path.GetExtension(nomeOriginal)?.ToLowerInvariant() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                return "Documento";
+            }
+
+            return extension switch
+            {
+                ".pdf" => "Pdf",
+                ".jpg" or ".jpeg" or ".png" or ".bmp" or ".gif" or ".webp" or ".svg" => "Imagem",
+                ".xls" or ".xlsx" or ".csv" or ".ods" => "Planilha",
+                ".zip" or ".rar" or ".7z" => "Comprimido",
+                _ => "Documento"
+            };
         }
     }
 

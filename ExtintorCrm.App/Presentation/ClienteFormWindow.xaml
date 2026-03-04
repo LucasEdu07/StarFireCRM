@@ -16,25 +16,16 @@
         <EventTrigger RoutedEvent="Window.Loaded">
             <BeginStoryboard>
                 <Storyboard>
-                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.22" />
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0"
+                                     To="1"
+                                     Duration="0:0:0.24"
+                                     EasingFunction="{StaticResource DialogEaseOut}" />
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
     </Window.Triggers>
     <Window.Resources>
-        <Style x:Key="ToolbarIconStyle" TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Width" Value="18" />
-            <Setter Property="Margin" Value="0,0,8,0" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-            <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
-            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
-        </Style>
-
         <Style x:Key="InputStyle" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
             <Setter Property="Height" Value="40" />
         </Style>
@@ -48,7 +39,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Style="{StaticResource AppTitleBarStyle}"
+                Style="{StaticResource DialogTitleBarStyle}"
                 MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -56,9 +47,9 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Novo Cliente"
-                           Style="{StaticResource AppTitleBarTextStyle}" />
+                           Style="{StaticResource DialogTitleTextStyle}" />
                 <Button Grid.Column="1"
-                        Style="{StaticResource AppTitleBarCloseButtonStyle}"
+                        Style="{StaticResource DialogCloseButtonStyle}"
                         Click="CloseButton_Click"
                         Content="&#xE8BB;" />
             </Grid>
@@ -78,7 +69,7 @@
 
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                    <Border Style="{StaticResource DialogSurfaceCardStyle}" Margin="0,0,0,12">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -126,7 +117,7 @@
                         </Grid>
                     </Border>
 
-                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                    <Border Style="{StaticResource DialogSurfaceCardStyle}" Margin="0,0,0,12">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -163,7 +154,7 @@
                         </Grid>
                     </Border>
 
-                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                    <Border Style="{StaticResource DialogSurfaceCardStyle}" Margin="0,0,0,12">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -213,7 +204,7 @@
                         </Grid>
                     </Border>
 
-                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                    <Border Style="{StaticResource DialogSurfaceCardStyle}" Margin="0,0,0,12">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -249,7 +240,7 @@
                         </Grid>
                     </Border>
 
-                    <Border Style="{StaticResource CardStyle}">
+                    <Border Style="{StaticResource DialogSurfaceCardStyle}">
                         <StackPanel>
                             <TextBlock Text="Observações" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12" />
                             <TextBox Height="100"
@@ -265,15 +256,13 @@
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
                 <Button Style="{StaticResource PrimaryButton}" Width="132" Margin="0,0,8,0" Click="Salvar_Click">
                     <StackPanel Style="{StaticResource IconButtonContent}">
-                        <TextBlock Style="{StaticResource ToolbarIconStyle}"
-                                   Text="&#xE74E;"
-                                   Foreground="{DynamicResource ButtonPrimaryFg}" />
+                        <Path Style="{StaticResource ToolbarVectorIconPrimaryStyle}" Data="{StaticResource IconSaveGeometry}" />
                         <TextBlock Text="Salvar" Foreground="{DynamicResource ButtonPrimaryFg}" />
                     </StackPanel>
                 </Button>
                 <Button Style="{StaticResource SecondaryButton}" Width="132" IsCancel="True">
                     <StackPanel Style="{StaticResource IconButtonContent}">
-                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCloseGeometry}" />
                         <TextBlock Text="Cancelar" />
                     </StackPanel>
                 </Button>
@@ -281,4 +270,6 @@
         </Grid>
     </Grid>
 </Window>
+
+
 

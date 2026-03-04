@@ -271,7 +271,7 @@
             </Style>
 
             <Style x:Key="DashboardKpiMetaGlyphStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+                <Setter Property="FontFamily" Value="{StaticResource IconGlyphFontFamily}" />
                 <Setter Property="FontSize" Value="11" />
                 <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
             </Style>
@@ -557,7 +557,7 @@
             </Style>
 
             <Style x:Key="ToastIconStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+                <Setter Property="FontFamily" Value="{StaticResource IconGlyphFontFamily}" />
                 <Setter Property="Text" Value="&#xE73E;" />
                 <Setter Property="Foreground" Value="{DynamicResource ToastSuccessFg}" />
                 <Style.Triggers>
@@ -953,7 +953,7 @@
             </Style>
 
             <Style x:Key="ClientesActiveFilterChipCloseStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+                <Setter Property="FontFamily" Value="{StaticResource IconGlyphFontFamily}" />
                 <Setter Property="FontSize" Value="10" />
                 <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
                 <Style.Triggers>
@@ -978,7 +978,7 @@
                                     BorderBrush="{DynamicResource ControlBorder}"
                                     BorderThickness="1">
                                 <TextBlock x:Name="CheckGlyph"
-                                           FontFamily="Segoe MDL2 Assets"
+                                           FontFamily="{StaticResource IconGlyphFontFamily}"
                                            Text="&#xE73E;"
                                            Foreground="{DynamicResource ButtonPrimaryFg}"
                                            FontSize="12"
@@ -1273,7 +1273,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                    <TextBlock FontFamily="{StaticResource IconGlyphFontFamily}"
                                Text="&#xE81E;"
                                Margin="0,0,8,0"
                                Foreground="{DynamicResource PrimaryRed}" />
@@ -1330,7 +1330,7 @@
                         <ToggleButton x:Name="NotificationBellButton"
                                       Style="{StaticResource NotificationBellToggleStyle}"
                                       IsChecked="{Binding IsNotificationPanelOpen, Mode=TwoWay}">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                            <TextBlock FontFamily="{StaticResource IconGlyphFontFamily}"
                                        Text="&#xE7ED;"
                                        FontSize="16"
                                        Foreground="{DynamicResource TextPrimary}" />
@@ -1377,7 +1377,7 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                        <TextBlock FontFamily="{StaticResource IconGlyphFontFamily}"
                                                    Text="&#xE7ED;"
                                                    FontSize="14"
                                                    VerticalAlignment="Center"
@@ -1506,7 +1506,7 @@
                                             MinWidth="126"
                                             Command="{Binding GoToDashboardCommand}">
                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xEA39;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                            <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconDangerStyle}" Data="{StaticResource IconEyeGeometry}" />
                                             <TextBlock Text="Ver no painel" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                         </StackPanel>
                                     </Button>
@@ -1548,7 +1548,7 @@
                             </ToggleButton.Template>
                             <DockPanel LastChildFill="False">
                                 <TextBlock DockPanel.Dock="Left"
-                                           FontFamily="Segoe MDL2 Assets"
+                                           FontFamily="{StaticResource IconGlyphFontFamily}"
                                            Text="&#xE946;"
                                            FontSize="12"
                                            Margin="0,0,6,0"
@@ -1594,7 +1594,7 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                        <TextBlock FontFamily="{StaticResource IconGlyphFontFamily}"
                                                    Text="&#xE81C;"
                                                    FontSize="14"
                                                    VerticalAlignment="Center"
@@ -1714,7 +1714,7 @@
                                         Click="HelpButton_Click"
                                         Tag="Dashboard">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE897;" />
+                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconHelpGeometry}" />
                                         <TextBlock Text="Ajuda" />
                                     </StackPanel>
                                 </Button>
@@ -1748,13 +1748,13 @@
                                             <WrapPanel x:Name="DashboardQuickActionsPanel" VerticalAlignment="Center">
                                             <Button Style="{StaticResource QuickActionButtonStyle}" Margin="0,0,10,0" Command="{Binding GoToClientesCommand}">
                                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE716;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                    <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconEyeGeometry}" />
                                                     <TextBlock Text="Ver clientes" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                                 </StackPanel>
                                             </Button>
                                             <Button Style="{StaticResource QuickActionAccentButtonStyle}" Command="{Binding GoToPagamentosCommand}">
                                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8B5;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                    <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconMoneyGeometry}" />
                                                     <TextBlock Text="Ver pagamentos" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                                 </StackPanel>
                                             </Button>
@@ -1795,7 +1795,7 @@
                                                 <Border x:Name="KpiIconWrap"
                                                         Style="{StaticResource DashboardKpiIconWrapStyle}">
                                                     <TextBlock x:Name="KpiIconGlyph"
-                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontFamily="{StaticResource IconGlyphFontFamily}"
                                                                FontSize="16"
                                                                FontWeight="SemiBold"
                                                                Text="{Binding IconGlyph}"
@@ -2141,7 +2141,7 @@
                                 Click="HelpButton_Click"
                                 Tag="Clientes">
                             <StackPanel Style="{StaticResource IconButtonContent}">
-                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE897;" />
+                                <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconHelpGeometry}" />
                                 <TextBlock Text="Ajuda">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -2170,7 +2170,7 @@
                             <WrapPanel Grid.Column="0" Orientation="Horizontal">
                                 <Button x:Name="NewClienteButton" Style="{StaticResource ActionBarPrimaryButtonStyle}" Margin="0,0,12,0" Command="{Binding NewCommand}" ToolTip="Novo cliente (Ctrl+N)">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE710;" Foreground="{DynamicResource ButtonPrimaryFg}" />
+                                        <Path Style="{StaticResource ToolbarVectorIconPrimaryStyle}" Data="{StaticResource IconAddGeometry}" />
                                         <TextBlock Text="Novo Cliente" Foreground="{DynamicResource ButtonPrimaryFg}" />
                                     </StackPanel>
                                 </Button>
@@ -2195,7 +2195,7 @@
                                     </Button.ToolTip>
                                     <ToolTipService.ShowOnDisabled>True</ToolTipService.ShowOnDisabled>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE946;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconUserGeometry}" />
                                         <TextBlock Text="Abrir Perfil" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -2203,7 +2203,7 @@
                                 <Button Style="{StaticResource ActionBarSecondaryButtonStyle}" Margin="0,0,12,0" Command="{Binding ActivateSelectedClientesCommand}">
                                     <ToolTipService.ShowOnDisabled>True</ToolTipService.ShowOnDisabled>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE73E;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCheckGeometry}" />
                                         <TextBlock Text="Ativar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -2211,7 +2211,7 @@
                                 <Button Style="{StaticResource ActionBarWarningButtonStyle}" Margin="0,0,12,0" Command="{Binding DeactivateSelectedClientesCommand}">
                                     <ToolTipService.ShowOnDisabled>True</ToolTipService.ShowOnDisabled>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCloseGeometry}" />
                                         <TextBlock Text="Inativar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -2236,7 +2236,7 @@
                                     </Button.ToolTip>
                                     <ToolTipService.ShowOnDisabled>True</ToolTipService.ShowOnDisabled>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE74D;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconTrashGeometry}" />
                                         <TextBlock Text="Excluir" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -2288,28 +2288,28 @@
                                 </TextBlock>
                                 <Button Style="{StaticResource ActionBarImportButtonStyle}" Margin="0,0,12,0" Command="{Binding ImportCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8B5;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconImportGeometry}" />
                                         <TextBlock Text="Importar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
 
                                 <Button Style="{StaticResource ActionBarExportButtonStyle}" Margin="0,0,12,0" Command="{Binding ExportCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE9D5;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconExportGeometry}" />
                                         <TextBlock Text="Exportar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
 
                                 <Button Style="{StaticResource ActionBarExportButtonStyle}" Margin="0,0,12,0" Command="{Binding ExportSelectedClientesCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8A5;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconExportGeometry}" />
                                         <TextBlock Text="Exportar Seleção" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
 
                                 <Button Style="{StaticResource ActionBarBackupButtonStyle}" Command="{Binding BackupCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8B7;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconBackupUploadGeometry}" />
                                         <TextBlock Text="Backup" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -2360,7 +2360,7 @@
                                     Height="36"
                                     Command="{Binding SearchCommand}">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE721;" />
+                                    <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconSearchGeometry}" />
                                     <TextBlock Text="Buscar" />
                                 </StackPanel>
                             </Button>
@@ -2391,7 +2391,7 @@
                                         Padding="10,0"
                                         Command="{Binding ToggleClientesFiltersCollapsedCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE70D;" />
+                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconChevronDownGeometry}" />
                                         <TextBlock Text="{Binding ClientesFiltersToggleText}" />
                                     </StackPanel>
                                 </Button>
@@ -2497,7 +2497,7 @@
                                         VerticalAlignment="Center"
                                         Command="{Binding ResetClienteFiltersCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCloseGeometry}" />
                                         <TextBlock Text="Limpar filtros" />
                                     </StackPanel>
                                 </Button>
@@ -2695,7 +2695,7 @@
                                     IsHitTestVisible="False">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE895;"
-                                               FontFamily="Segoe MDL2 Assets"
+                                               FontFamily="{StaticResource IconGlyphFontFamily}"
                                                FontSize="22"
                                                HorizontalAlignment="Center"
                                                Foreground="{DynamicResource TextSecondary}" />
@@ -2718,7 +2718,7 @@
                                     Visibility="{Binding ShowClientesEmptyState, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE8A5;"
-                                               FontFamily="Segoe MDL2 Assets"
+                                               FontFamily="{StaticResource IconGlyphFontFamily}"
                                                FontSize="22"
                                                HorizontalAlignment="Center"
                                                Foreground="{DynamicResource TextSecondary}" />
@@ -2741,7 +2741,7 @@
                                             Height="34"
                                             Command="{Binding ClearClientesSearchAndFiltersCommand}">
                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                                            <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCloseGeometry}" />
                                             <TextBlock Text="Limpar busca e filtros" />
                                         </StackPanel>
                                     </Button>
@@ -2770,7 +2770,7 @@
                                 <Button Style="{StaticResource ClientesPaginationNavButtonStyle}"
                                         Command="{Binding PreviousPageCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE76B;" />
+                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconArrowLeftGeometry}" />
                                         <TextBlock Text="Anterior" />
                                     </StackPanel>
                                 </Button>
@@ -2805,7 +2805,7 @@
                                         Command="{Binding NextPageCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
                                         <TextBlock Text="Próximo" />
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Margin="8,0,0,0" Text="&#xE76C;" />
+                                        <Path Margin="8,0,0,0"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconArrowRightGeometry}" />
                                     </StackPanel>
                                 </Button>
                             </WrapPanel>
@@ -2844,7 +2844,7 @@
                                 Click="HelpButton_Click"
                                 Tag="Pagamentos">
                             <StackPanel Style="{StaticResource IconButtonContent}">
-                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE897;" />
+                                <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconHelpGeometry}" />
                                 <TextBlock Text="Ajuda">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -2887,25 +2887,25 @@
                                 </TextBlock>
                                 <Button x:Name="NewPagamentoButton" Style="{StaticResource ActionBarPrimaryButtonStyle}" Margin="0,0,12,0" MinWidth="170" Command="{Binding NewPagamentoCommand}" ToolTip="Novo pagamento (Ctrl+N)">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE710;" Foreground="{DynamicResource ButtonPrimaryFg}" />
+                                        <Path Style="{StaticResource ToolbarVectorIconPrimaryStyle}" Data="{StaticResource IconAddGeometry}" />
                                         <TextBlock Text="Novo Pagamento" Foreground="{DynamicResource ButtonPrimaryFg}" />
                                     </StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource ActionBarSecondaryButtonStyle}" Margin="0,0,12,0" MinWidth="110" Command="{Binding EditPagamentoCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE70F;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconEditGeometry}" />
                                         <TextBlock Text="Editar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource ActionBarSecondaryButtonStyle}" Margin="0,0,12,0" MinWidth="132" Command="{Binding CobrancaCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8BD;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconPhoneGeometry}" />
                                         <TextBlock Text="Cobrança" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource ActionBarDangerButtonStyle}" Margin="0,0,12,0" Command="{Binding DeletePagamentoCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE74D;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconTrashGeometry}" />
                                         <TextBlock Text="Excluir" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -2951,7 +2951,7 @@
                                     VerticalAlignment="Center"
                                     Command="{Binding ImportPagamentosCommand}">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8B5;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconImportGeometry}" />
                                     <TextBlock Text="Importar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                 </StackPanel>
                             </Button>
@@ -3001,7 +3001,7 @@
                                     Height="36"
                                     Command="{Binding SearchPagamentosCommand}">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE721;" />
+                                    <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconSearchGeometry}" />
                                     <TextBlock Text="Buscar" />
                                 </StackPanel>
                             </Button>
@@ -3032,7 +3032,7 @@
                                         Padding="10,0"
                                         Command="{Binding TogglePagamentosFiltersCollapsedCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE70D;" />
+                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconChevronDownGeometry}" />
                                         <TextBlock Text="{Binding PagamentosFiltersToggleText}" />
                                     </StackPanel>
                                 </Button>
@@ -3068,7 +3068,7 @@
                                         VerticalAlignment="Center"
                                         Command="{Binding ResetPagamentoFiltersCommand}">
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCloseGeometry}" />
                                         <TextBlock Text="Limpar filtros" />
                                     </StackPanel>
                                 </Button>
@@ -3132,7 +3132,7 @@
                                     IsHitTestVisible="False">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE895;"
-                                               FontFamily="Segoe MDL2 Assets"
+                                               FontFamily="{StaticResource IconGlyphFontFamily}"
                                                FontSize="22"
                                                HorizontalAlignment="Center"
                                                Foreground="{DynamicResource TextSecondary}" />
@@ -3156,7 +3156,7 @@
                                     IsHitTestVisible="False">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="&#xEA39;"
-                                               FontFamily="Segoe MDL2 Assets"
+                                               FontFamily="{StaticResource IconGlyphFontFamily}"
                                                FontSize="22"
                                                HorizontalAlignment="Center"
                                                Foreground="{DynamicResource DangerFg}" />
@@ -3182,7 +3182,7 @@
                                     Visibility="{Binding ShowPagamentosEmptyState, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE8A5;"
-                                               FontFamily="Segoe MDL2 Assets"
+                                               FontFamily="{StaticResource IconGlyphFontFamily}"
                                                FontSize="22"
                                                HorizontalAlignment="Center"
                                                Foreground="{DynamicResource TextSecondary}" />
@@ -3205,7 +3205,7 @@
                                             Height="34"
                                             Command="{Binding ClearPagamentosSearchAndFiltersCommand}">
                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE711;" />
+                                            <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCloseGeometry}" />
                                             <TextBlock Text="Limpar busca e filtros" />
                                         </StackPanel>
                                     </Button>
@@ -3248,7 +3248,7 @@
                                     Click="HelpButton_Click"
                                     Tag="Configuracoes">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE897;" />
+                                    <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconHelpGeometry}" />
                                     <TextBlock Text="Ajuda" />
                                 </StackPanel>
                             </Button>
@@ -3259,7 +3259,7 @@
                                     Height="38"
                                     Command="{Binding SaveAlertSettingsCommand}">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE74E;" Foreground="{DynamicResource ButtonPrimaryFg}" />
+                                    <Path Style="{StaticResource ToolbarVectorIconPrimaryStyle}" Data="{StaticResource IconSaveGeometry}" />
                                     <TextBlock Text="{Binding ConfigSaveButtonText}" Foreground="{DynamicResource ButtonPrimaryFg}" />
                                 </StackPanel>
                             </Button>
@@ -3301,7 +3301,7 @@
                                         </Style>
                                     </Button.Style>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE946;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconPaletteGeometry}" />
                                         <TextBlock Text="Aparência" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -3319,7 +3319,7 @@
                                         </Style>
                                     </Button.Style>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8D3;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconBackupUploadGeometry}" />
                                         <TextBlock Text="Backup" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -3337,7 +3337,7 @@
                                         </Style>
                                     </Button.Style>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE7BA;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconWarningGeometry}" />
                                         <TextBlock Text="Alertas" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -3355,7 +3355,7 @@
                                         </Style>
                                     </Button.Style>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE7ED;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconBellGeometry}" />
                                         <TextBlock Text="Notificações" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -3373,7 +3373,7 @@
                                         </Style>
                                     </Button.Style>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE777;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconRefreshGeometry}" />
                                         <TextBlock Text="Atualizações" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -3391,7 +3391,7 @@
                                         </Style>
                                     </Button.Style>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE713;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconSettingsGeometry}" />
                                         <TextBlock Text="Avançado" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -3410,7 +3410,7 @@
                                         </Style>
                                     </Button.Style>
                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE946;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconInfoGeometry}" />
                                         <TextBlock Text="Sobre" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                     </StackPanel>
                                 </Button>
@@ -3610,7 +3610,7 @@
                                                             HorizontalAlignment="Left"
                                                             Command="{Binding PickUiBorderColorCommand}">
                                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE790;" />
+                                                            <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconPaletteGeometry}" />
                                                             <TextBlock Text="Selecionar cor" />
                                                         </StackPanel>
                                                     </Button>
@@ -3669,7 +3669,7 @@
                                                             HorizontalAlignment="Left"
                                                             Command="{Binding PickUiTitleBarColorCommand}">
                                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE790;" />
+                                                            <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconPaletteGeometry}" />
                                                             <TextBlock Text="Selecionar cor" />
                                                         </StackPanel>
                                                     </Button>
@@ -3728,7 +3728,7 @@
                                                             HorizontalAlignment="Left"
                                                             Command="{Binding PickUiVanillaColorCommand}">
                                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE790;" />
+                                                            <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconPaletteGeometry}" />
                                                             <TextBlock Text="Selecionar cor" />
                                                         </StackPanel>
                                                     </Button>
@@ -3877,7 +3877,7 @@
                                                     MinWidth="128"
                                                     Command="{Binding SelectBackupFolderCommand}">
                                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xED43;" />
+                                                    <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconShieldGeometry}" />
                                                     <TextBlock Text="Selecionar" />
                                                 </StackPanel>
                                             </Button>
@@ -3946,7 +3946,7 @@
                                                     Margin="0,0,10,0"
                                                     Command="{Binding BackupCommand}">
                                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE823;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                    <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconBackupUploadGeometry}" />
                                                     <TextBlock Text="Executar backup agora" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                                 </StackPanel>
                                             </Button>
@@ -3956,7 +3956,7 @@
                                                     Height="40"
                                                     Command="{Binding RestoreBackupCommand}">
                                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                                    <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE777;" />
+                                                    <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconBackupDownloadGeometry}" />
                                                     <TextBlock Text="Restaurar backup" />
                                                 </StackPanel>
                                             </Button>
@@ -4120,7 +4120,7 @@
                                                 HorizontalAlignment="Left"
                                                 Click="UpdateAppButton_Click">
                                             <StackPanel Style="{StaticResource IconButtonContent}">
-                                                <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE777;" />
+                                                <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconRefreshGeometry}" />
                                                 <TextBlock Text="Atualizar versão do app" />
                                             </StackPanel>
                                         </Button>
@@ -4217,7 +4217,7 @@
                                                             BorderThickness="1"
                                                             VerticalAlignment="Center">
                                                         <Viewbox StretchDirection="DownOnly">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                            <TextBlock FontFamily="{StaticResource IconGlyphFontFamily}"
                                                                        Text="&#xE717;"
                                                                        Foreground="White"
                                                                        Margin="3,2,3,2" />
@@ -4243,9 +4243,7 @@
                                                     Command="{Binding ContactSupportEmailCommand}"
                                                     ToolTip="Abrir e-mail com mensagem pronta">
                                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                                    <TextBlock Style="{StaticResource ToolbarIconStyle}"
-                                                               Text="&#xE715;"
-                                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                    <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconMailGeometry}" />
                                                     <TextBlock Text="Acionar via E-mail" />
                                                 </StackPanel>
                                             </Button>
@@ -4292,7 +4290,7 @@
                                                         Visibility="{Binding IsAdvancedConfigUnlocked, Converter={StaticResource BoolToVisibilityConverter}}"
                                                         Click="AdvancedRelockButton_Click">
                                                     <StackPanel Style="{StaticResource IconButtonContent}">
-                                                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE72E;" />
+                                                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconLockGeometry}" />
                                                         <TextBlock Text="Bloquear" />
                                                     </StackPanel>
                                                 </Button>
@@ -4311,10 +4309,7 @@
                                                             <ColumnDefinition Width="10" />
                                                             <ColumnDefinition Width="*" />
                                                         </Grid.ColumnDefinitions>
-                                                        <TextBlock Grid.Column="0"
-                                                                   Style="{StaticResource ToolbarIconStyle}"
-                                                                   Text="&#xE74D;"
-                                                                   VerticalAlignment="Center" />
+                                                        <Path Grid.Column="0" VerticalAlignment="Center"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconRebuildGeometry}" />
                                                         <StackPanel Grid.Column="2"
                                                                     VerticalAlignment="Center">
                                                             <TextBlock Text="Recriar base de clientes"
@@ -4336,10 +4331,7 @@
                                                             <ColumnDefinition Width="10" />
                                                             <ColumnDefinition Width="*" />
                                                         </Grid.ColumnDefinitions>
-                                                        <TextBlock Grid.Column="0"
-                                                                   Style="{StaticResource ToolbarIconStyle}"
-                                                                   Text="&#xE74D;"
-                                                                   VerticalAlignment="Center" />
+                                                        <Path Grid.Column="0" VerticalAlignment="Center"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconRebuildGeometry}" />
                                                         <StackPanel Grid.Column="2"
                                                                     VerticalAlignment="Center">
                                                             <TextBlock Text="Recriar base de pagamentos"
@@ -4382,7 +4374,7 @@
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                                         <TextBlock Text="&#xE72E;"
-                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontFamily="{StaticResource IconGlyphFontFamily}"
                                                                    FontSize="18"
                                                                    Foreground="{DynamicResource TextPrimary}"
                                                                    Margin="0,0,8,0"
@@ -4425,7 +4417,7 @@
                                                             HorizontalAlignment="Right"
                                                             Click="AdvancedUnlockButton_Click">
                                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE73E;" />
+                                                            <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCheckGeometry}" />
                                                             <TextBlock Text="Liberar acesso" />
                                                         </StackPanel>
                                                     </Button>
@@ -4451,7 +4443,7 @@
                 Visibility="{Binding IsOperationInProgress, Converter={StaticResource BoolToVisibilityConverter}}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="&#xE895;"
-                           FontFamily="Segoe MDL2 Assets"
+                           FontFamily="{StaticResource IconGlyphFontFamily}"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource TextSecondary}" />
                 <TextBlock Text="{Binding OperationStatusMessage}"
@@ -4568,7 +4560,7 @@
                                     Margin="0,0,8,0"
                                     Click="TourPrevButton_Click">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
-                                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE76B;" />
+                                    <TextBlock FontFamily="{StaticResource IconGlyphFontFamily}" Text="&#xE76B;" />
                                     <TextBlock Text="Anterior" />
                                 </StackPanel>
                             </Button>
@@ -4581,7 +4573,7 @@
                                     Click="TourNextButton_Click">
                                 <StackPanel Style="{StaticResource IconButtonContent}">
                                     <TextBlock Text="Próximo" />
-                                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE76C;" />
+                                    <TextBlock FontFamily="{StaticResource IconGlyphFontFamily}" Text="&#xE76C;" />
                                 </StackPanel>
                             </Button>
 
@@ -4684,6 +4676,9 @@
         </Border>
     </Grid>
 </Window>
+
+
+
 
 
 

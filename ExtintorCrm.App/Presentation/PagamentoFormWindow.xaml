@@ -1,4 +1,4 @@
-<Window x:Class="ExtintorCrm.App.Presentation.PagamentoFormWindow"
+﻿<Window x:Class="ExtintorCrm.App.Presentation.PagamentoFormWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Pagamento"
@@ -18,7 +18,11 @@
         <EventTrigger RoutedEvent="Window.Loaded">
             <BeginStoryboard>
                 <Storyboard>
-                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.22" />
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0"
+                                     To="1"
+                                     Duration="0:0:0.24"
+                                     EasingFunction="{StaticResource DialogEaseOut}" />
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -34,7 +38,7 @@
             <Setter Property="FontSize" Value="12" />
         </Style>
 
-        <Style x:Key="SectionCard" TargetType="Border" BasedOn="{StaticResource CardStyle}">
+        <Style x:Key="SectionCard" TargetType="Border" BasedOn="{StaticResource DialogSurfaceCardStyle}">
             <Setter Property="Padding" Value="16" />
             <Setter Property="CornerRadius" Value="14" />
         </Style>
@@ -127,16 +131,16 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Style="{StaticResource AppTitleBarStyle}"
+                Style="{StaticResource DialogTitleBarStyle}"
                 MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding WindowTitle}" Style="{StaticResource AppTitleBarTextStyle}" />
+                <TextBlock Text="{Binding WindowTitle}" Style="{StaticResource DialogTitleTextStyle}" />
                 <Button Grid.Column="1"
-                        Style="{StaticResource AppTitleBarCloseButtonStyle}"
+                        Style="{StaticResource DialogCloseButtonStyle}"
                         Click="CloseButton_Click"
                         Content="&#xE8BB;" />
             </Grid>
@@ -349,10 +353,7 @@
 
                             <TabItem Header="Documentos">
                                 <StackPanel>
-                                    <Border Background="{DynamicResource SurfaceMuted}"
-                                            BorderBrush="{DynamicResource BorderStrong}"
-                                            BorderThickness="1"
-                                            CornerRadius="10"
+                                    <Border Style="{StaticResource AttachmentSectionCardStyle}"
                                             Padding="10,9">
                                         <StackPanel>
                                             <Grid>
@@ -386,7 +387,7 @@
                                                             Margin="0,0,10,0"
                                                             Click="AnexarPagamentoDocumento_Click">
                                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE898;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                            <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconAttachmentGeometry}" />
                                                             <TextBlock Text="Anexar" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                                         </StackPanel>
                                                     </Button>
@@ -398,7 +399,7 @@
                                                             Margin="0,0,10,0"
                                                             Click="AbrirPagamentoDocumento_Click">
                                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8A7;" />
+                                                            <Path  Style="{StaticResource ToolbarVectorIconDangerStyle}" Data="{StaticResource IconOpenExternalGeometry}" />
                                                             <TextBlock Text="Abrir" />
                                                         </StackPanel>
                                                     </Button>
@@ -409,7 +410,7 @@
                                                             MinWidth="122"
                                                             Click="ExcluirPagamentoDocumento_Click">
                                                         <StackPanel Style="{StaticResource IconButtonContent}">
-                                                            <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE74D;" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                            <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconTrashGeometry}" />
                                                             <TextBlock Text="Excluir" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                                                         </StackPanel>
                                                     </Button>
@@ -425,13 +426,12 @@
                                                           CanUserResizeRows="False"
                                                           SelectionMode="Single"
                                                           Height="300"
-                                                          RowHeight="34"
-                                                          ColumnHeaderHeight="36"
+                                                          RowHeight="52"
+                                                          ColumnHeaderHeight="40"
                                                           FontSize="12.4"
                                                           SelectionChanged="PagamentoAnexosDataGrid_SelectionChanged">
                                                     <DataGrid.Columns>
-                                                        <DataGridTextColumn Header="Tipo" Binding="{Binding TipoDocumento}" Width="130" />
-                                                        <DataGridTextColumn Header="Documento" Binding="{Binding NomeOriginal}" Width="2*" />
+                                                        <DataGridTemplateColumn Header="Documento" Width="2.5*" CellTemplate="{StaticResource AttachmentExplorerFileTemplate}" />
                                                         <DataGridTextColumn Header="Tamanho" Binding="{Binding TamanhoTexto}" Width="110" />
                                                         <DataGridTextColumn Header="Incluído em" Binding="{Binding CriadoEmTexto}" Width="150" />
                                                     </DataGrid.Columns>
@@ -467,7 +467,7 @@
                         Margin="0,0,8,0"
                         IsCancel="True">
                     <StackPanel Style="{StaticResource IconButtonContent}">
-                        <TextBlock Style="{StaticResource ToolbarIconStyle}" Text="&#xE8BB;" />
+                        <Path  Style="{StaticResource ToolbarVectorIconStyle}" Data="{StaticResource IconCloseGeometry}" />
                         <TextBlock Text="Fechar" />
                     </StackPanel>
                 </Button>
@@ -476,9 +476,7 @@
                         Width="174"
                         Click="Salvar_Click">
                     <StackPanel Style="{StaticResource IconButtonContent}">
-                        <TextBlock Style="{StaticResource ToolbarIconStyle}"
-                                   Text="&#xE74E;"
-                                   Foreground="{DynamicResource ButtonPrimaryFg}" />
+                        <Path Style="{StaticResource ToolbarVectorIconPrimaryStyle}" Data="{StaticResource IconSaveGeometry}" />
                         <TextBlock Text="Salvar alterações"
                                    Foreground="{DynamicResource ButtonPrimaryFg}" />
                     </StackPanel>
@@ -487,3 +485,6 @@
         </Grid>
     </Grid>
 </Window>
+
+
+

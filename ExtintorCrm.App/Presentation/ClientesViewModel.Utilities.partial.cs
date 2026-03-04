@@ -475,6 +475,15 @@ namespace ExtintorCrm.App.Presentation
             return new List<ReleaseNoteVersion>
             {
                 new(
+                    "1.0.10",
+                    "04/03/2026",
+                    new[]
+                    {
+                        "Tela de cobranca repaginada com visual premium inspirado em mensageria moderna.",
+                        "Historico de cobrancas evoluiu para timeline estruturada com canal, etapa, tom e mensagem.",
+                        "Nova acao \"Cobranca WhatsApp automatica\" adicionada como preview de roadmap (Beta / Em validacao)."
+                    }),
+                new(
                     "1.0.9",
                     "03/03/2026",
                     new[]
